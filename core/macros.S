@@ -232,6 +232,26 @@
     movw bl, tosl
 .endm
 
+.macro pusha_
+    push al
+    push ah
+.endm
+
+.macro pushb_
+    push bl
+    push bh
+.endm
+
+.macro popa_
+    pop ah
+    pop al
+.endm
+
+.macro popb_
+    pop bh
+    pop bl
+.endm
+
 .macro in_ val, prt
 .if (\prt < 0x40)
   in \val, \prt

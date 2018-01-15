@@ -1,5 +1,5 @@
 # Simple makefile for building  
-# asforth for atmega328p target
+# if.atmega for atmega328p target
 
 # Examples of usage for atmega328p:
 #
