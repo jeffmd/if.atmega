@@ -398,7 +398,7 @@ forthword_ RAM_MCUSRO, 0, "mcusro"
 
 ; ( -- )
 ; System
-; start up asforth.
+; start up if.atmega.
 forthword_ COLD, 0, "cold"
     in_ r10, MCUSR
     clr r11
@@ -427,7 +427,7 @@ forthword_ COLD, 0, "cold"
 
 ; ( nx* -- ) (R: ny* -- )
 ; System
-; initialize asforth further. EXECs turnkey operation and go to quit
+; initialize if.atmega further. EXECs turnkey operation and go to quit
 forthword_ WARM, 0, "warm"
     rcall INITUSER
     doliteral_ pm(NOOP)
@@ -439,7 +439,7 @@ forthword_ WARM, 0, "warm"
     rcall USART
     rcall INTON
     call DOSLIT
-    ascii_ "asforth 1.2"
+    ascii_ "if.atmega 0.1"
     call ITYPE
     call CR
     
