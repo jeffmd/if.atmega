@@ -91,7 +91,7 @@ PFA_ITYPE1:
     breq PFA_ITYPE2
     rcall AFETCHI     ; ( len c1c2 )
     aplus_            ; a+
-    dup_              ; ( len c1c2 c1c2 )
+    push_              ; ( len c1c2 c1c2 )
     rcall EMIT        ; ( len c1c2 )
     highbyte_         ; ( len c2c1 )
     rcall EMIT        ; ( len )
@@ -100,7 +100,7 @@ PFA_ITYPE1:
     rjmp PFA_ITYPE1
 
 PFA_ITYPE2:
-    drop_             ; ( )
+    pop_             ; ( )
     cp bl, zerol      ; ( )
     breq PFA_ITYPE3
       rcall AFETCHI
@@ -146,14 +146,14 @@ forthword_ SLASHSTRING, 0, "/$"
 forthword_ CSKIP, 0, "cskip"
     rcall TO_B           ; ( addr1 n1 ) B: c
     niptoa_              ; ( n1 ) A: addr1
-    dup_                 ; ( n1 n1 )
+    push_                 ; ( n1 n1 )
 PFA_CSKIP1:
     dupzerosense_        ; ( n1 n')
     breq PFA_CSKIP2
     rcall ACFETCH        ; ( n1 n' c' )
     aplus_
     cp tosl, bl          ; ( n1 n' c' )
-    drop_                ; ( n1 n' )
+    pop_                ; ( n1 n' )
     brne PFA_CSKIP2
     oneminus_
     rjmp PFA_CSKIP1
@@ -171,14 +171,14 @@ forthword_ CSCAN, 0, "cscan"
     rcall TO_B           ; ( addr1 n1 ) B: c
     rcall OVER           ; ( addr1 n1 addr1 )
     rcall TO_A           ; ( addr1 n1 ) A: addr1
-    dup_                 ; ( addr1 n1 n1 )
+    push_                 ; ( addr1 n1 n1 )
 PFA_CSCAN1:
     dupzerosense_        ; ( addr1 n1 n')
     breq PFA_CSCAN2
     rcall ACFETCH        ; ( addr1 n1 n' c' )
     aplus_
     cp tosl, bl          ; ( addr1 n1 n' c' )
-    drop_                ; ( addr1 n1 n' )
+    pop_                ; ( addr1 n1 n' )
     breq PFA_CSCAN2
     oneminus_
     rjmp PFA_CSCAN1
@@ -221,14 +221,14 @@ PFA_ICOMPARE_LOOP:
     zerosense_               ; ( r-addr )
     breq PFA_ICOMPARE_DONE
 
-    dup_                     ; ( r-addr r-addr )
+    push_                     ; ( r-addr r-addr )
     rcall FETCH              ; ( r-addr r-cc )
     rcall AFETCHI            ; ( r-addr r-cc f-cc )
     aplus_
     ; flash strings are zero-padded at the last cell
     ; that means: if the flash cell is less $0100, than mask the
     ; high byte in the ram cell
-    dup_                     ; ( r-addr r-cc f-cc f-cc )
+    push_                     ; ( r-addr r-cc f-cc f-cc )
     doliteral_ 0x100         ; ( r-addr r-cc f-cc f-cc 0x100 )
     rcall ULESS              ; ( r-addr r-cc f-cc flag)
     ; if
@@ -258,7 +258,7 @@ PFA_ICOMPARE_NEXTLOOP:
 
 PFA_ICOMPARE_DONE:
     ; strings are the same
-    drop_
+    pop_
     rjmp TRUE
     
     
@@ -266,7 +266,7 @@ PFA_ICOMPARE_DONE:
 ; Tools
 ; get string address and length information out of a counted string in flash
 forthword_ ICOUNT, 0, "$l"
-    dup_
+    push_
     oneplus_
     rcall SWAP
     rjmp FETCHI
@@ -302,7 +302,7 @@ forthword_ PARSE, 0, "parse"
     rcall SRCIN      ; ( -- c addr len)
     rcall ROT        ; ( -- addr' len' c)
     rcall CSCAN      ; ( -- len'')
-    dup_             ; ( -- addr' len'' len'')
+    push_             ; ( -- addr' len'' len'')
     oneplus_         ; ( -- addr' len'' len''+1 )
     rcall G_IN       ; ( -- addr' len'' len''+1 >in)
     rjmp PLUSSTORE   ; ( -- addr' len'')
@@ -380,7 +380,7 @@ FINDWI:
       rjmp FINDNFA      ; ( nfa)
 
 FINDLAST:
-      drop_
+      pop_
       rjmp FINDROOT
       
 ; ( addr len --  0 | nfa )
@@ -412,7 +412,7 @@ FINDW_BEGIN:
         ret
         
 FINDW_NEXT:
-      drop_             ; ( addr len idx )
+      pop_             ; ( addr len idx )
       ; decrement index
       oneminus_         ; ( addr len idx-1 )
       rjmp FINDW_BEGIN
@@ -429,7 +429,7 @@ forthword_ DOSLIT, 0, "(slit)"
   ; get return address to get string length, calculate string address start,
   ; and calculate return address
   rcall R_FROM   ; ( raddr )  (R: raddr -- )
-  dup_           ; ( raddr raddr )
+  push_           ; ( raddr raddr )
   ; get the string length
   rcall FETCHI   ; ( raddr slength )
   rcall OVER     ; ( raddr slength raddr )
@@ -508,7 +508,7 @@ REC_WORD_CHECKSTATE:
  	    call COMPILEXT
 	    rjmp TRUE
 REC_WORD_EXECUTE:
-    drop_
+    pop_
     ; state is zero, EXEC xt
     rcall EXEC
 REC_WORD_OK:
@@ -763,12 +763,12 @@ ACCEPT_checkdelete:
     zerosense_           ; ( k )
     brne ACCEPT_dodelete
     ; at the beginning of the line, ignore this character
-    drop_
+    pop_
     rjmp ZERO
 
 ACCEPT_dodelete:
     andi tosl, 8
-    dup_                 ; ( k k )
+    push_                 ; ( k k )
     rcall EMIT           ; ( k )
     rcall BL             ; ( k bl )
     rcall EMIT           ; ( k )
@@ -783,13 +783,13 @@ ACCEPT_checkcontrol:
     ; check for remaining control characters, replace them with blank
     cpi tosl, 32         ; ( k k bl )
     brge ACCEPT_echo
-    drop_
+    pop_
     ; replace control key with a space
     rcall BL
 
 ACCEPT_echo:
     ; emit the key
-    dup_                 ; ( k k)
+    push_                 ; ( k k)
     rcall EMIT           ; ( k)
     ; now store the key in the input buffer
     rcall STIB           ; ( k tibaddr #tib)

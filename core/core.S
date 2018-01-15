@@ -8,7 +8,7 @@
 ; execute XT
 forthword_ EXEC, 0, "exec"
     movw ZL, tosl
-    poptos
+    pop_
     ijmp
 
 ; (  -- )
@@ -23,7 +23,7 @@ forthword_ NOOP, INLINE_OPT, "noop"
 ; Stack
 ; duplicate TOS
 forthword_ DUP, INLINE_OPT, "dup"
-    pushtos
+    push_
     ret
 
 ; ( n1 -- [ n1 n1 ] | 0) 
@@ -32,7 +32,7 @@ forthword_ DUP, INLINE_OPT, "dup"
 forthword_ QDUP, 0, "?dup"
     sbiw tosl, 0
     breq PFA_QDUP1
-    pushtos
+    push_
 PFA_QDUP1:
     ret
 
@@ -41,7 +41,7 @@ PFA_QDUP1:
 ; swaps the two top level stack cells
 forthword_ SWAP, 0, "swap"
     movw temp0, tosl
-    poptos
+    pop_
     st -Y, temp1
     st -Y, temp0
     ret
@@ -50,7 +50,7 @@ forthword_ SWAP, 0, "swap"
 ; Stack
 ; Place a copy of x1 on top of the stack
 forthword_ OVER, 0, "over"
-    pushtos
+    push_
     ldd tosl, Y+2
     ldd tosh, Y+3
     ret
@@ -66,7 +66,7 @@ forthword_ TWOOVER, 0, "2over"
 ; Stack
 ; drop TOS
 forthword_ DROP, INLINE_OPT, "drop"
-    drop_
+    pop_
     ret
 
 ; ( n n -- ) 
@@ -74,7 +74,7 @@ forthword_ DROP, INLINE_OPT, "drop"
 ; drop TOS twice
 forthword_ DDROP, 0, "2drop"
     nip_
-    drop_
+    pop_
     ret
 
 ; ( n1 n2 -- n2) 
@@ -122,7 +122,7 @@ forthword_ ROT, 0, "rot"
     movw temp0, tosl
     ld temp2, Y+
     ld temp3, Y+ 
-    poptos
+    pop_
     st -Y, temp3
     st -Y, temp2
     st -Y, temp1
@@ -153,7 +153,7 @@ forthword_ RROT, 0, "-rot"
 forthword_ R_FROM, DIS_CALL_OPT, "r>"
     pop ZH
     pop ZL
-    pushtos
+    push_
     pop tosh
     pop tosl
     ijmp
@@ -171,7 +171,7 @@ forthword_ R_DROP, INLINE_OPT, "r>drop"
 ; must be called, do not use jmp
 ; used if data in program mem and need an address to it
 forthword_ POPRET, DIS_CALL_OPT, "popret"
-    pushtos
+    push_
     pop tosh
     pop tosl
     ret
@@ -192,7 +192,7 @@ forthword_ TO_R, DIS_CALL_OPT, ">r"
     pop ZH
     pop ZL
     dup_r_
-    poptos
+    pop_
     ijmp
 
 ; ( -- n) (R: n -- n )
@@ -201,7 +201,7 @@ forthword_ TO_R, DIS_CALL_OPT, ">r"
 forthword_ R_FETCH, DIS_CALL_OPT, "r"
     in ZL, SPL
     in ZH, SPH
-    pushtos
+    push_
     ldd tosh, Z+3
     ldd tosl, Z+4
     ret
@@ -213,7 +213,7 @@ forthword_ R_FETCH, DIS_CALL_OPT, "r"
 forthword_ R_FETCHPLUS, DIS_CALL_OPT, "r>r+"
     pop ZH
     pop ZL
-    pushtos
+    push_
     pop tosh
     pop tosl
     adiw tosl, 0x01
@@ -318,7 +318,7 @@ forthword_ ZEROSET, INLINE_OPT, "0:"
 ; Arithmetics
 ; place a value 0 on TOS
 forthword_ ZERO, 0, "0"
-    pushtos
+    push_
 PFA_ZERO1:
     zerotos_
     ret
@@ -327,7 +327,7 @@ PFA_ZERO1:
 ; Arithmetics
 ; place a value 1 on TOS
 forthword_ ONE, 0, "1"
-    pushtos
+    push_
     ldi tosh, 0
     ldi tosl, 1
     ret
@@ -336,7 +336,7 @@ forthword_ ONE, 0, "1"
 ; Arithmetics
 ; place a value 2 on TOS
 forthword_ TWO, 0, "2"
-    pushtos
+    push_
     ldi tosh, 0
     ldi tosl, 2
     ret
@@ -345,7 +345,7 @@ forthword_ TWO, 0, "2"
 ; Arithmetics
 ; place a value 10 on TOS
 forthword_ TEN, 0, "10"
-    pushtos
+    push_
     ldi tosh, 0
     ldi tosl, 10
     ret
@@ -354,7 +354,7 @@ forthword_ TEN, 0, "10"
 ; Arithmetics
 ; leaves the value -1 (true) on TOS
 forthword_ TRUE, 0, "true"
-    pushtos
+    push_
 PFA_TRUE1:
     ser tosl
     ser tosh
@@ -519,7 +519,7 @@ forthword_ WALIGN, 0, "w_"
 ; logically shift n1 left n2 times
 forthword_ LSHIFT, 0, "<<"
     movw ZL, tosl
-    poptos
+    pop_
 PFA_LSHIFT1:
     sbiw ZL, 1
     brmi PFA_LSHIFT2
@@ -534,7 +534,7 @@ PFA_LSHIFT2:
 ; shift n1 n2-times logically right
 forthword_ RSHIFT, 0, ">>"
     movw ZL, tosl
-    poptos
+    pop_
 PFA_RSHIFT1:
     sbiw ZL, 1
     brmi PFA_RSHIFT2
@@ -552,7 +552,7 @@ PFA_RSHIFT2:
 ; current return stack pointer address
 ; must be called, don't use jmp to optimize
 forthword_ RP_FETCH, DIS_CALL_OPT, "rp@"
-    pushtos
+    push_
     in tosl, SPL
     in tosh, SPH
     ; don't include return address
@@ -572,14 +572,14 @@ forthword_ RP_STORE, DIS_CALL_OPT, "rp!"
     out SPL, tosl
     out SPH, tosh
     out SREG, temp2
-    poptos
+    pop_
     ijmp
 
 ; (  -- addr ) 
 ; Stack
 ; current data stack pointer
 forthword_ SP_FETCH, INLINE_OPT, "sp@"
-    pushtos
+    push_
     movw tosl, YL
     ret
 
@@ -588,7 +588,7 @@ forthword_ SP_FETCH, INLINE_OPT, "sp@"
 ; set data stack pointer to addr
 forthword_ SP_STORE, INLINE_OPT, "sp!"
     movw YL, tosl
-    poptos
+    pop_
     ret
 
 ; ( n1 -- n2 ) 
@@ -628,7 +628,7 @@ forthword_ SREIGHT, INLINE_OPT, "~h"
 ; System Variable
 ; get user area pointer
 forthword_ UP_FETCH, INLINE_OPT, "up@"
-    pushtos
+    push_
     movw tosl, upl
     ret
 
@@ -637,7 +637,7 @@ forthword_ UP_FETCH, INLINE_OPT, "up@"
 ; set user area pointer
 forthword_ UP_STORE, INLINE_OPT, "up!"
     movw upl, tosl
-    poptos
+    pop_
     ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -648,7 +648,7 @@ forthword_ UP_STORE, INLINE_OPT, "up!"
 ; write n (2bytes) to eeprom address
 forthword_ STOREE, 0, "!e"
     movw ZL, tosl
-    poptos
+    pop_
     in_ temp2, SREG
     cli
     rcall PFA_STOREE1
@@ -657,7 +657,7 @@ forthword_ STOREE, 0, "!e"
     mov tosl, tosh
     rcall PFA_STOREE1
     out_ SREG, temp2
-    poptos
+    pop_
     ret
     
 PFA_STOREE1:
@@ -716,7 +716,7 @@ forthword_ STOREI, 0, "!i"
   cli
 
   movw temp2, tosl ; save the (word) address
-  poptos          ; get the new value for the flash cell
+  pop_          ; get the new value for the flash cell
   ; save parameter stack
   push YL
   push YH
@@ -725,7 +725,7 @@ forthword_ STOREI, 0, "!i"
   pop YH
   pop YL
   ; finally clear the stack
-  poptos
+  pop_
   pop temp1
   ; restore status register (and interrupt enable flag)
   out SREG,temp1
@@ -863,12 +863,12 @@ ZFETCH:
 ; write n to RAM memory at addr, low byte first
 forthword_ STORE, 0, "!"
     movw ZL, tosl
-    poptos
+    pop_
 
 ZSTORE:
     st Z+, tosl
     st Z+, tosh
-    poptos
+    pop_
     ret
 
 ; ( addr -- )
@@ -884,14 +884,14 @@ forthword_ ZEROSTORE, 0, "0!"
 ; write n to RAM memory at addr, high byte first
 forthword_ HSTORE, 0, "h!"
     movw ZL, tosl
-    poptos
+    pop_
 
     in_ temp2, SREG
     cli
     st Z, tosh
     st -Z, tosl
     out_ SREG, temp2
-    poptos
+    pop_
     ret
 
 ; ( c a-addr -- ) 
@@ -899,11 +899,11 @@ forthword_ HSTORE, 0, "h!"
 ; store a single byte to RAM address
 forthword_ CSTORE, 0, "c!"
     movw ZL, tosl
-    poptos
+    pop_
 
 ZCSTORE:
     st Z+, tosl
-    poptos
+    pop_
     ret
     
 ; ( a-addr -- ) 
@@ -930,7 +930,7 @@ ZCFETCH:
 ; add n to content of RAM address a-addr
 forthword_ PLUSSTORE, 0, "+!"
     movw ZL, tosl
-    poptos
+    pop_
     ld temp2, Z
     ldd temp3, Z+1
     add tosl, temp2
@@ -952,7 +952,7 @@ forthword_ ONEPLUSSTORE, 0, "1+!"
 ; add n to content of byte RAM address a-addr
 forthword_ PLUSCSTORE, 0, "+c!"
     movw ZL, tosl
-    poptos
+    pop_
     ld temp2, Z
     add tosl, temp2
     rjmp ZCSTORE
@@ -990,7 +990,7 @@ forthword_ STOREU, 0, "!u"
 ; Read memory pointed to by register A (Extended VM)
 forthword_ AFETCH, 0, "a@"
     movw ZL, al
-    pushtos
+    push_
     rjmp ZFETCH
 
 ; ( -- n2 ) 
@@ -998,7 +998,7 @@ forthword_ AFETCH, 0, "a@"
 ; Read program memory pointed to by register A (Extended VM)
 forthword_ AFETCHI, 0, "a@i"
     movw ZL, al
-    pushtos
+    push_
     rjmp ZFETCHI
 
 
@@ -1017,7 +1017,7 @@ forthword_ AFETCHI, 0, "a@i"
 ; Read a byte from ram pointed to by register A (Extended VM)
 forthword_ ACFETCH, 0, "ac@"
     movw ZL, al
-    pushtos
+    push_
     rjmp ZCFETCH
 
 
@@ -1026,7 +1026,7 @@ forthword_ ACFETCH, 0, "ac@"
 ; Move TOS to A register (Extended VM)
 forthword_ TO_A, INLINE_OPT, ">a"
     copytoa_
-    poptos
+    pop_
     ret
 
 ; ( n -- ) B: n
@@ -1034,7 +1034,7 @@ forthword_ TO_A, INLINE_OPT, ">a"
 ; Move TOS to B register (Extended VM)
 forthword_ TO_B, INLINE_OPT, ">b"
     copytob_
-    poptos
+    pop_
     ret
 
 ; ( n -- n ) A: n
@@ -1069,7 +1069,7 @@ forthword_ NIPTOB, INLINE_OPT, "nip>b"
 ; Extended VM
 ; read the A register (Extended VM)
 forthword_ A_, INLINE_OPT, "a"
-    pushtos
+    push_
     movw tosl, al
     ret
 
@@ -1077,7 +1077,7 @@ forthword_ A_, INLINE_OPT, "a"
 ; Extended VM
 ; read the B register (Extended VM)
 forthword_ B_, INLINE_OPT, "b"
-    pushtos
+    push_
     movw tosl, bl
     ret
 
@@ -1103,7 +1103,7 @@ forthword_ NASTORE, 0, "na!"
     movw ZL, al
     add ZL, tosl
     adc ZH, tosh
-    poptos
+    pop_
     rjmp ZSTORE
 
 ; ( -- )
@@ -1118,7 +1118,7 @@ forthword_ APLUS, INLINE_OPT, "a+"
 ; Arithmetics
 ; convert byte length to word length plus remainder
 forthword_ BTOW, 0, "btow"
-    dup_        ; ( -- len len)
+    push_        ; ( -- len len)
     twoslash_   ; ( -- len len/2
     rcall TUCK  ; ( -- len/2 len len/2
     twostar_    ; ( -- len/2 len len'
@@ -1135,7 +1135,7 @@ ITOI_B:
     dupzerosense_   ; ( start count )
     breq ITOI_END
     rcall TO_B      ; ( start ) B: count
-    dup_            ; ( start start )
+    push_            ; ( start start )
     rcall FETCHI    ; ( start val )
     rcall A_        ; ( start val dest )
     rcall STOREI    ; ( start )

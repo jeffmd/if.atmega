@@ -132,7 +132,7 @@ TAILOPT_OPT:
     ; fetch contents at DP-1
     rcall DP       ; ( DP )
     oneminus_      ; ( DP-1 )
-    dup_           ; ( DP-1 DP-1 )
+    push_           ; ( DP-1 DP-1 )
     rcall FETCHI   ; ( DP-1 inst )
     ; bit 4 of high byte must be cleared.
     cbr tosh, 1<<4    ; ( DP-1 inst' )
@@ -222,7 +222,7 @@ PFA_SCOMMA1:
     rjmp PFA_SCOMMA1
 
 PFA_SCOMMA2:
-    drop_              ; (  )
+    pop_              ; (  )
     rcall R_FROM       ; ( rem ) (R: )
     ; if
     zerosense_         ; ( )
@@ -243,14 +243,14 @@ PFA_SCOMMA3:
 forthword_ FINDI, 0, "findi"
     ; fetch from flash and check if equal to match word
     rcall TO_B       ; ( start ) B: match
-    dup_             ; ( start start )
+    push_             ; ( start start )
     twostar_         ; ( start start*2 )
     rcall TO_A       ; ( start ) A: start*2
     ; begin
 FINDI_BEGIN:
       rcall AFETCHI  ; ( start val )
       aplus_
-      pushtos
+      push_
       movw tosl, bl  ; ( start val match )
       rcall EQUAL    ; ( start flag )
     ; until
@@ -278,7 +278,7 @@ forthword_ INLINE, 0, "inline"
     ; dp swap dup dp+ itoi
     rcall DP                 ; ( start count dp )
     rcall SWAP               ; ( start dp count )
-    dup_                     ; ( start dp count count )
+    push_                     ; ( start dp count count )
     rcall DPPLUS             ; ( start dp count )
     rjmp ITOI
 
@@ -298,7 +298,7 @@ forthword_ NFATOXTF, 0, "nfa>xtf"
     dupzerosense_              ; ( n )
     breq NFATOXTF_EXIT
 
-    dup_                        ; ( nfa nfa )
+    push_                        ; ( nfa nfa )
     rcall FETCHI                ; ( nfa xtflags )
     rcall TO_R                  ; ( nfa ) (R: xtflags)
     rcall NFA2LFA               ; ( lfa )
@@ -316,7 +316,7 @@ NFATOXTF_EXIT:
 forthword_ ONLY, IMMEDIATE_EN, "only"
     ; forth vocab always takes slot 0
     doliteral_ EE_FORTHWORDLIST
-    dup_
+    push_
     rcall CONTEXT
     rcall STORE
     ; make current also forth vocab

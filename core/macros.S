@@ -29,10 +29,10 @@
 
   ; registers used for Next on Stack (NOS) and local storage
   ; these registers get saved during an Interrupt Service Routine
-  temp0 = 16 ; low byte of NOS
-  temp1 = 17 ; high byte of NOS
-  temp2 = 18
-  temp3 = 19
+  temp0 = 16 ; low byte of NOS or X
+  temp1 = 17 ; high byte of NOS or X
+  temp2 = 18 ; low byte of Y
+  temp3 = 19 ; low byte of Y
 
   ; not to be used in ISR
   temp6 = 20
@@ -45,7 +45,7 @@
 ; enable inlining of word
 ; bit 0 : enable inlinning
 .set INLINE_OPT_FB, 0
-.set INLINE_OPT, 0x01
+.set INLINE_OPT, 1 << INLINE_OPT_FB
 ; bit 2 : dissable tail call optimization
 ; disable tail call optimization : & with word count flag ie: HFLAGS & DIS_CALL_OPT | 04
 .set DIS_CALL_OPT, 0x04
@@ -54,12 +54,12 @@
 .set COMPILE_ONLY_FB, 3
 ; set immediate word as compile time only execution
 ; disable interpret execution : & with word count flag ie: 0xFF04 & COMPILE_ONLY
-.set COMPILE_ONLY, 0x08
+.set COMPILE_ONLY, 1 << COMPILE_ONLY_FB
 
 ; bit 7 : immediate execution when in compile state
 ; enable immediate execution : & with word count flag ie: 0xFF04 & IMMEDIATE_EN
 .set IMMEDIATE_EN_FB, 7
-.set IMMEDIATE_EN, 0x80
+.set IMMEDIATE_EN, 1 << IMMEDIATE_EN_FB
 
 ; forth flags
 ; bit 0 : rcall was last instruction
@@ -97,23 +97,16 @@
     pop temp0
 .endm
 
-.macro poptos ; load tos, (drop)
+.macro pop_ ; load tos, (drop)
     ld tosl, Y+
     ld tosh, Y+
 .endm
 
-.macro drop_
-    poptos
-.endm
-
-.macro pushtos ; save tos, (dup)
+.macro push_ ; save WR on data stack
     st -Y, tosh
     st -Y, tosl
 .endm
 
-.macro dup_
-    pushtos
-.endm
 
 .macro oneplus_
     adiw tosl, 1
@@ -168,7 +161,7 @@
 
 .macro zerosense_
     sbiw tosl, 0
-    poptos
+    pop_
 .endm
 
 .macro dupzerosense_
@@ -191,7 +184,7 @@
 .endm
 
 .macro doliteral_ val
-    pushtos
+    push_
     ldi tosl, lo8(\val) 
     ldi tosh, hi8(\val) 
 .endm

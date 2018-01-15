@@ -90,7 +90,7 @@ MIN_TEST:
       call SWAP
       
 MIN_exit:
-    drop_
+    pop_
     ret
 
 ; ( n1 n2 -- n1|n2 )
@@ -127,17 +127,17 @@ forthword_ PNIB, 0, ".h"
 forthword_ PHEX, 0, ".$"
     doliteral_ '$
     call EMIT
-    dup_
+    push_
     highbyte_
     swapnib_
     rcall PNIB
-    dup_
+    push_
     highbyte_
     rcall PNIB
-    dup_
+    push_
     swapnib_
     rcall PNIB
-    dup_
+    push_
     rcall PNIB
     zerohigh_
     ldi tosl, 32
@@ -154,16 +154,16 @@ forthword_ DIGITQ, 0, "digit?"
     sbiw tosl, 7
     cpi tosl, 10
     brge PFA_DIGITQ0
-    drop_
+    pop_
     jmp ZERO
 
 PFA_DIGITQ0:
-    dup_
+    push_
     rcall BASEFETCH
     call UGREATEREQUAL
     zerosense_
     breq PFA_DIGITQ2
-    drop_
+    pop_
     jmp ZERO
 
 PFA_DIGITQ2:
@@ -255,7 +255,7 @@ forthword_ THROW, 0, "throw"
 ;forthword_ SETBASE, 0, "setbase"
 SETBASE:        ; ( c -- )
     mov temp0, tosl
-    drop_
+    pop_
     cpi temp0, '$
     brne PFA_SETBASE0
     rjmp HEX
@@ -271,7 +271,7 @@ PFA_SETBASE1:
     rjmp DECIMAL
 
 PFA_SETBASE2:        ; ( error)
-    dup_
+    push_
     movw tosl, temp0
     call EMIT
     call DOSLIT
@@ -288,7 +288,7 @@ PRAEFIX:        ; ( adr1 len1 -- adr2 len2 )
     cpi tosl, 0x30 
     brlo PFA_PRAEFIX0
     ; no praefix
-    drop_
+    pop_
     ret
 
 PFA_PRAEFIX0:
@@ -370,7 +370,7 @@ PFA_NUMBER2:
     rjmp PFA_NUMBER5
 
 PFA_NUMBER1:
-    drop_                   ; ( n )  (R: base flagsign' )
+    pop_                   ; ( n )  (R: base flagsign' )
     ; incorporate sign into number
     call R_FROM             ; ( n flagsign' ) (R: base )
     zerosense_
@@ -418,7 +418,7 @@ forthword_ COLD, 0, "cold"
     ; init parameter stack pointer
     ldi YL, lo8(stackstart)
     ldi YH, hi8(stackstart)
-    pushtos
+    push_
     movw tosl, r10
     rcall RAM_MCUSRO
     call STORE
@@ -470,11 +470,11 @@ forthword_ RP0, 0, "rp0"
 
 ;forthword_ COMPARE, 0, "compare"
 ;    movw temp0, tosl
-;    poptos
+;    pop_
 ;    movw XL, tosl
-;    poptos
+;    pop_
 ;    movw temp2, tosl
-;    poptos
+;    pop_
 ;    movw ZL, tosl
 ;PFA_COMPARE_LOOP:
 ;    ld temp4, X+
@@ -522,7 +522,7 @@ forthword_ RP0, 0, "rp0"
 ;    oneminus_
 ;    brbc 1, PFA_CMOVE2
 ;PFA_CMOVE1:
-;    poptos
+;    pop_
 ;    ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -549,7 +549,7 @@ forthword_ RP0, 0, "rp0"
 ;    oneminus_
 ;    brbc 1, PFA_CMOVE_G2
 ;PFA_CMOVE_G1:
-;    poptos
+;    pop_
 ;    ret
 
 
@@ -557,7 +557,7 @@ forthword_ RP0, 0, "rp0"
 ; Tools
 ; Get an array from EEPROM and put on the stack
 ;forthword_ FETCH_EE_ARRAY, 0, "@e[]"
-;    dup_               ; ( ee-addr ee-addr )
+;    push_               ; ( ee-addr ee-addr )
 ;    rcall FETCHE       ; ( ee-addr len )
 ;    rcall _A           ; ( ee-addr len ) A: len
 ;    twostar_           ; ( ee-addr blen )
@@ -595,7 +595,7 @@ forthword_ RP0, 0, "rp0"
 ;    oneminus_      ; ( e-addr+2 n-1 )
 ;    rjmp PFA_STORE_EE_ARRAY1
 ;PFA_STORE_EE_ARRAY2:
-;    drop_
+;    pop_
 ;    ret
 
 ; ( -- n )
@@ -643,7 +643,7 @@ PFA_EE2RAM_1:
     dupzerosense_
     breq PFA_EE2RAM_2
     call B_              ; (len e-addr)
-    dup_                 ; ( len e-addr e-addr )
+    push_                 ; ( len e-addr e-addr )
     call FETCHE          ; ( len e-addr n )
     call ASTORE          ; ( len e-addr )
     aplus_
@@ -672,7 +672,7 @@ forthword_ INITUSER, 0, "i-u"
 ; multiply 2 unsigned cells to a cell
 forthword_ STAR, 0, "*"
     rcall MSTAR
-    drop_
+    pop_
     ret
 
 ; ( u1 u2 -- u)
@@ -680,7 +680,7 @@ forthword_ STAR, 0, "*"
 ; multiply 2 unsigned cells to a cell
 forthword_ MSTAR, 0, "m*"
     movw temp0, tosl
-    poptos
+    pop_
     movw temp2, tosl
     ; high cell ah*bh
     muls temp3, temp1
@@ -702,7 +702,7 @@ forthword_ MSTAR, 0, "m*"
     adc   temp4, r1
     adc   temp5, zerol
 
-    pushtos
+    push_
     movw tosl, temp4
     ret
 
@@ -864,7 +864,7 @@ SLASHMOD_end:
 ; get the absolute value
 
 forthword_ ABS, 0, "abs"
-    dup_
+    push_
     call LESSZERO
     ; <if>
     zerosense_

@@ -21,7 +21,7 @@ forthword_ RD_K, 0, "Rd,k,"
     call TO_R            ;( Rd k8 opcode ) (R: mask )
     call TO_R            ;( Rd k8 ) (R: mask opcode )
     zerohigh_            ;( Rd 00k8 )
-    dup_                 ;( Rd 00k8 00k8 )
+    push_                 ;( Rd 00k8 00k8 )
     doliteral_ 4         ;( Rd 00k8 00k8 4 )
     call LSHIFT          ;( Rd 00k8 0000kkkk.kkkk0000 )
     call OR              ;( Rd 0000kkkk.kkkkkkkk )
@@ -179,11 +179,11 @@ forthword_ COMPILEXT, 0, "cxt"
     ; if bit 0 of high byte flag is 0 then word is to be inlinned
     sbrc tosh, INLINE_OPT_FB
     rjmp DO_COMPILEXT
-    drop_           ; ( xt )
+    pop_           ; ( xt )
     jmp INLINE
 
 DO_COMPILEXT:
-    drop_                ; ( xt )
+    pop_                ; ( xt )
     ; calculate relative distance in words from start to dest
     call DP              ; ( xt dp )
     call OVER            ; ( xt dp xt )
@@ -195,7 +195,7 @@ DO_COMPILEXT:
     zerosense_           ; ( xt distance )
     ; do relative call if flag is true
     brne DO_RCALLC
-    drop_                ; ( xt )
+    pop_                ; ( xt )
     rjmp CALLC
 
 DO_RCALLC:

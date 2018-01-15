@@ -7,7 +7,7 @@
 ; runtime part of user
 ; get the address of the user var which is located at the return address of the caller
 forthword_ DOUSER, DIS_CALL_OPT, "(user)"
-    pushtos
+    push_
     pop ZH
     pop ZL
     rcall ZDFETCHI
@@ -20,7 +20,7 @@ forthword_ DOUSER, DIS_CALL_OPT, "(user)"
 ; System
 ; get defer contents
 forthword_ DEFGET, 0, "defg"
-    dup_                ; ( addr addr )
+    push_                ; ( addr addr )
     ; get address of defer
     rcall FETCHI        ; ( addr valaddr )
     rjmp SWAP           ; ( valaddr addr )

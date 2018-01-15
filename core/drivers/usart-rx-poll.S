@@ -19,7 +19,7 @@ RX_nodata:
 forthword_ RXQ_POLL, 0, "rx?-poll"
   ;rcall PAUSE
   doliteral_ bm_USART_RXRD
-  dup_
+  push_
   doliteral_ USART_A
   call CFETCH
   call AND
