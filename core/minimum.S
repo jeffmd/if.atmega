@@ -654,7 +654,7 @@ PFA_EE2RAM_1:
     rjmp PFA_EE2RAM_1
 
 PFA_EE2RAM_2:
-    jmp DROP
+    jmp DPOP
 
 ; ( -- )
 ; Tools

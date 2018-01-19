@@ -98,9 +98,166 @@
     pop xrl
 .endm
 
-.macro pop_ ; load tos, (drop)
-    ld wl, Y+
-    ld wh, Y+
+.macro str_d0_
+  st Y, wl
+  std Y+1, wh
+.endm
+
+.macro d0_ ; load tos from stack
+  ld wl, Y
+  ldd wh, Y+1
+.endm
+
+.macro str_d1_
+  std Y+2, wl
+  std Y+3, wh
+.endm
+
+.macro d1_ ; load tos from stack
+  ldd wl, Y+2
+  ldd wh, Y+3
+.endm
+
+.macro str_d2_
+  std Y+4, wl
+  std Y+5, wh
+.endm
+
+.macro d2_ ; load tos from stack
+  ldd wl, Y+4
+  ldd wh, Y+5
+.endm
+
+.macro a_str_d0_
+  st Y, al
+  std Y+1, ah
+.endm
+
+.macro b_str_d0_
+  st Y, bl
+  std Y+1, bh
+.endm
+
+.macro x_str_d0_
+  st Y, xrl
+  std Y+1, xrh
+.endm
+
+.macro y_str_d0_
+  st Y, yrl
+  std Y+1, yrh
+.endm
+
+.macro a_str_d1_
+  std Y+2, al
+  std Y+3, ah
+.endm
+
+.macro b_str_d1_
+  std Y+2, bl
+  std Y+3, bh
+.endm
+
+.macro x_str_d1_
+  std Y+2, xrl
+  std Y+3, xrh
+.endm
+
+.macro y_str_d1_
+  std Y+2, yrl
+  std Y+3, yrh
+.endm
+
+.macro a_str_d2_
+  std Y+4, al
+  std Y+5, ah
+.endm
+
+.macro b_str_d2_
+  std Y+4, bl
+  std Y+5, bh
+.endm
+
+.macro x_str_d2_
+  std Y+4, xrl
+  std Y+5, xrh
+.endm
+
+.macro y_str_d2_
+  std Y+4, yrl
+  std Y+5, yrh
+.endm
+
+.macro d0_str_a_ 
+  ld al, Y
+  ldd ah, Y+1
+.endm
+
+.macro d1_str_a_ 
+  ldd al, Y+2
+  ldd ah, Y+3
+.endm
+
+.macro d2_str_a_ 
+  ldd al, Y+4
+  ldd ah, Y+5
+.endm
+
+.macro d0_str_b_ 
+  ld bl, Y
+  ldd bh, Y+1
+.endm
+
+.macro d1_str_b_ 
+  ldd bl, Y+2
+  ldd bh, Y+3
+.endm
+
+.macro d2_str_b_ 
+  ldd bl, Y+4
+  ldd bh, Y+5
+.endm
+
+.macro d0_str_x_ 
+  ld xrl, Y
+  ldd xrh, Y+1
+.endm
+
+.macro d1_str_x_ 
+  ldd xrl, Y+2
+  ldd xrh, Y+3
+.endm
+
+.macro d2_str_x_ 
+  ldd xrl, Y+4
+  ldd xrh, Y+5
+.endm
+
+.macro d0_str_y_ 
+  ld yrl, Y
+  ldd yrh, Y+1
+.endm
+
+.macro d1_str_y_ 
+  ldd yrl, Y+2
+  ldd yrh, Y+3
+.endm
+
+.macro d2_str_y_ 
+  ldd yrl, Y+4
+  ldd yrh, Y+5
+.endm
+
+.macro top1_ ; move stack pointer down one cell
+  sbiw YL, 2
+.endm
+
+.macro top2_ ; move stack pointer down two cells
+  sbiw YL, 4
+.endm
+
+.macro top3_ ; move stack pointer down three cells
+    sbiw YL, 6
 .endm
 
 .macro push_ ; save WR on data stack
@@ -108,6 +265,62 @@
     st -Y, wl
 .endm
 
+.macro pop_ ; load tos, (drop)
+    ld wl, Y+
+    ld wh, Y+
+.endm
+
+.macro pusha_ ; save WR on data stack
+    st -Y, ah
+    st -Y, al
+.endm
+
+.macro pushb_ ; save WR on data stack
+    st -Y, bh
+    st -Y, bl
+.endm
+
+.macro pushx_ ; save WR on data stack
+    st -Y, xrh
+    st -Y, xrl
+.endm
+
+.macro pushy_ ; save WR on data stack
+    st -Y, yrh
+    st -Y, yrl
+.endm
+
+.macro popa_ ; load tos, (drop)
+    ld al, Y+
+    ld ah, Y+
+.endm
+
+.macro popb_ ; load tos, (drop)
+    ld bl, Y+
+    ld bh, Y+
+.endm
+
+.macro popx_ ; load tos, (drop)
+    ld xrl, Y+
+    ld xrh, Y+
+.endm
+
+.macro popy_ ; load tos, (drop)
+    ld yrl, Y+
+    ld yrh, Y+
+.endm
+
+.macro nip_
+    adiw YL, 2
+.endm
+
+.macro nip2_
+    adiw YL, 4
+.endm
+
+.macro nip3_
+    adiw YL, 6
+.endm
 
 .macro oneplus_
     adiw wl, 1
@@ -145,14 +358,6 @@
 
 .macro highbyte_
   mov wl, wh
-.endm
-
-.macro nip_
-    adiw YL, 2
-.endm
-
-.macro dnip_
-    adiw YL, 4
 .endm
 
 .macro not_
@@ -208,40 +413,63 @@
 .endm
 
 .macro niptob_
-    ld bl, Y+
-    ld bh, Y+
+  ld bl, Y+
+  ld bh, Y+
 .endm
 
 
 .macro aplus_
-    movw al, ZL
+  movw al, ZL
 .endm
 
-
-.macro copytoa_
-    movw al, wl
+.macro str_a_
+  movw al, wl
 .endm
 
-.macro copytob_
-    movw bl, wl
+.macro str_b_
+  movw bl, wl
 .endm
 
-.macro pusha_
+.macro str_x_
+  movw xrl, wl
+.endm
+
+.macro str_y_
+  movw yrl, wl
+.endm
+
+.macro a_
+  movw wl, al
+.endm
+
+.macro b_
+  movw wl, bl
+.endm
+
+.macro x_
+  movw wl, xrl
+.endm
+
+.macro y_
+  movw wl, yrl
+.endm
+
+.macro rpusha_
     push al
     push ah
 .endm
 
-.macro pushb_
+.macro rpushb_
     push bl
     push bh
 .endm
 
-.macro popa_
+.macro rpopa_
     pop ah
     pop al
 .endm
 
-.macro popb_
+.macro rpopb_
     pop bh
     pop bl
 .endm

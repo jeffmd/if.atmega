@@ -121,7 +121,7 @@ PFA_TYPE1:
     oneminus_        ; ( n-1 )
     rjmp PFA_TYPE1
 PFA_TYPE2:
-    rjmp DROP
+    rjmp DPOP
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -203,7 +203,7 @@ forthword_ ICOMPARE, 0, "icmp"
     breq PFA_ICOMPARE_SAMELEN
 
     ; strings are not the same length
-    dnip_
+    nip2_
     zerotos_                 ; ( 0 )
     ret
 
@@ -216,7 +216,7 @@ PFA_ICOMPARE_SAMELEN:
 
     ; begin
 PFA_ICOMPARE_LOOP:
-    copytob_                 ; ( r-addr len ) B: len
+    str_b_                   ; ( r-addr len ) B: len
     ; while
     zerosense_               ; ( r-addr )
     breq PFA_ICOMPARE_DONE
@@ -325,7 +325,7 @@ forthword_ FINDNFA, 0, "findnfa"
     dupzerosense_
     brne FINDNFA_
       ; terminating, wid is empty
-      dnip_
+      nip2_
       ret
 FINDNFA_:
     rcall FETCHE                ; ( c-addr len nfa )
@@ -335,7 +335,7 @@ FINDNFA_BEGIN:
     dupzerosense_               ; ( c-addr len nfa )
     brne FINDNFA_CHECK
       ; terminating, 0 found
-      dnip_                     ; ( 0 )
+      nip2_                     ; ( 0 )
       ret
 
 FINDNFA_CHECK:
@@ -407,7 +407,7 @@ FINDW_BEGIN:
       dupzerosense_
       ; end loop if word found
       breq FINDW_NEXT
-        dnip_           ; ( addr nfa )
+        nip2_           ; ( addr nfa )
         nip_            ; ( nfa )
         ret
         

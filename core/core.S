@@ -40,10 +40,12 @@ PFA_QDUP1:
 ; Stack
 ; swaps the two top level stack cells
 forthword_ SWAP, 0, "swap"
-    movw xrl, wl
-    pop_
-    st -Y, xrh
-    st -Y, xrl
+    ;movw xrl, wl
+    ;pop_
+    ;pushx_
+    d0_str_y_
+    str_d0_
+    y_
     ret
 
 ; ( x1 x2 -- x1 x2 x1 ) 
@@ -51,8 +53,7 @@ forthword_ SWAP, 0, "swap"
 ; Place a copy of x1 on top of the stack
 forthword_ OVER, 0, "over"
     push_
-    ldd wl, Y+2
-    ldd wh, Y+3
+    d1_    
     ret
 
 ; ( x1 x2 -- x1 x2 x1 x2) 
@@ -65,7 +66,7 @@ forthword_ TWOOVER, 0, "2over"
 ; ( n -- ) 
 ; Stack
 ; drop TOS
-forthword_ DROP, INLINE_OPT, "drop"
+forthword_ DPOP, INLINE_OPT, "pop"
     pop_
     ret
 
@@ -88,8 +89,15 @@ forthword_ NIP, INLINE_OPT, "nip"
 ; ( n1 n2 n3 -- n3) 
 ; Stack
 ; drop NOS twice, two cells before TOS.
-forthword_ DNIP, INLINE_OPT, "2nip"
-    dnip_
+forthword_ NIP2, INLINE_OPT, "nip2"
+    nip2_
+    ret
+
+; ( n1 n2 n3 n4 -- n4) 
+; Stack
+; drop NOS three times.
+forthword_ NIP3, INLINE_OPT, "nip3"
+    nip3_
     ret
 
 ; ( n1 n2 -- n2 n1 n2) 
@@ -241,8 +249,7 @@ forthword_ EQUALZERO, 0, "0="
 ; ( n2 n1 -- n1 )
 ; compare top of stack and next on top of stack and sets mcu status register flags
 forthword_ NTCP, 0, "ntcp"
-    ld xrl, Y+
-    ld xrh, Y+
+    popx_
     cp xrl, wl
     cpc xrh, wh
     ret
@@ -379,8 +386,7 @@ forthword_ QZEROSENSE, INLINE_OPT, "?0?"
 ; Arithmetics
 ; subtract n2 from n1
 forthword_ MINUS, 0, "-"
-    ld xrl, Y+
-    ld xrh, Y+
+    popx_
     sub xrl, wl
     sbc xrh, wh
     movw wl, xrl
@@ -390,8 +396,7 @@ forthword_ MINUS, 0, "-"
 ; Arithmetics
 ; add n1 and n2
 forthword_ PLUS, 0, "+"
-    ld xrl, Y+
-    ld xrh, Y+
+    popx_
     add wl, xrl
     adc wh, xrh
     ret
@@ -431,8 +436,7 @@ forthword_ TWOSTAR, INLINE_OPT, "2*"
 ; bitwise and
 
 forthword_ AND, 0, "and"
-    ld xrl, Y+
-    ld xrh, Y+
+    popx_
     and wl, xrl
     and wh, xrh
     ret
@@ -441,8 +445,7 @@ forthword_ AND, 0, "and"
 ; Logic
 ; logical or
 forthword_ OR, 0, "or"
-    ld xrl, Y+
-    ld xrh, Y+
+    popx_
     or wl, xrl
     or wh, xrh
     ret
@@ -451,8 +454,7 @@ forthword_ OR, 0, "or"
 ; Logic
 ; exclusive or
 forthword_ XOR, 0, "xor"
-    ld xrl, Y+
-    ld xrh, Y+
+    popx_
     eor wl, xrl
     eor wh, xrh
     ret
@@ -1025,7 +1027,7 @@ forthword_ ACFETCH, 0, "ac@"
 ; Extended VM
 ; Move TOS to A register (Extended VM)
 forthword_ TO_A, INLINE_OPT, ">a"
-    copytoa_
+    str_a_
     pop_
     ret
 
@@ -1033,22 +1035,22 @@ forthword_ TO_A, INLINE_OPT, ">a"
 ; Extended VM
 ; Move TOS to B register (Extended VM)
 forthword_ TO_B, INLINE_OPT, ">b"
-    copytob_
+    str_b_
     pop_
     ret
 
 ; ( n -- n ) A: n
 ; Extended VM
 ; copy TOS to A register (Extended VM)
-forthword_ _A, INLINE_OPT, ":a"
-    copytoa_
+forthword_ STR_A, INLINE_OPT, "!a"
+    str_a_
     ret
 
 ; ( n -- n ) B: n
 ; Extended VM
 ; copy TOS to B register (Extended VM)
-forthword_ _B, INLINE_OPT, ":b"
-    copytob_
+forthword_ STR_B, INLINE_OPT, "!b"
+    str_b_
     ret
 
 ; ( n1 n2 -- n2 ) A: n1
