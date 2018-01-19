@@ -77,8 +77,8 @@
   zerol = 23
   
   ; parameter working register [wreg]
-  wregl = 24
-  wregh = 25
+  wl = 24
+  wh = 25
 
 
   ; XL (26), XH (27) general purpose addressing
@@ -88,8 +88,8 @@
 
 ; Inline macros
 .macro rpush_ ; put copy of tos on return stack
-    push wregl
-    push wregh
+    push wl
+    push wh
 .endm
 
 .macro r_drop_ ; drop TOR
@@ -98,52 +98,52 @@
 .endm
 
 .macro pop_ ; load tos, (drop)
-    ld wregl, Y+
-    ld wregh, Y+
+    ld wl, Y+
+    ld wh, Y+
 .endm
 
 .macro push_ ; save WR on data stack
-    st -Y, wregh
-    st -Y, wregl
+    st -Y, wh
+    st -Y, wl
 .endm
 
 
 .macro oneplus_
-    adiw wregl, 1
+    adiw wl, 1
 .endm
 
 .macro oneminus_
-    sbiw wregl, 1
+    sbiw wl, 1
 .endm
 
 .macro twoplus_
-    adiw wregl, 2
+    adiw wl, 2
 .endm
 
 .macro fourplus_
-    adiw wregl, 4
+    adiw wl, 4
 .endm
 
 .macro twominus_
-    sbiw wregl, 2
+    sbiw wl, 2
 .endm
 
 .macro fourminus_
-    sbiw wregl, 4
+    sbiw wl, 4
 .endm
 
 .macro twoslash_
-    asr wregh
-    ror wregl
+    asr wh
+    ror wl
 .endm
 
 .macro twostar_
-    lsl wregl
-    rol wregh
+    lsl wl
+    rol wh
 .endm
 
 .macro highbyte_
-  mov wregl, wregh
+  mov wl, wh
 .endm
 
 .macro nip_
@@ -155,50 +155,50 @@
 .endm
 
 .macro not_
-    com wregl
-    com wregh
+    com wl
+    com wh
 .endm
 
 .macro zerosense_
-    sbiw wregl, 0
+    sbiw wl, 0
     pop_
 .endm
 
 .macro dupzerosense_
-    sbiw wregl, 0
+    sbiw wl, 0
 .endm
 
 .macro zerotos_
-    clr wregl
-    clr wregh
+    clr wl
+    clr wh
 .endm
 
 .macro anditos_ val
-    andi wregh, hi8(\val)
-    andi wregl, lo8(\val)
+    andi wh, hi8(\val)
+    andi wl, lo8(\val)
 .endm
 
 .macro oritos_ val
-    ori wregh, hi8(\val)
-    ori wregl, lo8(\val)
+    ori wh, hi8(\val)
+    ori wl, lo8(\val)
 .endm
 
 .macro doliteral_ val
     push_
-    ldi wregl, lo8(\val) 
-    ldi wregh, hi8(\val) 
+    ldi wl, lo8(\val) 
+    ldi wh, hi8(\val) 
 .endm
 
 .macro zerohigh_
-    clr wregh
+    clr wh
 .endm
 
 .macro zerolow_
-    clr wregl
+    clr wl
 .endm
 
 .macro swapnib_
-    swap wregl
+    swap wl
 .endm
 
 .macro niptoa_
@@ -218,11 +218,11 @@
 
 
 .macro copytoa_
-    movw al, wregl
+    movw al, wl
 .endm
 
 .macro copytob_
-    movw bl, wregl
+    movw bl, wl
 .endm
 
 .macro pusha_

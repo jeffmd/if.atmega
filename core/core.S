@@ -7,7 +7,7 @@
 ; System
 ; execute XT
 forthword_ EXEC, 0, "exec"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
     ijmp
 
@@ -30,7 +30,7 @@ forthword_ DUP, INLINE_OPT, "dup"
 ; Stack
 ; duplicate TOS if non-zero
 forthword_ QDUP, 0, "?dup"
-    sbiw wregl, 0
+    sbiw wl, 0
     breq PFA_QDUP1
     push_
 PFA_QDUP1:
@@ -40,7 +40,7 @@ PFA_QDUP1:
 ; Stack
 ; swaps the two top level stack cells
 forthword_ SWAP, 0, "swap"
-    movw temp0, wregl
+    movw temp0, wl
     pop_
     st -Y, temp1
     st -Y, temp0
@@ -51,8 +51,8 @@ forthword_ SWAP, 0, "swap"
 ; Place a copy of x1 on top of the stack
 forthword_ OVER, 0, "over"
     push_
-    ldd wregl, Y+2
-    ldd wregh, Y+3
+    ldd wl, Y+2
+    ldd wh, Y+3
     ret
 
 ; ( x1 x2 -- x1 x2 x1 x2) 
@@ -98,8 +98,8 @@ forthword_ DNIP, INLINE_OPT, "2nip"
 forthword_ TUCK, 0, "tuck"
     ld temp0, y+
     ld temp1, y+
-    st -y, wregh 
-    st -y, wregl
+    st -y, wh 
+    st -y, wl
     st -y, temp1 
     st -y, temp0
     ret
@@ -110,16 +110,16 @@ forthword_ TUCK, 0, "tuck"
 forthword_ FLIP, 0, "flip"
     ldd temp0, y+2
     ldd temp1, y+3
-    std y+3, wregh 
-    std y+2, wregl
-    movw wregl, temp0 
+    std y+3, wh 
+    std y+2, wl
+    movw wl, temp0 
     ret
 
 ; ( n1 n2 n3 -- n2 n3 n1) 
 ; Stack
 ; rotate the three top level cells
 forthword_ ROT, 0, "rot"
-    movw temp0, wregl
+    movw temp0, wl
     ld temp2, Y+
     ld temp3, Y+ 
     pop_
@@ -138,11 +138,11 @@ forthword_ RROT, 0, "-rot"
     ld temp1, Y+
     ld temp2, Y+
     ld temp3, Y+
-    st -Y, wregh
-    st -Y, wregl
+    st -Y, wh
+    st -Y, wl
     st -Y, temp3
     st -Y, temp2
-    movw wregl, temp0
+    movw wl, temp0
     ret
 
 ;;;;;;;;;;;; Return Stack ;;;;;;;;;;;;;
@@ -154,8 +154,8 @@ forthword_ R_FROM, DIS_CALL_OPT, "r>"
     pop ZH
     pop ZL
     push_
-    pop wregh
-    pop wregl
+    pop wh
+    pop wl
     ijmp
 
 ; ( -- ) (R: n -- )
@@ -172,8 +172,8 @@ forthword_ R_DROP, INLINE_OPT, "r>drop"
 ; used if data in program mem and need an address to it
 forthword_ POPRET, DIS_CALL_OPT, "popret"
     push_
-    pop wregh
-    pop wregl
+    pop wh
+    pop wl
     ret
 
 
@@ -202,8 +202,8 @@ forthword_ R_FETCH, DIS_CALL_OPT, "r"
     in ZL, SPL
     in ZH, SPH
     push_
-    ldd wregh, Z+3
-    ldd wregl, Z+4
+    ldd wh, Z+3
+    ldd wl, Z+4
     ret
 
 ; ( -- n) (R: n -- n+1 )
@@ -214,12 +214,12 @@ forthword_ R_FETCHPLUS, DIS_CALL_OPT, "r>r+"
     pop ZH
     pop ZL
     push_
-    pop wregh
-    pop wregl
-    adiw wregl, 0x01
-    push wregl
-    push wregh
-    sbiw wregl, 0x01
+    pop wh
+    pop wl
+    adiw wl, 0x01
+    push wl
+    push wh
+    sbiw wl, 0x01
     ijmp
 
 
@@ -234,7 +234,7 @@ forthword_ NOTEQUAL, 0, "<>"
 ; Compare
 ; flag is true if TOS equal to 0 (zero)
 forthword_ EQUALZERO, 0, "0="
-    or wregh, wregl
+    or wh, wl
     rjmp PFA_EQUALDONE
 
 
@@ -243,8 +243,8 @@ forthword_ EQUALZERO, 0, "0="
 forthword_ NTCP, 0, "ntcp"
     ld temp0, Y+
     ld temp1, Y+
-    cp temp0, wregl
-    cpc temp1, wregh
+    cp temp0, wl
+    cpc temp1, wh
     ret
 
 ; ( n1 n2 -- flag ) 
@@ -297,14 +297,14 @@ forthword_ ULESS, 0, "u<"
 ; Compare
 ; flag is true if TOS is less than zero
 forthword_ LESSZERO, 0, "0<"
-    sbiw wregl, 0
+    sbiw wl, 0
     rjmp PFA_LESSDONE
 
 ; ( n1 -- flag ) 
 ; Compare
 ; flag is true if n1 is greater than 0
 forthword_ GREATERZERO, 0, "0>"
-    sbiw wregl, 0
+    sbiw wl, 0
     rjmp PFA_GREATERDONE
 
 ; ( -- 0 ) 
@@ -328,8 +328,8 @@ PFA_ZERO1:
 ; place a value 1 on TOS
 forthword_ ONE, 0, "1"
     push_
-    ldi wregh, 0
-    ldi wregl, 1
+    ldi wh, 0
+    ldi wl, 1
     ret
 
 ; ( -- 2 ) 
@@ -337,8 +337,8 @@ forthword_ ONE, 0, "1"
 ; place a value 2 on TOS
 forthword_ TWO, 0, "2"
     push_
-    ldi wregh, 0
-    ldi wregl, 2
+    ldi wh, 0
+    ldi wl, 2
     ret
 
 ; ( -- 10 ) 
@@ -346,8 +346,8 @@ forthword_ TWO, 0, "2"
 ; place a value 10 on TOS
 forthword_ TEN, 0, "10"
     push_
-    ldi wregh, 0
-    ldi wregl, 10
+    ldi wh, 0
+    ldi wl, 10
     ret
 
 ; ( -- -1 ) 
@@ -356,8 +356,8 @@ forthword_ TEN, 0, "10"
 forthword_ TRUE, 0, "true"
     push_
 PFA_TRUE1:
-    ser wregl
-    ser wregh
+    ser wl
+    ser wh
     ret
 
 ; ( n -- ) 
@@ -381,9 +381,9 @@ forthword_ QZEROSENSE, INLINE_OPT, "?0?"
 forthword_ MINUS, 0, "-"
     ld temp0, Y+
     ld temp1, Y+
-    sub temp0, wregl
-    sbc temp1, wregh
-    movw wregl, temp0
+    sub temp0, wl
+    sbc temp1, wh
+    movw wl, temp0
     ret
 
 ; ( n1 n2 -- n3) 
@@ -392,8 +392,8 @@ forthword_ MINUS, 0, "-"
 forthword_ PLUS, 0, "+"
     ld temp0, Y+
     ld temp1, Y+
-    add wregl, temp0
-    adc wregh, temp1
+    add wl, temp0
+    adc wh, temp1
     ret
 
 
@@ -433,8 +433,8 @@ forthword_ TWOSTAR, INLINE_OPT, "2*"
 forthword_ AND, 0, "and"
     ld temp0, Y+
     ld temp1, Y+
-    and wregl, temp0
-    and wregh, temp1
+    and wl, temp0
+    and wh, temp1
     ret
 
 ; ( n1 n2 -- n3 ) 
@@ -443,8 +443,8 @@ forthword_ AND, 0, "and"
 forthword_ OR, 0, "or"
     ld temp0, Y+
     ld temp1, Y+
-    or wregl, temp0
-    or wregh, temp1
+    or wl, temp0
+    or wh, temp1
     ret
 
 ; ( n1 n2 -- n3) 
@@ -453,8 +453,8 @@ forthword_ OR, 0, "or"
 forthword_ XOR, 0, "xor"
     ld temp0, Y+
     ld temp1, Y+
-    eor wregl, temp0
-    eor wregh, temp1
+    eor wl, temp0
+    eor wh, temp1
     ret
 
 
@@ -509,7 +509,7 @@ forthword_ FOURMINUS, INLINE_OPT, "4-"
 
 forthword_ WALIGN, 0, "w_"
     oneplus_
-	andi wregl, 0xfe
+	andi wl, 0xfe
     twoslash_
     ret
 
@@ -518,13 +518,13 @@ forthword_ WALIGN, 0, "w_"
 ; Arithmetics
 ; logically shift n1 left n2 times
 forthword_ LSHIFT, 0, "<<"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
 PFA_LSHIFT1:
     sbiw ZL, 1
     brmi PFA_LSHIFT2
-    lsl wregl
-    rol wregh
+    lsl wl
+    rol wh
     rjmp PFA_LSHIFT1
 PFA_LSHIFT2:
     ret
@@ -533,13 +533,13 @@ PFA_LSHIFT2:
 ; Arithmetics
 ; shift n1 n2-times logically right
 forthword_ RSHIFT, 0, ">>"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
 PFA_RSHIFT1:
     sbiw ZL, 1
     brmi PFA_RSHIFT2
-    lsr wregh
-    ror wregl
+    lsr wh
+    ror wl
     rjmp PFA_RSHIFT1
 PFA_RSHIFT2:
     ret
@@ -553,8 +553,8 @@ PFA_RSHIFT2:
 ; must be called, don't use jmp to optimize
 forthword_ RP_FETCH, DIS_CALL_OPT, "rp@"
     push_
-    in wregl, SPL
-    in wregh, SPH
+    in wl, SPL
+    in wh, SPH
     ; don't include return address
     twoplus_
     ret
@@ -569,8 +569,8 @@ forthword_ RP_STORE, DIS_CALL_OPT, "rp!"
     ; keep the return address
     pop ZH
     pop ZL
-    out SPL, wregl
-    out SPH, wregh
+    out SPL, wl
+    out SPH, wh
     out SREG, temp2
     pop_
     ijmp
@@ -580,14 +580,14 @@ forthword_ RP_STORE, DIS_CALL_OPT, "rp!"
 ; current data stack pointer
 forthword_ SP_FETCH, INLINE_OPT, "sp@"
     push_
-    movw wregl, YL
+    movw wl, YL
     ret
 
 ; ( addr -- i*x) 
 ; Stack
 ; set data stack pointer to addr
 forthword_ SP_STORE, INLINE_OPT, "sp!"
-    movw YL, wregl
+    movw YL, wl
     pop_
     ret
 
@@ -596,9 +596,9 @@ forthword_ SP_STORE, INLINE_OPT, "sp!"
 ; exchange the bytes of the TOS
 
 forthword_ BYTESWAP, INLINE_OPT, "><"
-    mov temp0, wregh
-    mov wregh, wregl
-    mov wregl, temp0
+    mov temp0, wh
+    mov wh, wl
+    mov wl, temp0
     ret
 
 ; ( n1 -- n2 ) 
@@ -629,14 +629,14 @@ forthword_ SREIGHT, INLINE_OPT, "~h"
 ; get user area pointer
 forthword_ UP_FETCH, INLINE_OPT, "up@"
     push_
-    movw wregl, upl
+    movw wl, upl
     ret
 
 ; ( addr -- ) 
 ; System Variable
 ; set user area pointer
 forthword_ UP_STORE, INLINE_OPT, "up!"
-    movw upl, wregl
+    movw upl, wl
     pop_
     ret
 
@@ -647,14 +647,14 @@ forthword_ UP_STORE, INLINE_OPT, "up!"
 ; Memory
 ; write n (2bytes) to eeprom address
 forthword_ STOREE, 0, "!e"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
     in_ temp2, SREG
     cli
     rcall PFA_STOREE1
     adiw ZL,1
 
-    mov wregl, wregh
+    mov wl, wh
     rcall PFA_STOREE1
     out_ SREG, temp2
     pop_
@@ -671,7 +671,7 @@ PFA_STOREE2: ; estore_wait_low_spm:
 
     out_ EEARH,ZH
     out_ EEARL,ZL
-    out_ EEDR, wregl
+    out_ EEDR, wl
     sbi EECR,EEMPE
     sbi EECR,EEPE
 
@@ -683,14 +683,14 @@ PFA_STOREE2: ; estore_wait_low_spm:
 forthword_ FETCHE, 0, "@e"
     in_ temp2, SREG
     cli
-    movw ZL, wregl
+    movw ZL, wl
     rcall FETCHE_READ
-    in_ wregl, EEDR
+    in_ wl, EEDR
 
     adiw ZL, 1
 
     rcall FETCHE_READ
-    in_  wregh, EEDR
+    in_  wh, EEDR
     out_ SREG, temp2
     adiw ZL, 1
     ret
@@ -715,7 +715,7 @@ forthword_ STOREI, 0, "!i"
   push temp1
   cli
 
-  movw temp2, wregl ; save the (word) address
+  movw temp2, wl ; save the (word) address
   pop_          ; get the new value for the flash cell
   ; save parameter stack
   push YL
@@ -735,7 +735,7 @@ forthword_ STOREI, 0, "!i"
 ; 
 DO_STOREI_atmega:
   ; write data to temp page buffer
-  ; use the values in wregl/wregh at the
+  ; use the values in wl/wh at the
   ; appropiate place
   rcall pageload
 
@@ -743,9 +743,9 @@ DO_STOREI_atmega:
   ; it is needed if a bit goes from 0 to 1
   com temp4
   com temp5
-  and wregl, temp4
-  and wregh, temp5
-  or wregh, wregl
+  and wl, temp4
+  and wh, temp5
+  or wh, wl
   breq DO_STOREI_writepage 
 
     movw ZL, temp2
@@ -794,7 +794,7 @@ pageload_loop:
     rjmp pageload_cont
 pageload_newdata:
     movw temp4, temp6
-    movw r0, wregl
+    movw r0, wl
 pageload_cont:
   clr temp0
   rcall dospm
@@ -834,15 +834,15 @@ dospm_wait_spm:
 ; Memory
 ; read 1 cell from flash
 forthword_ FETCHI, 0, "@i"
-    movw ZL, wregl
+    movw ZL, wl
 
 ZDFETCHI:
     lsl ZL
     rol ZH
 
 ZFETCHI:
-	lpm wregl, Z+
-	lpm wregh, Z+
+	lpm wl, Z+
+	lpm wh, Z+
 
     ret
 
@@ -850,31 +850,31 @@ ZFETCHI:
 ; Memory
 ; read 1 cell from RAM address
 forthword_ FETCH, 0, "@"
-    movw ZL, wregl
+    movw ZL, wl
 
 ZFETCH:
     ; low byte is read before the high byte
-    ld wregl, Z+
-    ld wregh, Z+
+    ld wl, Z+
+    ld wh, Z+
     ret
 
 ; ( n addr -- ) 
 ; Memory
 ; write n to RAM memory at addr, low byte first
 forthword_ STORE, 0, "!"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
 
 ZSTORE:
-    st Z+, wregl
-    st Z+, wregh
+    st Z+, wl
+    st Z+, wh
     pop_
     ret
 
 ; ( addr -- )
 ; write 0 to RAM memory at addr.    
 forthword_ ZEROSTORE, 0, "0!"
-    movw ZL, wregl
+    movw ZL, wl
     zerotos_
     rjmp ZSTORE
 
@@ -883,13 +883,13 @@ forthword_ ZEROSTORE, 0, "0!"
 ; Memory
 ; write n to RAM memory at addr, high byte first
 forthword_ HSTORE, 0, "h!"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
 
     in_ temp2, SREG
     cli
-    st Z, wregh
-    st -Z, wregl
+    st Z, wh
+    st -Z, wl
     out_ SREG, temp2
     pop_
     ret
@@ -898,11 +898,11 @@ forthword_ HSTORE, 0, "h!"
 ; Memory
 ; store a single byte to RAM address
 forthword_ CSTORE, 0, "c!"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
 
 ZCSTORE:
-    st Z+, wregl
+    st Z+, wl
     pop_
     ret
     
@@ -910,51 +910,51 @@ ZCSTORE:
 ; Memory
 ; store a 0 to single byte RAM address
 forthword_ ZEROCSTORE, 0, "0c!"
-    movw ZL, wregl
-    clr wregl
+    movw ZL, wl
+    clr wl
     rjmp ZCSTORE
 
 ; ( a-addr - c1 ) 
 ; Memory
 ; fetch a single byte from RAM
 forthword_ CFETCH, 0, "c@"
-    movw ZL, wregl
+    movw ZL, wl
 
 ZCFETCH:
-    clr wregh
-    ld wregl, Z+
+    clr wh
+    ld wl, Z+
     ret
 
 ; ( n a-addr -- ) 
 ; Memory
 ; add n to content of RAM address a-addr
 forthword_ PLUSSTORE, 0, "+!"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
     ld temp2, Z
     ldd temp3, Z+1
-    add wregl, temp2
-    adc wregh, temp3
+    add wl, temp2
+    adc wh, temp3
     rjmp ZSTORE
     
 ; ( a-addr -- ) 
 ; Memory
 ; add 1 to content of word RAM address a-addr
 forthword_ ONEPLUSSTORE, 0, "1+!"
-    movw ZL, wregl
-    ld wregl, Z
-    ldd wregh, Z+1
-    adiw wregl, 1
+    movw ZL, wl
+    ld wl, Z
+    ldd wh, Z+1
+    adiw wl, 1
     rjmp ZSTORE
 
 ; ( n a-addr -- ) 
 ; Memory
 ; add n to content of byte RAM address a-addr
 forthword_ PLUSCSTORE, 0, "+c!"
-    movw ZL, wregl
+    movw ZL, wl
     pop_
     ld temp2, Z
-    add wregl, temp2
+    add wl, temp2
     rjmp ZCSTORE
     
 
@@ -962,9 +962,9 @@ forthword_ PLUSCSTORE, 0, "+c!"
 ; Memory
 ; add 1 to content of byte RAM address a-addr
 forthword_ ONEPLUSCSTORE, 0, "1+c!"
-    movw ZL, wregl
-    ld wregl, Z
-    subi wregl, -1
+    movw ZL, wl
+    ld wl, Z
+    subi wl, -1
     rjmp ZCSTORE
 
 
@@ -1007,8 +1007,8 @@ forthword_ AFETCHI, 0, "a@i"
 ; Read memory pointed to by register A plus offset (Extended VM)
 ;forthword_ NAFETCH, 0, "na@"
 ;    movw ZL, al
-;    add ZL, wregl
-;    adc ZH, wregh
+;    add ZL, wl
+;    adc ZH, wh
 ;    rjmp ZFETCH
 
 
@@ -1070,7 +1070,7 @@ forthword_ NIPTOB, INLINE_OPT, "nip>b"
 ; read the A register (Extended VM)
 forthword_ A_, INLINE_OPT, "a"
     push_
-    movw wregl, al
+    movw wl, al
     ret
 
 ; ( -- n ) 
@@ -1078,7 +1078,7 @@ forthword_ A_, INLINE_OPT, "a"
 ; read the B register (Extended VM)
 forthword_ B_, INLINE_OPT, "b"
     push_
-    movw wregl, bl
+    movw wl, bl
     ret
 
 ; ( n -- )
@@ -1101,8 +1101,8 @@ forthword_ ACSTORE, 0, "ac!"
 ; Write TOS to memory pointed to by register A plus offset (Extended VM)
 forthword_ NASTORE, 0, "na!"
     movw ZL, al
-    add ZL, wregl
-    adc ZH, wregh
+    add ZL, wl
+    adc ZH, wh
     pop_
     rjmp ZSTORE
 

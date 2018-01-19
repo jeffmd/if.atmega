@@ -103,12 +103,12 @@ forthword_ LIT, 0, "lit"
     call COMMA
     doliteral_ 0x938a     ;( n 0x938a )
     call COMMA
-    doliteral_ wregl       ;( n wregl )
-    call OVER             ;( n wregl n )
+    doliteral_ wl       ;( n wl )
+    call OVER             ;( n wl n )
     rcall LDI             ;( n )
     call BYTESWAP         ;( n' )
-    doliteral_ wregh       ;( n' wregh )
-    call SWAP             ;( wregh n' )
+    doliteral_ wh       ;( n' wh )
+    call SWAP             ;( wh n' )
     rjmp LDI              ;(  )
 
 ; Assembler
@@ -122,8 +122,8 @@ forthword_ RET_C, 0, "ret,"
 ; compile rjmp
 ; ( distance -- )
 forthword_ RJMP, 0, "rjmp,"
-    andi    wregh, 0x0f
-    ori     wregh, 0xc0
+    andi    wh, 0x0f
+    ori     wh, 0xc0
     jmp     COMMA
 
 ; calc relative distance
@@ -147,8 +147,8 @@ forthword_ RJMPC, 0, "rjmpc"
     ; calculate relative distance in words from start to dest
     rcall RELDIST
     ; compile a rjmp at first mark that jumps to the current DP
-    andi    wregh, 0x0f
-    ori     wregh, 0xc0   ; ( start rjmpdist )
+    andi    wh, 0x0f
+    ori     wh, 0xc0   ; ( start rjmpdist )
     call SWAP            ; ( rjmpdist start )
     jmp STOREI           ; ( )
 
@@ -157,12 +157,12 @@ forthword_ RJMPC, 0, "rjmpc"
 ; Determines if a relative distance is within a relative jmp/call range
 ; flag is true if relative distance is between -2048 and 2047
 forthword_ QRDIST, 0, "?rdist"
-    cpi wregh, 0x08
+    cpi wh, 0x08
     brsh QDIST_HTEST
 QDIST_INRANGE:
     jmp TRUE
 QDIST_HTEST:
-    cpi wregh, 0xf8
+    cpi wh, 0xf8
     brsh QDIST_INRANGE
     jmp ZERO
 
@@ -173,11 +173,11 @@ forthword_ COMPILEXT, 0, "cxt"
     ; default to tail call optimization enabled
     cbr fflags, 1<<DIS_CALL_OPT_FB
     ; check bit 2 of word high byte flags: if set then tail call optimization stays enabled
-    sbrs wregh, DIS_CALL_OPT_FB
+    sbrs wh, DIS_CALL_OPT_FB
     ; bit 2 of high byte flag is clear so disable tail call optimization
     sbr fflags, 1<<DIS_CALL_OPT_FB
     ; if bit 0 of high byte flag is 0 then word is to be inlinned
-    sbrc wregh, INLINE_OPT_FB
+    sbrc wh, INLINE_OPT_FB
     rjmp DO_COMPILEXT
     pop_           ; ( xt )
     jmp INLINE
@@ -205,8 +205,8 @@ DO_RCALLC:
 
     nip_                 ; ( distance )
     ; compile a rcall at the current DP
-    andi    wregh, 0x0f
-    ori     wregh, 0xd0   ; ( rcalldist )
+    andi    wh, 0x0f
+    ori     wh, 0xd0   ; ( rcalldist )
     jmp COMMA            ; ( )
 
 ; compile call at start address
