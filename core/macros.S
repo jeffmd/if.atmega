@@ -76,9 +76,9 @@
 ; always has zero / cleared
   zerol = 23
   
-  ; parameter top of stack [TOS] register
-  tosl = 24
-  tosh = 25
+  ; parameter working register [wreg]
+  wregl = 24
+  wregh = 25
 
 
   ; XL (26), XH (27) general purpose addressing
@@ -87,9 +87,9 @@
   ; SP is used to hold the Forth VM return stack pointer and is the hardware stack pointer for the MCU
 
 ; Inline macros
-.macro dup_r_ ; put copy of tos on return stack
-    push tosl
-    push tosh
+.macro rpush_ ; put copy of tos on return stack
+    push wregl
+    push wregh
 .endm
 
 .macro r_drop_ ; drop TOR
@@ -98,52 +98,52 @@
 .endm
 
 .macro pop_ ; load tos, (drop)
-    ld tosl, Y+
-    ld tosh, Y+
+    ld wregl, Y+
+    ld wregh, Y+
 .endm
 
 .macro push_ ; save WR on data stack
-    st -Y, tosh
-    st -Y, tosl
+    st -Y, wregh
+    st -Y, wregl
 .endm
 
 
 .macro oneplus_
-    adiw tosl, 1
+    adiw wregl, 1
 .endm
 
 .macro oneminus_
-    sbiw tosl, 1
+    sbiw wregl, 1
 .endm
 
 .macro twoplus_
-    adiw tosl, 2
+    adiw wregl, 2
 .endm
 
 .macro fourplus_
-    adiw tosl, 4
+    adiw wregl, 4
 .endm
 
 .macro twominus_
-    sbiw tosl, 2
+    sbiw wregl, 2
 .endm
 
 .macro fourminus_
-    sbiw tosl, 4
+    sbiw wregl, 4
 .endm
 
 .macro twoslash_
-    asr tosh
-    ror tosl
+    asr wregh
+    ror wregl
 .endm
 
 .macro twostar_
-    lsl tosl
-    rol tosh
+    lsl wregl
+    rol wregh
 .endm
 
 .macro highbyte_
-  mov tosl, tosh
+  mov wregl, wregh
 .endm
 
 .macro nip_
@@ -155,50 +155,50 @@
 .endm
 
 .macro not_
-    com tosl
-    com tosh
+    com wregl
+    com wregh
 .endm
 
 .macro zerosense_
-    sbiw tosl, 0
+    sbiw wregl, 0
     pop_
 .endm
 
 .macro dupzerosense_
-    sbiw tosl, 0
+    sbiw wregl, 0
 .endm
 
 .macro zerotos_
-    clr tosl
-    clr tosh
+    clr wregl
+    clr wregh
 .endm
 
 .macro anditos_ val
-    andi tosh, hi8(\val)
-    andi tosl, lo8(\val)
+    andi wregh, hi8(\val)
+    andi wregl, lo8(\val)
 .endm
 
 .macro oritos_ val
-    ori tosh, hi8(\val)
-    ori tosl, lo8(\val)
+    ori wregh, hi8(\val)
+    ori wregl, lo8(\val)
 .endm
 
 .macro doliteral_ val
     push_
-    ldi tosl, lo8(\val) 
-    ldi tosh, hi8(\val) 
+    ldi wregl, lo8(\val) 
+    ldi wregh, hi8(\val) 
 .endm
 
 .macro zerohigh_
-    clr tosh
+    clr wregh
 .endm
 
 .macro zerolow_
-    clr tosl
+    clr wregl
 .endm
 
 .macro swapnib_
-    swap tosl
+    swap wregl
 .endm
 
 .macro niptoa_
@@ -218,11 +218,11 @@
 
 
 .macro copytoa_
-    movw al, tosl
+    movw al, wregl
 .endm
 
 .macro copytob_
-    movw bl, tosl
+    movw bl, wregl
 .endm
 
 .macro pusha_

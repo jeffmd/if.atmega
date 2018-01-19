@@ -12,8 +12,8 @@ forthword_ DOUSER, DIS_CALL_OPT, "(user)"
     pop ZL
     rcall ZDFETCHI
     ; calculate user address
-    add tosl, upl
-    adc tosh, uph
+    add wregl, upl
+    adc wregh, uph
     ret
 
 ; ( defaddr -- deferval defaddr )

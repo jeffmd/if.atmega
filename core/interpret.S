@@ -152,7 +152,7 @@ PFA_CSKIP1:
     breq PFA_CSKIP2
     rcall ACFETCH        ; ( n1 n' c' )
     aplus_
-    cp tosl, bl          ; ( n1 n' c' )
+    cp wregl, bl          ; ( n1 n' c' )
     pop_                ; ( n1 n' )
     brne PFA_CSKIP2
     oneminus_
@@ -177,7 +177,7 @@ PFA_CSCAN1:
     breq PFA_CSCAN2
     rcall ACFETCH        ; ( addr1 n1 n' c' )
     aplus_
-    cp tosl, bl          ; ( addr1 n1 n' c' )
+    cp wregl, bl          ; ( addr1 n1 n' c' )
     pop_                ; ( addr1 n1 n' )
     breq PFA_CSCAN2
     oneminus_
@@ -400,7 +400,7 @@ FINDW_BEGIN:
       rcall TWOOVER     ; ( addr len addr len ) ( R: idx )
       ; get next wordlist in array
       rcall R_FROM      ; ( addr len addr len idx ) ( R: )
-      dup_r_            ; ( addr len addr len idx ) ( R: idx)
+      rpush_            ; ( addr len addr len idx ) ( R: idx)
       rcall FINDWI
       rcall R_FROM      ; ( addr len nfa idx ) ( R: )
       rcall SWAP        ; ( addr len idx nfa )
@@ -479,7 +479,7 @@ forthword_ REC_WORD, 0, "recw"
 REC_WORD_FOUND:
     rcall NFATOXTF
     ; check if compile only word
-    sbrc tosh, COMPILE_ONLY_FB 
+    sbrc wregh, COMPILE_ONLY_FB 
         rjmp CHECK_IMMEDIATE
         
 CHECK_COMPILE_ONLY:
@@ -495,7 +495,7 @@ CHECK_COMPILE_ONLY:
 CHECK_IMMEDIATE:
 	; either compile or EXEC the XT
     ; check if word is immediate: bit 7 is clear if immediate
-	sbrs tosh, IMMEDIATE_EN_FB ; skip next instruction if bit 7 is set: not immediate word
+	sbrs wregh, IMMEDIATE_EN_FB ; skip next instruction if bit 7 is set: not immediate word
 	    ; flag is 0: always EXEC
 	    rjmp REC_WORD_EXECUTE
 
@@ -738,20 +738,20 @@ forthword_ ACCEPT, 0, "accept"
 
 ACCEPT_haskey:
     ; check for EOL
-    cpi tosl, 10
+    cpi wregl, 10
     ; <if>
     brne ACCEPT_checkreturn
     ret
 
 ACCEPT_checkreturn:
-    cpi tosl, 13         ; ( k k 13 )
+    cpi wregl, 13         ; ( k k 13 )
     ; <if>
     brne ACCEPT_checkdelete
     ret
 
 ACCEPT_checkdelete:
     ; check delete
-    cpi tosl, 127        ; ( k k 8 )
+    cpi wregl, 127        ; ( k k 8 )
     ; <if>
     brne ACCEPT_checkcontrol
     ; delete previous character
@@ -767,7 +767,7 @@ ACCEPT_checkdelete:
     rjmp ZERO
 
 ACCEPT_dodelete:
-    andi tosl, 8
+    andi wregl, 8
     push_                 ; ( k k )
     rcall EMIT           ; ( k )
     rcall BL             ; ( k bl )
@@ -781,7 +781,7 @@ ACCEPT_dodelete:
 
 ACCEPT_checkcontrol:
     ; check for remaining control characters, replace them with blank
-    cpi tosl, 32         ; ( k k bl )
+    cpi wregl, 32         ; ( k k bl )
     brge ACCEPT_echo
     pop_
     ; replace control key with a space

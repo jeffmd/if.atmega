@@ -106,14 +106,14 @@ forthword_ MAX, 0, "max"
 ; convert low byte of val to a printable hex character    
 forthword_ NHEX, 0, "#h"
     zerohigh_
-    andi tosl, 0x0F
-    cpi tosl, 10
+    andi wregl, 0x0F
+    cpi wregl, 10
     brlo NHEX_NEXT
-    adiw tosl, 7
+    adiw wregl, 7
     
     ; <then>
 NHEX_NEXT:
-    adiw tosl, 48  
+    adiw wregl, 48  
     ret            
 
 ; ( n -- )
@@ -140,7 +140,7 @@ forthword_ PHEX, 0, ".$"
     push_
     rcall PNIB
     zerohigh_
-    ldi tosl, 32
+    ldi wregl, 32
     jmp EMIT
     
 
@@ -148,11 +148,11 @@ forthword_ PHEX, 0, ".$"
 ; Numeric IO
 ; tries to convert a character to a number, set flag accordingly
 forthword_ DIGITQ, 0, "digit?"
-    sbiw tosl, 0x30
-    cpi tosl, 10
+    sbiw wregl, 0x30
+    cpi wregl, 10
     brlo PFA_DIGITQ0
-    sbiw tosl, 7
-    cpi tosl, 10
+    sbiw wregl, 7
+    cpi wregl, 10
     brge PFA_DIGITQ0
     pop_
     jmp ZERO
@@ -254,7 +254,7 @@ forthword_ THROW, 0, "throw"
 ; set the BASE value depending on the character
 ;forthword_ SETBASE, 0, "setbase"
 SETBASE:        ; ( c -- )
-    mov temp0, tosl
+    mov temp0, wregl
     pop_
     cpi temp0, '$
     brne PFA_SETBASE0
@@ -272,7 +272,7 @@ PFA_SETBASE1:
 
 PFA_SETBASE2:        ; ( error)
     push_
-    movw tosl, temp0
+    movw wregl, temp0
     call EMIT
     call DOSLIT
     ascii_ " bad base!"
@@ -285,7 +285,7 @@ PFA_SETBASE2:        ; ( error)
 PRAEFIX:        ; ( adr1 len1 -- adr2 len2 )
     call OVER
     call CFETCH
-    cpi tosl, 0x30 
+    cpi wregl, 0x30 
     brlo PFA_PRAEFIX0
     ; no praefix
     pop_
@@ -302,7 +302,7 @@ PFA_PRAEFIX0:
 NUMBERSIGN:        ; ( addr len -- )
     call OVER      ; ( addr len addr )
     call CFETCH    ; ( addr len char )
-    cpi tosl, '-
+    cpi wregl, '-
     breq NUMBERSIGN_HASSIGN
       zerotos_
       ret
@@ -419,7 +419,7 @@ forthword_ COLD, 0, "cold"
     ldi YL, lo8(stackstart)
     ldi YH, hi8(stackstart)
     push_
-    movw tosl, r10
+    movw wregl, r10
     rcall RAM_MCUSRO
     call STORE
     rjmp WARM
@@ -469,13 +469,13 @@ forthword_ RP0, 0, "rp0"
 ; compares two strings in RAM
 
 ;forthword_ COMPARE, 0, "compare"
-;    movw temp0, tosl
+;    movw temp0, wregl
 ;    pop_
-;    movw XL, tosl
+;    movw XL, wregl
 ;    pop_
-;    movw temp2, tosl
+;    movw temp2, wregl
 ;    pop_
-;    movw ZL, tosl
+;    movw ZL, wregl
 ;PFA_COMPARE_LOOP:
 ;    ld temp4, X+
 ;    ld temp5, Z+
@@ -491,14 +491,14 @@ forthword_ RP0, 0, "rp0"
 ;PFA_COMPARE_ENDREACHED:
 ;    or temp0, temp2
 ;    brne PFA_COMPARE_CHECKLASTCHAR
-;    clr tosl
+;    clr wregl
 ;    rjmp PFA_COMPARE_DONE
 ;PFA_COMPARE_CHECKLASTCHAR:
 ;PFA_COMPARE_NOTEQUAL:
-;    ser tosl
+;    ser wregl
 
 ;PFA_COMPARE_DONE:
-;    mov tosh, tosl
+;    mov wregh, wregl
 ;    ret
 
 
@@ -513,8 +513,8 @@ forthword_ RP0, 0, "rp0"
 ;    ld ZH, Y+ ; addr-to
 ;    ld XL, Y+
 ;    ld XH, Y+ ; addr-from
-;    mov temp0, tosh
-;    or temp0, tosl
+;    mov temp0, wregh
+;    or temp0, wregl
 ;    brbs 1, PFA_CMOVE1
 ;PFA_CMOVE2:
 ;    ld temp1, X+
@@ -536,13 +536,13 @@ forthword_ RP0, 0, "rp0"
 ;    ld ZH, Y+ ; addr-to
 ;    ld XL, Y+
 ;    ld XH, Y+ ; addr-from
-;    mov temp0, tosh
-;    or temp0, tosl
+;    mov temp0, wregh
+;    or temp0, wregl
 ;    brbs 1, PFA_CMOVE_G1
-;    add ZL, tosl
-;    adc ZH, tosh
-;    add XL, tosl
-;    adc XH, tosh
+;    add ZL, wregl
+;    adc ZH, wregh
+;    add XL, wregl
+;    adc XH, wregh
 ;PFA_CMOVE_G2:
 ;    ld temp1, -X
 ;    st -Z, temp1
@@ -679,38 +679,38 @@ forthword_ STAR, 0, "*"
 ; Arithmetics
 ; multiply 2 unsigned cells to a cell
 forthword_ MSTAR, 0, "m*"
-    movw temp0, tosl
+    movw temp0, wregl
     pop_
-    movw temp2, tosl
+    movw temp2, wregl
     ; high cell ah*bh
     muls temp3, temp1
     movw temp4, r0
     ; low cell  al*bl
     mul  temp2, temp0
-    movw tosl, r0
+    movw wregl, r0
     ; signed ah*bl
     mulsu temp3, temp0
     sbc   temp5, zerol
-    add   tosh,  r0
+    add   wregh,  r0
     adc   temp4, r1
     adc   temp5, zerol
 
     ; signed al*bh
     mulsu temp1, temp2
     sbc   temp5, zerol
-    add   tosh,  r0
+    add   wregh,  r0
     adc   temp4, r1
     adc   temp5, zerol
 
     push_
-    movw tosl, temp4
+    movw wregl, temp4
     ret
 
 ; ( ud u2 -- rem quot)
 ; Arithmetics
 ; unsigned division ud / u2 with remainder
 forthword_ UMSLASHMOD, 0, "um/mod"
-    movw temp4, tosl
+    movw temp4, wregl
 
     ld temp2, Y+
     ld temp3, Y+
@@ -759,7 +759,7 @@ PFA_UMSLASHMODmod_done:
     st -Y,temp2
 
     ; put quotient on stack
-    movw tosl, temp0
+    movw wregl, temp0
     ret
 
    
@@ -805,7 +805,7 @@ DIV16_16_3:
 ; Arithmetics
 ; unsigned division n1/n2 with remainder and quotient
 forthword_ USLASHMOD, 0, "u/mod"
-    movw temp2, tosl
+    movw temp2, wregl
 
     ld temp0, Y+
     ld temp1, Y+
@@ -818,7 +818,7 @@ forthword_ USLASHMOD, 0, "u/mod"
 ; Arithmetics
 ; signed division n1/n2 with remainder and quotient
 forthword_ SLASHMOD, 0, "/mod"
-    movw temp2, tosl
+    movw temp2, wregl
 
     ld temp0, Y+
     ld temp1, Y+
@@ -855,7 +855,7 @@ SLASHMOD_end:
     st -Y, temp5
     st -Y, temp4
     ; put quotient on stack
-    movw tosl, temp0
+    movw wregl, temp0
     ret
 
 

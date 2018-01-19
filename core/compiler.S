@@ -135,7 +135,7 @@ TAILOPT_OPT:
     push_           ; ( DP-1 DP-1 )
     rcall FETCHI   ; ( DP-1 inst )
     ; bit 4 of high byte must be cleared.
-    cbr tosh, 1<<4    ; ( DP-1 inst' )
+    cbr wregh, 1<<4    ; ( DP-1 inst' )
     ; store result at DP-1
     rcall SWAP     ; ( inst' DP-1 )
     rjmp STOREI     ; (  )
@@ -251,7 +251,7 @@ FINDI_BEGIN:
       rcall AFETCHI  ; ( start val )
       aplus_
       push_
-      movw tosl, bl  ; ( start val match )
+      movw wregl, bl  ; ( start val match )
       rcall EQUAL    ; ( start flag )
     ; until
     zerosense_       ; ( start )
