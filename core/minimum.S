@@ -254,25 +254,25 @@ forthword_ THROW, 0, "throw"
 ; set the BASE value depending on the character
 ;forthword_ SETBASE, 0, "setbase"
 SETBASE:        ; ( c -- )
-    mov temp0, wl
+    mov xrl, wl
     pop_
-    cpi temp0, '$
+    cpi xrl, '$
     brne PFA_SETBASE0
     rjmp HEX
 
 PFA_SETBASE0:
-    cpi temp0, '%
+    cpi xrl, '%
     brne PFA_SETBASE1
     rjmp BIN
 
 PFA_SETBASE1:
-    cpi temp0, '&
+    cpi xrl, '&
     brne PFA_SETBASE2
     rjmp DECIMAL
 
 PFA_SETBASE2:        ; ( error)
     push_
-    movw wl, temp0
+    movw wl, xrl
     call EMIT
     call DOSLIT
     ascii_ " bad base!"
@@ -410,10 +410,10 @@ forthword_ COLD, 0, "cold"
     movw upl, ZL
     ; init return stack pointer
 	; using the MCU SP registers
-    ldi temp0, lo8(rstackstart)
-    out_ SPL,temp0
-    ldi temp1, hi8(rstackstart)
-    out_ SPH,temp1
+    ldi xrl, lo8(rstackstart)
+    out_ SPL,xrl
+    ldi xrh, hi8(rstackstart)
+    out_ SPH,xrh
 
     ; init parameter stack pointer
     ldi YL, lo8(stackstart)
@@ -469,11 +469,11 @@ forthword_ RP0, 0, "rp0"
 ; compares two strings in RAM
 
 ;forthword_ COMPARE, 0, "compare"
-;    movw temp0, wl
+;    movw xrl, wl
 ;    pop_
 ;    movw XL, wl
 ;    pop_
-;    movw temp2, wl
+;    movw yrl, wl
 ;    pop_
 ;    movw ZL, wl
 ;PFA_COMPARE_LOOP:
@@ -481,15 +481,15 @@ forthword_ RP0, 0, "rp0"
 ;    ld temp5, Z+
 ;    cp temp4, temp5
 ;    brne PFA_COMPARE_NOTEQUAL
-;    dec temp0
+;    dec xrl
 ;    breq PFA_COMPARE_ENDREACHED2
-;    dec temp2
+;    dec yrl
 ;    brne PFA_COMPARE_LOOP
 ;    rjmp PFA_COMPARE_ENDREACHED
 ;PFA_COMPARE_ENDREACHED2:
-;    dec temp2
+;    dec yrl
 ;PFA_COMPARE_ENDREACHED:
-;    or temp0, temp2
+;    or xrl, yrl
 ;    brne PFA_COMPARE_CHECKLASTCHAR
 ;    clr wl
 ;    rjmp PFA_COMPARE_DONE
@@ -513,12 +513,12 @@ forthword_ RP0, 0, "rp0"
 ;    ld ZH, Y+ ; addr-to
 ;    ld XL, Y+
 ;    ld XH, Y+ ; addr-from
-;    mov temp0, wh
-;    or temp0, wl
+;    mov xrl, wh
+;    or xrl, wl
 ;    brbs 1, PFA_CMOVE1
 ;PFA_CMOVE2:
-;    ld temp1, X+
-;    st Z+, temp1
+;    ld xrh, X+
+;    st Z+, xrh
 ;    oneminus_
 ;    brbc 1, PFA_CMOVE2
 ;PFA_CMOVE1:
@@ -536,16 +536,16 @@ forthword_ RP0, 0, "rp0"
 ;    ld ZH, Y+ ; addr-to
 ;    ld XL, Y+
 ;    ld XH, Y+ ; addr-from
-;    mov temp0, wh
-;    or temp0, wl
+;    mov xrl, wh
+;    or xrl, wl
 ;    brbs 1, PFA_CMOVE_G1
 ;    add ZL, wl
 ;    adc ZH, wh
 ;    add XL, wl
 ;    adc XH, wh
 ;PFA_CMOVE_G2:
-;    ld temp1, -X
-;    st -Z, temp1
+;    ld xrh, -X
+;    st -Z, xrh
 ;    oneminus_
 ;    brbc 1, PFA_CMOVE_G2
 ;PFA_CMOVE_G1:
@@ -679,24 +679,24 @@ forthword_ STAR, 0, "*"
 ; Arithmetics
 ; multiply 2 unsigned cells to a cell
 forthword_ MSTAR, 0, "m*"
-    movw temp0, wl
+    movw xrl, wl
     pop_
-    movw temp2, wl
+    movw yrl, wl
     ; high cell ah*bh
-    muls temp3, temp1
+    muls yrh, xrh
     movw temp4, r0
     ; low cell  al*bl
-    mul  temp2, temp0
+    mul  yrl, xrl
     movw wl, r0
     ; signed ah*bl
-    mulsu temp3, temp0
+    mulsu yrh, xrl
     sbc   temp5, zerol
     add   wh,  r0
     adc   temp4, r1
     adc   temp5, zerol
 
     ; signed al*bh
-    mulsu temp1, temp2
+    mulsu xrh, yrl
     sbc   temp5, zerol
     add   wh,  r0
     adc   temp4, r1
@@ -712,11 +712,11 @@ forthword_ MSTAR, 0, "m*"
 forthword_ UMSLASHMOD, 0, "um/mod"
     movw temp4, wl
 
-    ld temp2, Y+
-    ld temp3, Y+
+    ld yrl, Y+
+    ld yrh, Y+
 
-    ld temp0, Y+
-    ld temp1, Y+
+    ld xrl, Y+
+    ld xrh, Y+
 
 ;; unsigned 32/16 -> 16r16 divide
 
@@ -728,15 +728,15 @@ PFA_UMSLASHMODmod:
 PFA_UMSLASHMODmod_loop:
     ; shift left, saving high bit
     clr XH
-    lsl temp0
-    rol temp1
-    rol temp2
-    rol temp3
+    lsl xrl
+    rol xrh
+    rol yrl
+    rol yrh
     rol XH
 
   ; try subtracting divisor
-    cp temp2, temp4
-    cpc temp3, temp5
+    cp yrl, temp4
+    cpc yrh, temp5
     cpc XH,zerol
 
     brcs PFA_UMSLASHMODmod_loop_control
@@ -745,9 +745,9 @@ PFA_UMSLASHMODmod_subtract:
     ; dividend is large enough
     ; do the subtraction for real
     ; and set lowest bit
-    inc temp0
-    sub temp2, temp4
-    sbc temp3, temp5
+    inc xrl
+    sub yrl, temp4
+    sbc yrh, temp5
 
 PFA_UMSLASHMODmod_loop_control:
     dec  XL
@@ -755,11 +755,11 @@ PFA_UMSLASHMODmod_loop_control:
 
 PFA_UMSLASHMODmod_done:
     ; put remainder on stack
-    st -Y,temp3
-    st -Y,temp2
+    st -Y,yrh
+    st -Y,yrl
 
     ; put quotient on stack
-    movw wl, temp0
+    movw wl, xrl
     ret
 
    
@@ -780,8 +780,8 @@ DIV16_16:
     ldi	XL, 17	    ;init loop counter
 
 DIV16_16_1:
-	rol	temp0		    ;shift left dividend
-    rol	temp1
+	rol	xrl		    ;shift left dividend
+    rol	xrh
     dec	XL	    	;decrement counter
     brne DIV16_16_2		;if done
     ret
@@ -789,11 +789,11 @@ DIV16_16_1:
 DIV16_16_2:
 	rol	temp4	;shift dividend into remainder
     rol	temp5
-    sub	temp4, temp2	;remainder = remainder - divisor
-    sbc	temp5, temp3	;
+    sub	temp4, yrl	;remainder = remainder - divisor
+    sbc	temp5, yrh	;
     brcc	DIV16_16_3		;if result negative
-    add	temp4, temp2	;    restore remainder
-    adc	temp5, temp3
+    add	temp4, yrl	;    restore remainder
+    adc	temp5, yrh
     clc			;    clear carry to be shifted into result
     rjmp	DIV16_16_1		;else
 
@@ -805,10 +805,10 @@ DIV16_16_3:
 ; Arithmetics
 ; unsigned division n1/n2 with remainder and quotient
 forthword_ USLASHMOD, 0, "u/mod"
-    movw temp2, wl
+    movw yrl, wl
 
-    ld temp0, Y+
-    ld temp1, Y+
+    ld xrl, Y+
+    ld xrh, Y+
 
     rcall DIV16_16
     rjmp SLASHMOD_end
@@ -818,44 +818,44 @@ forthword_ USLASHMOD, 0, "u/mod"
 ; Arithmetics
 ; signed division n1/n2 with remainder and quotient
 forthword_ SLASHMOD, 0, "/mod"
-    movw temp2, wl
+    movw yrl, wl
 
-    ld temp0, Y+
-    ld temp1, Y+
+    ld xrl, Y+
+    ld xrh, Y+
 
-    mov	XL, temp1	;move dividend High to sign register
-    eor	XL, temp3	;xor divisor High with sign register
-    sbrs	temp1, 7	;if MSB in dividend set
+    mov	XL, xrh	;move dividend High to sign register
+    eor	XL, yrh	;xor divisor High with sign register
+    sbrs	xrh, 7	;if MSB in dividend set
     rjmp	SLASHMOD_1
-    com	temp1		;    change sign of dividend
-    com	temp0
-    subi	temp0, lo8(-1)
-    sbci	temp1, hi8(-1)
+    com	xrh		;    change sign of dividend
+    com	xrl
+    subi	xrl, lo8(-1)
+    sbci	xrh, hi8(-1)
 
 SLASHMOD_1:
-    sbrs	temp3, 7	;if MSB in divisor set
+    sbrs	yrh, 7	;if MSB in divisor set
     rjmp	SLASHMOD_2
-    com	temp3		;    change sign of divisor
-    com	temp2
-    subi	temp2, lo8(-1)
-    sbci	temp3, hi8(-1)
+    com	yrh		;    change sign of divisor
+    com	yrl
+    subi	yrl, lo8(-1)
+    sbci	yrh, hi8(-1)
 
 SLASHMOD_2:
     rcall DIV16_16
 
     sbrs	XL, 7		;    if MSB in sign register set
     rjmp	SLASHMOD_end
-    com	temp1            	;        change sign of result
-    com	temp0
-    subi	temp0, lo8(-1)
-    sbci	temp1, hi8(-1)
+    com	xrh            	;        change sign of result
+    com	xrl
+    subi	xrl, lo8(-1)
+    sbci	xrh, hi8(-1)
 
 SLASHMOD_end:
     ; put remainder on stack
     st -Y, temp5
     st -Y, temp4
     ; put quotient on stack
-    movw wl, temp0
+    movw wl, xrl
     ret
 
 

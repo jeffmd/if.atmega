@@ -29,16 +29,16 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
     ; save important registers
     movw isrZL, ZL
     movw isrXL, XL
-    movw isrt0, temp0
-    movw isrt2, temp2
+    movw isrt0, xrl
+    movw isrt2, yrl
     
     ; pop return address
     pop ZH
     pop ZL
     
     ; save status register
-    in temp0, SREG
-    push temp0
+    in xrl, SREG
+    push xrl
     ijmp
 
 ; ( -- )
@@ -47,8 +47,8 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
 forthword_ IEND, 0, "(i;)"
     movw ZL, isrZL
     movw XL, isrXL
-    movw temp0, isrt0
-    movw temp2, isrt2
+    movw xrl, isrt0
+    movw yrl, isrt2
     
     pop isrt0
     out SREG, isrt0    

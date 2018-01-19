@@ -40,10 +40,10 @@ PFA_QDUP1:
 ; Stack
 ; swaps the two top level stack cells
 forthword_ SWAP, 0, "swap"
-    movw temp0, wl
+    movw xrl, wl
     pop_
-    st -Y, temp1
-    st -Y, temp0
+    st -Y, xrh
+    st -Y, xrl
     ret
 
 ; ( x1 x2 -- x1 x2 x1 ) 
@@ -96,37 +96,37 @@ forthword_ DNIP, INLINE_OPT, "2nip"
 ; Stack
 ; tuck TOS before NOS, same as SWAP OVER
 forthword_ TUCK, 0, "tuck"
-    ld temp0, y+
-    ld temp1, y+
+    ld xrl, y+
+    ld xrh, y+
     st -y, wh 
     st -y, wl
-    st -y, temp1 
-    st -y, temp0
+    st -y, xrh 
+    st -y, xrl
     ret
 
 ; ( n1 n2 n3 -- n3 n2 n1) 
 ; Stack
 ; exchange TOS and stack cell before NOS, same as SWAP ROT
 forthword_ FLIP, 0, "flip"
-    ldd temp0, y+2
-    ldd temp1, y+3
+    ldd xrl, y+2
+    ldd xrh, y+3
     std y+3, wh 
     std y+2, wl
-    movw wl, temp0 
+    movw wl, xrl 
     ret
 
 ; ( n1 n2 n3 -- n2 n3 n1) 
 ; Stack
 ; rotate the three top level cells
 forthword_ ROT, 0, "rot"
-    movw temp0, wl
-    ld temp2, Y+
-    ld temp3, Y+ 
+    movw xrl, wl
+    ld yrl, Y+
+    ld yrh, Y+ 
     pop_
-    st -Y, temp3
-    st -Y, temp2
-    st -Y, temp1
-    st -Y, temp0
+    st -Y, yrh
+    st -Y, yrl
+    st -Y, xrh
+    st -Y, xrl
     ret
 
 ; ( n1 n2 n3 -- n3 n1 n2) 
@@ -134,15 +134,15 @@ forthword_ ROT, 0, "rot"
 ; reverse rotate the three top level cells
 ; equivalent to rotate twice but faster
 forthword_ RROT, 0, "-rot"
-    ld temp0, Y+
-    ld temp1, Y+
-    ld temp2, Y+
-    ld temp3, Y+
+    ld xrl, Y+
+    ld xrh, Y+
+    ld yrl, Y+
+    ld yrh, Y+
     st -Y, wh
     st -Y, wl
-    st -Y, temp3
-    st -Y, temp2
-    movw wl, temp0
+    st -Y, yrh
+    st -Y, yrl
+    movw wl, xrl
     ret
 
 ;;;;;;;;;;;; Return Stack ;;;;;;;;;;;;;
@@ -241,10 +241,10 @@ forthword_ EQUALZERO, 0, "0="
 ; ( n2 n1 -- n1 )
 ; compare top of stack and next on top of stack and sets mcu status register flags
 forthword_ NTCP, 0, "ntcp"
-    ld temp0, Y+
-    ld temp1, Y+
-    cp temp0, wl
-    cpc temp1, wh
+    ld xrl, Y+
+    ld xrh, Y+
+    cp xrl, wl
+    cpc xrh, wh
     ret
 
 ; ( n1 n2 -- flag ) 
@@ -379,21 +379,21 @@ forthword_ QZEROSENSE, INLINE_OPT, "?0?"
 ; Arithmetics
 ; subtract n2 from n1
 forthword_ MINUS, 0, "-"
-    ld temp0, Y+
-    ld temp1, Y+
-    sub temp0, wl
-    sbc temp1, wh
-    movw wl, temp0
+    ld xrl, Y+
+    ld xrh, Y+
+    sub xrl, wl
+    sbc xrh, wh
+    movw wl, xrl
     ret
 
 ; ( n1 n2 -- n3) 
 ; Arithmetics
 ; add n1 and n2
 forthword_ PLUS, 0, "+"
-    ld temp0, Y+
-    ld temp1, Y+
-    add wl, temp0
-    adc wh, temp1
+    ld xrl, Y+
+    ld xrh, Y+
+    add wl, xrl
+    adc wh, xrh
     ret
 
 
@@ -431,30 +431,30 @@ forthword_ TWOSTAR, INLINE_OPT, "2*"
 ; bitwise and
 
 forthword_ AND, 0, "and"
-    ld temp0, Y+
-    ld temp1, Y+
-    and wl, temp0
-    and wh, temp1
+    ld xrl, Y+
+    ld xrh, Y+
+    and wl, xrl
+    and wh, xrh
     ret
 
 ; ( n1 n2 -- n3 ) 
 ; Logic
 ; logical or
 forthword_ OR, 0, "or"
-    ld temp0, Y+
-    ld temp1, Y+
-    or wl, temp0
-    or wh, temp1
+    ld xrl, Y+
+    ld xrh, Y+
+    or wl, xrl
+    or wh, xrh
     ret
 
 ; ( n1 n2 -- n3) 
 ; Logic
 ; exclusive or
 forthword_ XOR, 0, "xor"
-    ld temp0, Y+
-    ld temp1, Y+
-    eor wl, temp0
-    eor wh, temp1
+    ld xrl, Y+
+    ld xrh, Y+
+    eor wl, xrl
+    eor wh, xrh
     ret
 
 
@@ -564,14 +564,14 @@ forthword_ RP_FETCH, DIS_CALL_OPT, "rp@"
 ; set return stack pointer
 ; must be called
 forthword_ RP_STORE, DIS_CALL_OPT, "rp!"
-    in temp2, SREG
+    in yrl, SREG
     cli
     ; keep the return address
     pop ZH
     pop ZL
     out SPL, wl
     out SPH, wh
-    out SREG, temp2
+    out SREG, yrl
     pop_
     ijmp
 
@@ -596,9 +596,9 @@ forthword_ SP_STORE, INLINE_OPT, "sp!"
 ; exchange the bytes of the TOS
 
 forthword_ BYTESWAP, INLINE_OPT, "><"
-    mov temp0, wh
+    mov xrl, wh
     mov wh, wl
-    mov wl, temp0
+    mov wl, xrl
     ret
 
 ; ( n1 -- n2 ) 
@@ -649,14 +649,14 @@ forthword_ UP_STORE, INLINE_OPT, "up!"
 forthword_ STOREE, 0, "!e"
     movw ZL, wl
     pop_
-    in_ temp2, SREG
+    in_ yrl, SREG
     cli
     rcall PFA_STOREE1
     adiw ZL,1
 
     mov wl, wh
     rcall PFA_STOREE1
-    out_ SREG, temp2
+    out_ SREG, yrl
     pop_
     ret
     
@@ -665,8 +665,8 @@ PFA_STOREE1:
     rjmp PFA_STOREE1
 
 PFA_STOREE2: ; estore_wait_low_spm:
-    in_ temp0, SPMCSR
-    sbrc temp0,SPMEN
+    in_ xrl, SPMCSR
+    sbrc xrl,SPMEN
     rjmp PFA_STOREE2
 
     out_ EEARH,ZH
@@ -681,7 +681,7 @@ PFA_STOREE2: ; estore_wait_low_spm:
 ; Memory
 ; read 1 cell from eeprom
 forthword_ FETCHE, 0, "@e"
-    in_ temp2, SREG
+    in_ yrl, SREG
     cli
     movw ZL, wl
     rcall FETCHE_READ
@@ -691,7 +691,7 @@ forthword_ FETCHE, 0, "@e"
 
     rcall FETCHE_READ
     in_  wh, EEDR
-    out_ SREG, temp2
+    out_ SREG, yrl
     adiw ZL, 1
     ret
 
@@ -711,11 +711,11 @@ FETCHE_READ:
 ; writes n to flash memory using assembly code (code to be placed in boot loader section)
 forthword_ STOREI, 0, "!i"
   ; store status register
-  in temp1,SREG
-  push temp1
+  in xrh,SREG
+  push xrh
   cli
 
-  movw temp2, wl ; save the (word) address
+  movw yrl, wl ; save the (word) address
   pop_          ; get the new value for the flash cell
   ; save parameter stack
   push YL
@@ -726,9 +726,9 @@ forthword_ STOREI, 0, "!i"
   pop YL
   ; finally clear the stack
   pop_
-  pop temp1
+  pop xrh
   ; restore status register (and interrupt enable flag)
-  out SREG,temp1
+  out SREG,xrh
 
   ret
 
@@ -748,29 +748,29 @@ DO_STOREI_atmega:
   or wh, wl
   breq DO_STOREI_writepage 
 
-    movw ZL, temp2
-    ldi temp0,(1<<PGERS)
+    movw ZL, yrl
+    ldi xrl,(1<<PGERS)
     rcall dospm
 
 DO_STOREI_writepage:
   ; write page
-  movw ZL, temp2
-  ldi temp0,(1<<PGWRT)
+  movw ZL, yrl
+  ldi xrl,(1<<PGWRT)
   rcall dospm
 
   ; reenable RWW section
-  movw ZL, temp2
-  ldi temp0,(1<<RWWSRE)
+  movw ZL, yrl
+  ldi xrl,(1<<RWWSRE)
   rcall dospm
   ; incase A+ gets used
-  movw ZL, temp2
+  movw ZL, yrl
   adiw ZL, 1
   ret
 
 ; load the desired page
 .equ pagemask, ~ ( PAGESIZE - 1 )
 pageload:
-  movw ZL, temp2
+  movw ZL, yrl
   ; get the beginning of page
   andi ZL,lo8(pagemask)
   andi ZH,hi8(pagemask)
@@ -785,10 +785,10 @@ pageload_loop:
   rol ZH
   lpm temp6, Z+
   lpm temp7, Z+
-  ; now check: if Z points to the same cell as temp2/3, we want the new data
+  ; now check: if Z points to the same cell as yrl/3, we want the new data
   movw ZL, YL
-  cp ZL, temp2
-  cpc ZH, temp3
+  cp ZL, yrl
+  cpc ZH, yrh
   breq pageload_newdata
     movw r0, temp6
     rjmp pageload_cont
@@ -796,7 +796,7 @@ pageload_newdata:
     movw temp4, temp6
     movw r0, wl
 pageload_cont:
-  clr temp0
+  clr xrl
   rcall dospm
   adiw YL, 1
   sbiw XL, 1
@@ -809,15 +809,15 @@ pageload_done:
 ;; dospm
 ;;
 ;; EXEC spm instruction
-;;   temp0 holds the value for SPMCR
+;;   xrl holds the value for SPMCR
 
 dospm:
 dospm_wait_ee:
   sbic EECR, EEPE
   rjmp dospm_wait_ee
 dospm_wait_spm:
-  in_  temp1, SPMCSR
-  sbrc temp1, SPMEN
+  in_  xrh, SPMCSR
+  sbrc xrh, SPMEN
   rjmp dospm_wait_spm
 
   ; turn the word addres into a byte address
@@ -825,8 +825,8 @@ dospm_wait_spm:
   rol ZH
 
   ; EXEC spm
-  ori temp0, (1<<SPMEN)
-  out_ SPMCSR,temp0
+  ori xrl, (1<<SPMEN)
+  out_ SPMCSR,xrl
   spm
   ret
 
@@ -886,11 +886,11 @@ forthword_ HSTORE, 0, "h!"
     movw ZL, wl
     pop_
 
-    in_ temp2, SREG
+    in_ yrl, SREG
     cli
     st Z, wh
     st -Z, wl
-    out_ SREG, temp2
+    out_ SREG, yrl
     pop_
     ret
 
@@ -931,10 +931,10 @@ ZCFETCH:
 forthword_ PLUSSTORE, 0, "+!"
     movw ZL, wl
     pop_
-    ld temp2, Z
-    ldd temp3, Z+1
-    add wl, temp2
-    adc wh, temp3
+    ld yrl, Z
+    ldd yrh, Z+1
+    add wl, yrl
+    adc wh, yrh
     rjmp ZSTORE
     
 ; ( a-addr -- ) 
@@ -953,8 +953,8 @@ forthword_ ONEPLUSSTORE, 0, "1+!"
 forthword_ PLUSCSTORE, 0, "+c!"
     movw ZL, wl
     pop_
-    ld temp2, Z
-    add wl, temp2
+    ld yrl, Z
+    add wl, yrl
     rjmp ZCSTORE
     
 

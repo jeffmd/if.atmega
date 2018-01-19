@@ -10,6 +10,7 @@
   upl = 4 ; ram user area 
   uph = 5
 
+  ; not to be used in ISR
   ; address A
   al = 6
   ah = 7
@@ -29,10 +30,10 @@
 
   ; registers used for Next on Stack (NOS) and local storage
   ; these registers get saved during an Interrupt Service Routine
-  temp0 = 16 ; low byte of NOS or X
-  temp1 = 17 ; high byte of NOS or X
-  temp2 = 18 ; low byte of Y
-  temp3 = 19 ; low byte of Y
+  xrl = 16 ; low byte of NOS or X
+  xrh = 17 ; high byte of NOS or X
+  yrl = 18 ; low byte of Y
+  yrh = 19 ; high byte of Y
 
   ; not to be used in ISR
   temp6 = 20
@@ -93,8 +94,8 @@
 .endm
 
 .macro r_drop_ ; drop TOR
-    pop temp1
-    pop temp0
+    pop xrh
+    pop xrl
 .endm
 
 .macro pop_ ; load tos, (drop)
