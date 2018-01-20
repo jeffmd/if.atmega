@@ -112,7 +112,8 @@ forthword_ TAILOPT, 0, ";opt"
     ; optimize only if smudge is not zero
     rcall SMUDGE
     rcall FETCH
-    zerosense_
+    iszero_
+    pop_
     brne TAILOPT_OPT
     ret
     
@@ -162,8 +163,9 @@ TAILOPT_CALL:
 forthword_ UWID, 0, "uwid"
     rcall SMUDGE
     rcall FETCH
-    rcall QDUP
-    zerosense_
+    rcall QDPUSH
+    iszero_
+    pop_
     breq UWID_end
        rcall CURRENT
        rcall FETCH
@@ -212,7 +214,7 @@ forthword_ DOSCOMMA, 0, "(s,)"
     ; begin
 PFA_SCOMMA1:
     ; ?while
-    dupzerosense_      ; ( len )
+    iszero_      ; ( len )
     breq PFA_SCOMMA2
     rcall AFETCH       ; ( len c1c2 )
     aplus_
@@ -225,7 +227,8 @@ PFA_SCOMMA2:
     pop_              ; (  )
     rcall R_FROM       ; ( rem ) (R: )
     ; if
-    zerosense_         ; ( )
+    iszero_         ; ( )
+    pop_
     breq PFA_SCOMMA3
       rcall ACFETCH    ; ( c1 )
       rjmp COMMA       ; ( )
@@ -254,7 +257,8 @@ FINDI_BEGIN:
       movw wl, bl  ; ( start val match )
       rcall EQUAL    ; ( start flag )
     ; until
-    zerosense_       ; ( start )
+    iszero_          ; ( start )
+    pop_
     breq FINDI_BEGIN
 
     rcall A_         ; ( start end )
@@ -295,7 +299,7 @@ forthword_ NFA2LFA, 0, "nfa>lfa"
 ; ( nfa -- [ 0 ] | [ xt xtflags] )
 ; convert name field address to xt and xtflags
 forthword_ NFATOXTF, 0, "nfa>xtf"
-    dupzerosense_              ; ( n )
+    iszero_              ; ( n )
     breq NFATOXTF_EXIT
 
     push_                        ; ( nfa nfa )

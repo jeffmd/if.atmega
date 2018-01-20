@@ -93,6 +93,26 @@
     push wh
 .endm
 
+.macro rpusha_ 
+    push al
+    push ah
+.endm
+
+.macro rpushb_ 
+    push bl
+    push bh
+.endm
+
+.macro rpushx_ 
+    push xrl
+    push xrh
+.endm
+
+.macro rpushy_ 
+    push yrl
+    push yrh
+.endm
+
 .macro r_drop_ ; drop TOR
     pop xrh
     pop xrl
@@ -365,12 +385,8 @@
     com wh
 .endm
 
-.macro zerosense_
-    sbiw wl, 0
-    pop_
-.endm
 
-.macro dupzerosense_
+.macro iszero_
     sbiw wl, 0
 .endm
 
@@ -452,16 +468,6 @@
 
 .macro y_
   movw wl, yrl
-.endm
-
-.macro rpusha_
-    push al
-    push ah
-.endm
-
-.macro rpushb_
-    push bl
-    push bh
 .endm
 
 .macro rpopa_

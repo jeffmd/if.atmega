@@ -4,7 +4,8 @@
 forthword_ TX_POLL, 0, "tx-poll"
   ; wait for data ready
   rcall TXQ_POLL
-  zerosense_
+  iszero_
+  pop_
   breq TX_POLL
   ; send to usart
   doliteral_ USART_DATA

@@ -4,7 +4,8 @@
 forthword_ RX_POLL, 0, "rx-poll"
   ; wait for data ready
   rcall RXQ_POLL
-  zerosense_ 
+  iszero_
+  pop_
   breq RX_nodata
   ; get character from usart
   doliteral_ USART_DATA

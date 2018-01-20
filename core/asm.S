@@ -191,8 +191,9 @@ DO_COMPILEXT:
     rcall RELDIST        ; ( xt dp distance )
     nip_                 ; ( xt distance )
     ; is the relative distance in range
-    rcall QRDIST          ; ( xt distance flag )
-    zerosense_           ; ( xt distance )
+    rcall QRDIST         ; ( xt distance flag )
+    iszero_              ; ( xt distance )
+    pop_
     ; do relative call if flag is true
     brne DO_RCALLC
     pop_                ; ( xt )
@@ -227,8 +228,8 @@ forthword_ BRNZ1_COMPILE, 0, "brnz1,"
     doliteral_ 0xf409
     jmp COMMA
 
-; dupzerosense inline
+; iszero inline
 ; ( f -- f )
-forthword_ DUPZEROSENSE_COMPILE, 0, "?0?,"
+forthword_ ISZERO_COMPILE, 0, "?0?,"
     doliteral_ 0x9700
     jmp COMMA

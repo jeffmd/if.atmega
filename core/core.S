@@ -21,15 +21,15 @@ forthword_ NOOP, INLINE_OPT, "noop"
 ;;;;;;;;;;;; Parameter Stack ;;;;;;;;;;;;;
 ; ( n -- n n ) 
 ; Stack
-; duplicate TOS
-forthword_ DUP, INLINE_OPT, "dup"
+; push WR onto data stack
+forthword_ DPUSH, INLINE_OPT, "push"
     push_
     ret
 
 ; ( n1 -- [ n1 n1 ] | 0) 
 ; Stack
-; duplicate TOS if non-zero
-forthword_ QDUP, 0, "?dup"
+; duplicate WR if non-zero
+forthword_ QDPUSH, 0, "?push"
     sbiw wl, 0
     breq PFA_QDUP1
     push_
@@ -188,7 +188,7 @@ forthword_ POPRET, DIS_CALL_OPT, "popret"
 ; ( n -- n ) (R: -- n )
 ; Stack
 ; copy TOS to TOR
-forthword_ DUP_R, INLINE_OPT, "r>r"
+forthword_ RPUSH, INLINE_OPT, "rpush"
     rpush_
     ret
 
@@ -367,18 +367,11 @@ PFA_TRUE1:
     ser wh
     ret
 
-; ( n -- ) 
-; Compare
-; test TOS if zero
-forthword_ ZEROSENSE, INLINE_OPT, "0?"
-    zerosense_
-    ret
-
 ; ( n -- n) 
 ; Compare
-; test TOS if zero, does not consume TOS
-forthword_ QZEROSENSE, INLINE_OPT, "?0?"
-    dupzerosense_
+; test WR if zero, does not consume WR
+forthword_ ISZERO, INLINE_OPT, "0?"
+    iszero_
     ret
 
 
@@ -1134,7 +1127,7 @@ forthword_ BTOW, 0, "btow"
 forthword_ ITOI, 0, "itoi"
     niptoa_         ; ( start count ) A: dest
 ITOI_B:
-    dupzerosense_   ; ( start count )
+    iszero_   ; ( start count )
     breq ITOI_END
     rcall TO_B      ; ( start ) B: count
     push_            ; ( start start )

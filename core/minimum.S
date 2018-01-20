@@ -85,7 +85,8 @@ forthword_ MIN, 0, "min"
     call GREATER
     ; <if>
 MIN_TEST:
-    zerosense_
+    iszero_
+    pop_
     breq MIN_exit
       call SWAP
       
@@ -161,7 +162,8 @@ PFA_DIGITQ0:
     push_
     rcall BASEFETCH
     call UGREATEREQUAL
-    zerosense_
+    iszero_
+    pop_
     breq PFA_DIGITQ2
     pop_
     jmp ZERO
@@ -317,12 +319,13 @@ NUMBERSIGN_HASSIGN:
 ; Numeric IO
 ; convert a string to a number  c-addr2/u2 is the unconverted string
 forthword_ TO_NUMBER, 0, ">num"
-    dupzerosense_
+    iszero_
     breq PFA_TO_NUMBER1
         call OVER            ; ( u adr len adr)
         call CFETCH          ; ( u adr len char)
         rcall DIGITQ         ; ( u adr len digit flag)
-        zerosense_
+        iszero_
+        pop_
         brne PFA_TO_NUMBER2
             ; character is not a recognized number
             ret
@@ -359,7 +362,8 @@ forthword_ NUMBER, 0, "num"
     rcall TO_NUMBER         ; ( n addr' len' )
     ; check length of the remaining string.
     ; if zero: a single cell number is entered
-    zerosense_
+    iszero_
+    pop_
 	breq PFA_NUMBER1
 
     ; error in string to number conversion
@@ -373,7 +377,8 @@ PFA_NUMBER1:
     pop_                   ; ( n )  (R: base flagsign' )
     ; incorporate sign into number
     call R_FROM             ; ( n flagsign' ) (R: base )
-    zerosense_
+    iszero_
+    pop_
     breq PFA_NUMBER4
     call NEGATE
 PFA_NUMBER4:
@@ -564,7 +569,7 @@ forthword_ RP0, 0, "rp0"
     ; go from bigger to smaller addresses
 ;PFA_FETCH_EE_ARRAY1:
 ;    copytob_           ; ( ee-addr2 blen )
-;    dupzerosense_      ; ( ee-addr2 blen)
+;    iszero_      ; ( ee-addr2 blen)
 ;    breq PFA_FETCH_EE_ARRAY2
 ;    rcall OVER         ; ( ee-addr2 blen ee-addr2 )
 ;    rcall PLUS          ; ( ee-addr2 ee-addr3 )
@@ -586,7 +591,8 @@ forthword_ RP0, 0, "rp0"
 ;    rcall SWAP   ; ( recn .. rec0 e-addr n )
 ;PFA_STORE_EE_ARRAY1:
 ;    copytob_       ; ( recn .. rec0 e-addr n ) B: n
-;    zerosense_
+;    iszero_
+;    pop_
 ;    breq PFA_STORE_EE_ARRAY2
 ;    twoplus_       ; ( i_x e-addr+2 )
 ;    rcall TUCK     ; ( e-addr+2 i_x e-addr+2 )
@@ -615,7 +621,8 @@ forthword_ DEPTH, 0, "depth"
 forthword_ QSTACK, 0, "?sp"
     rcall DEPTH
     call LESSZERO
-    zerosense_
+    iszero_
+    pop_
     brne PFA_QSTACKERROR
     ret
 PFA_QSTACKERROR:
@@ -640,7 +647,7 @@ forthword_ EE2RAM, 0, "ee>r"
 PFA_EE2RAM_1:
     ; <begin>
     ; <while>
-    dupzerosense_
+    iszero_
     breq PFA_EE2RAM_2
     call B_              ; (len e-addr)
     push_                 ; ( len e-addr e-addr )
@@ -867,7 +874,8 @@ forthword_ ABS, 0, "abs"
     push_
     call LESSZERO
     ; <if>
-    zerosense_
+    iszero_
+    pop_
     breq ABS_exit
       jmp NEGATE
     ; <then>  

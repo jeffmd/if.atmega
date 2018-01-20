@@ -87,7 +87,7 @@ forthword_ ITYPE, 0, "itype"
     ; begin
 PFA_ITYPE1:
     ; ?while
-    dupzerosense_
+    iszero_
     breq PFA_ITYPE2
     rcall AFETCHI     ; ( len c1c2 )
     aplus_            ; a+
@@ -113,7 +113,7 @@ PFA_ITYPE3:
 forthword_ TYPE, 0, "type"
     niptoa_          ; ( n ) A: addr
 PFA_TYPE1:
-    dupzerosense_
+    iszero_
     breq PFA_TYPE2
     rcall ACFETCH    ; ( n c )
     aplus_           ; a+
@@ -148,7 +148,7 @@ forthword_ CSKIP, 0, "cskip"
     niptoa_              ; ( n1 ) A: addr1
     push_                 ; ( n1 n1 )
 PFA_CSKIP1:
-    dupzerosense_        ; ( n1 n')
+    iszero_        ; ( n1 n')
     breq PFA_CSKIP2
     rcall ACFETCH        ; ( n1 n' c' )
     aplus_
@@ -173,7 +173,7 @@ forthword_ CSCAN, 0, "cscan"
     rcall TO_A           ; ( addr1 n1 ) A: addr1
     push_                 ; ( addr1 n1 n1 )
 PFA_CSCAN1:
-    dupzerosense_        ; ( addr1 n1 n')
+    iszero_        ; ( addr1 n1 n')
     breq PFA_CSCAN2
     rcall ACFETCH        ; ( addr1 n1 n' c' )
     aplus_
@@ -199,7 +199,8 @@ forthword_ ICOMPARE, 0, "icmp"
     ; check if strings are same length
     rcall NOTEQUAL           ; ( r-addr r-len f-addr flag )
     ; if
-    zerosense_               ; ( r-addr r-len f-addr )
+    iszero_                  ; ( r-addr r-len f-addr flag )
+    pop_                     ; ( r-addr r-len f-addr )
     breq PFA_ICOMPARE_SAMELEN
 
     ; strings are not the same length
@@ -218,7 +219,8 @@ PFA_ICOMPARE_SAMELEN:
 PFA_ICOMPARE_LOOP:
     str_b_                   ; ( r-addr len ) B: len
     ; while
-    zerosense_               ; ( r-addr )
+    iszero_                  ; ( r-addr len )
+    pop_                     ; ( r-addr )
     breq PFA_ICOMPARE_DONE
 
     push_                     ; ( r-addr r-addr )
@@ -232,7 +234,8 @@ PFA_ICOMPARE_LOOP:
     doliteral_ 0x100         ; ( r-addr r-cc f-cc f-cc 0x100 )
     rcall ULESS              ; ( r-addr r-cc f-cc flag)
     ; if
-    zerosense_
+    iszero_
+    pop_
     breq PFA_ICOMPARE_LASTCELL
     rcall SWAP               ; ( r-addr f-cc r-cc)
     zerohigh_                ; ( r-addr f-cc 0:r-cc)
@@ -240,7 +243,8 @@ PFA_ICOMPARE_LOOP:
 PFA_ICOMPARE_LASTCELL:
     rcall NOTEQUAL           ; ( r-addr flag)
     ; if
-    zerosense_               ; ( r-addr )
+    iszero_                  ; ( r-addr )
+    pop_
     breq PFA_ICOMPARE_NEXTLOOP
 
     ; strings don't match
@@ -322,7 +326,7 @@ forthword_ PNAME, 0, "pname"
 ; 0 if word not found in dictionary
 ; nfa if word is found
 forthword_ FINDNFA, 0, "findnfa"
-    dupzerosense_
+    iszero_
     brne FINDNFA_
       ; terminating, wid is empty
       nip2_
@@ -332,7 +336,7 @@ FINDNFA_:
     ; <begin>
 FINDNFA_BEGIN:
     ; <while>
-    dupzerosense_               ; ( c-addr len nfa )
+    iszero_               ; ( c-addr len nfa )
     brne FINDNFA_CHECK
       ; terminating, 0 found
       nip2_                     ; ( 0 )
@@ -346,7 +350,8 @@ FINDNFA_CHECK:
     zerohigh_                   ; ( c-addr len c-addr len f-addr 0:len )
     rcall ICOMPARE              ; ( c-addr len flag )
     ; <if>
-    zerosense_
+    iszero_
+    pop_
     breq FINDNFA_NEXT
       ; we found the string
       rcall DDROP               ; ( )
@@ -394,7 +399,7 @@ forthword_ FINDW, 0, "findw"
     oneminus_           ; ( addr len context-1 )
     rcall CFETCH        ; ( addr len idx )
 FINDW_BEGIN:
-    dupzerosense_
+    iszero_
     brmi FINDLAST       ; ( addr len idx )
       rcall TO_R        ; ( addr len ) ( R: idx )
       rcall TWOOVER     ; ( addr len addr len ) ( R: idx )
@@ -404,7 +409,7 @@ FINDW_BEGIN:
       rcall FINDWI
       rcall R_FROM      ; ( addr len nfa idx ) ( R: )
       rcall SWAP        ; ( addr len idx nfa )
-      dupzerosense_
+      iszero_
       ; end loop if word found
       breq FINDW_NEXT
         nip2_           ; ( addr nfa )
@@ -452,11 +457,13 @@ forthword_ DOSLIT, 0, "(slit)"
 forthword_ REC_NUM, 0, "rec#"
     ; try converting to a number
     call NUMBER              ; ( [n] f )
-    zerosense_
+    iszero_
+    pop_
     breq PFA_REC_NONUMBER
 
     rcall STATEFETCH         ; ( n state )
-    zerosense_
+    iszero_
+    pop_
     breq PFA_REC_NUMBER_OK
     call LIT
 PFA_REC_NUMBER_OK:
@@ -472,7 +479,7 @@ PFA_REC_NONUMBER:
 forthword_ REC_WORD, 0, "recw"
 
     rcall FINDW
-    dupzerosense_
+    iszero_
     brne REC_WORD_FOUND
     ret
 
@@ -484,7 +491,8 @@ REC_WORD_FOUND:
         
 CHECK_COMPILE_ONLY:
     rcall STATEFETCH
-    zerosense_
+    iszero_
+    pop_
     brne CHECK_IMMEDIATE
         ; word can only be used in compile state
         call DOSLIT
@@ -502,7 +510,8 @@ CHECK_IMMEDIATE:
 REC_WORD_CHECKSTATE:
         ; check state
 	    rcall STATEFETCH
-	    zerosense_
+	    iszero_
+      pop_
 	    breq REC_WORD_EXECUTE
         ; in compile mode so compile xt
  	    call COMPILEXT
@@ -531,7 +540,8 @@ forthword_ RECX, 0, "recx"
     rcall R_FROM          ; ( addr len ) (R: n )
     rcall A_              ; ( addr len flag ) A:  
     ; <if>
-    zerosense_            ; ( addr len )
+    iszero_               ; ( addr len )
+    pop_
     brne RECX_DONE
     rcall TWOOVER         ; ( addr len addr len  )
     rcall TO_R            ; ( addr len addr ) (R: len )
@@ -542,7 +552,8 @@ forthword_ RECX, 0, "recx"
     rcall R_FROM          ; ( addr ) (R: n len )
     rcall R_FROM          ; ( addr len ) (R: n )
     rcall A_              ; ( addr len flag ) A:  
-    zerosense_            ; ( addr len )
+    iszero_               ; ( addr len )
+    pop_
     brne RECX_DONE
     ; not recognized so throw
     rcall CR
@@ -563,7 +574,7 @@ forthword_ INTERPRET, 0, "interp"
     rcall PNAME         ; ( -- addr len )
 
     ; ?while
-    dupzerosense_       ; ( -- addr len )
+    iszero_       ; ( -- addr len )
     breq INTERPRET_END
 
     rcall RECX          ; ( )
@@ -582,7 +593,8 @@ forthword_ QP_RD, 0, "?prd"
     rcall STATEFETCH
     ; output ready prompt if in interpret mode
     ; <-if>
-    zerosense_
+    iszero_
+    pop_
     brne QP_RD_exit
       rjmp PROMPTRDY
 QP_RD_exit:
@@ -607,7 +619,8 @@ forthword_ DOREFILL, 0, "(refill)"
   ; if just starting new input line then check prompt and reset input position
   rcall G_IN               ; ( >inaddr )
   rcall FETCH              ; ( >in )
-  zerosense_               ; ( )
+  iszero_                  ; ( )
+  pop_
   breq DOREFILL_do
     rjmp INRESET
     
@@ -615,7 +628,8 @@ DOREFILL_do:
   ; refill the input buffer
   rcall REFILL              ; ( f )
   ; <if>
-  zerosense_
+  iszero_
+  pop_
   breq DOREFILL_end
     ; there is something in the input buffer, try interpreting it      
     rjmp DOINTERPRET
@@ -676,7 +690,8 @@ forthword_ DOINTERPRET, 0, "(interp)"
   call CATCH
   ; check to make sure no throws
   ; <if>
-  zerosense_
+  iszero_
+  pop_
   breq DOINTERPRET_ok
     rcall PROMPTERROR
 	rjmp QUIT
@@ -732,11 +747,11 @@ forthword_ PROMPTERROR, 0, ".??"
 forthword_ ACCEPT, 0, "accept"
     ; <begin>
     rcall KEY            ; ( k )
-    dupzerosense_        ; ( k )
-    brne ACCEPT_haskey
+    iszero_              ; ( k )
+    brne ACCEPT_checkeol
     ret
 
-ACCEPT_haskey:
+ACCEPT_checkeol:
     ; check for EOL
     cpi wl, 10
     ; <if>
@@ -760,7 +775,8 @@ ACCEPT_checkdelete:
     rcall SHARPTIB
     rcall FETCH          ; ( k #tib )
     ; <if>
-    zerosense_           ; ( k )
+    iszero_             ; ( k tib )
+    pop_                ; ( k )
     brne ACCEPT_dodelete
     ; at the beginning of the line, ignore this character
     pop_
@@ -806,7 +822,8 @@ ACCEPT_checkmaxinput:
     rcall FETCH          ; ( tibsize #tib)
     rcall MINUS          ; ( tibsize-#tib)
     ; <if>
-    zerosense_           ; ( )
+    iszero_              ; ( )
+    pop_
     breq ACCEPT_atmaxinput
     rjmp ZERO
     
@@ -819,7 +836,7 @@ ACCEPT_atmaxinput:
 ; refills the input buffer - flag is true if buffer has something
 forthword_ REFILLTIB, 0, "reftib"
     rcall ACCEPT         ; ( f )
-    dupzerosense_        ; ( f )
+    iszero_        ; ( f )
     breq REFILLTIB_exit
     rjmp CR
     
