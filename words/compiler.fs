@@ -39,7 +39,7 @@
 \ copy the first character of the next word onto the stack
 : char  ( "<spaces>name" -- c )
     pname
-    drop
+    pop
     c@
 ;
 
@@ -128,11 +128,12 @@
 \ compile zerosense and conditional branch forward
 : ?brc
     
-    compile 0?       \ inline zerosense
+    compile 0?       \ inline 0? pop
+    compile pop
     brnz1,
 ;
 
-\ compile dupzerosense and conditional branch forward
+\ compile iszero and conditional branch forward
 : ??brc
     ?0?,
     brnz1,
@@ -313,9 +314,9 @@
     rword
     compile (val)
     edp                ( n edp )
-    dup                ( n edp edp )
+    push               ( n edp edp )
     ,                  ( n edp )
-    dup                ( n edp edp )
+    push               ( n edp edp )
     dcell+             ( n edp edp+dcell)
     to edp             ( n edp )
     !e                 ( )
@@ -326,7 +327,7 @@
 
 \ compiles a string from RAM to Flash
 : s, ( addr len -- )
-    dup
+    push
     (s,)
 ;
 

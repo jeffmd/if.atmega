@@ -1,9 +1,9 @@
 dp
-pname header dup $FF00 or (s,)
+pname header push $FF00 or (s,)
   current @ @e , 
   smudge !
   ffrst 1 state !
-    dp >r >r dup $FF00 or (s,) r> @e , r>
+    dp >r >r push $FF00 or (s,) r> @e , r>
   [
   ;opt uwid
 
@@ -36,7 +36,7 @@ pname (create) current @ header
 : widf 
     cur@
     @e
-    dup
+    push
     @i
     rot and
     swap

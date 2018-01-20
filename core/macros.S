@@ -113,9 +113,29 @@
     push yrh
 .endm
 
-.macro r_drop_ ; drop TOR
+.macro rpop_
+    pop wh
+    pop wl
+.endm
+
+.macro rpopa_ 
+    pop ah
+    pop al
+.endm
+
+.macro rpopb_ 
+    pop bh
+    pop bl
+.endm
+
+.macro rpopx_ 
     pop xrh
     pop xrl
+.endm
+
+.macro rpopy_
+    pop yrh
+    pop yrl
 .endm
 
 .macro str_d0_
@@ -468,16 +488,6 @@
 
 .macro y_
   movw wl, yrl
-.endm
-
-.macro rpopa_
-    pop ah
-    pop al
-.endm
-
-.macro rpopb_
-    pop bh
-    pop bl
 .endm
 
 .macro in_ val, prt

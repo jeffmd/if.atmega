@@ -73,7 +73,7 @@ forthword_ DPOP, INLINE_OPT, "pop"
 ; ( n n -- ) 
 ; Stack
 ; drop TOS twice
-forthword_ DDROP, 0, "2drop"
+forthword_ DPOP2, 0, "pop2"
     nip_
     pop_
     ret
@@ -157,20 +157,15 @@ forthword_ RROT, 0, "-rot"
 ; ( -- n ) (R: n --)
 ; Stack
 ; move TOR to TOS
-; call only
-forthword_ R_FROM, DIS_CALL_OPT, "r>"
-    pop ZH
-    pop ZL
-    push_
-    pop wh
-    pop wl
-    ijmp
-
+forthword_ RPOP, INLINE_OPT, "rpop"
+    rpop_
+    ret
+    
 ; ( -- ) (R: n -- )
 ; Stack
-; Drop TOR
-forthword_ R_DROP, INLINE_OPT, "r>drop"
-    r_drop_
+; pop TOR into X
+forthword_ RPOPX, INLINE_OPT, "rpop.x"
+    rpopx_
     ret
 
 ; ( -- retaddr )
@@ -1141,7 +1136,7 @@ ITOI_B:
     rjmp ITOI_B
 
 ITOI_END:
-    rjmp DDROP
+    rjmp DPOP2
 
 .include "interpret.S"
 .include "compiler.S"

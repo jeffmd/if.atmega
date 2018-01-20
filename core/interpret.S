@@ -354,7 +354,7 @@ FINDNFA_CHECK:
     pop_
     breq FINDNFA_NEXT
       ; we found the string
-      rcall DDROP               ; ( )
+      rcall DPOP2               ; ( )
       rcall R_FROM              ; ( nfa )
       ret
     ; <then>
@@ -564,7 +564,7 @@ forthword_ RECX, 0, "recx"
     jmp THROW
     
 RECX_DONE:
-    rjmp DDROP           ; ( )
+    rjmp DPOP2           ; ( )
 
 ; ( -- ) (R: i*x - j*x )
 ; System
@@ -584,7 +584,7 @@ forthword_ INTERPRET, 0, "interp"
     rjmp INTERPRET
 
 INTERPRET_END:
-    rjmp DDROP
+    rjmp DPOP2
     
 ; ( -- )
 ; System

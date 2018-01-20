@@ -217,7 +217,7 @@ forthword_ CATCH, 0, "catch"
     call R_FROM         ; ( hxt ) (R: callerret SP )
     rcall HANDLER       ; ( hxt haddr )
     call STORE          ; ( )
-    r_drop_             ; ( ) (R: callerret)
+    rpopx_              ; ( ) (R: callerret)
     jmp ZERO
 
 ; ( $addr len -- )
@@ -369,7 +369,7 @@ forthword_ NUMBER, 0, "num"
     ; error in string to number conversion
 PFA_NUMBER2:
 	nip_                    ; ( addr' )  (R: base flagsign' )
-	r_drop_                 ; ( addr' ) (R: base )
+	rpopx_                  ; ( addr' ) (R: base )
 	zerotos_                ; ( 0 ) (R: base )
     rjmp PFA_NUMBER5
 

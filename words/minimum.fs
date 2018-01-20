@@ -9,7 +9,7 @@
 
 \ increment a cvar by one.  If val > max then set flag to true.
 : 1+c!mx ( maxval cvar -- flag )
-  nip>b >a ac@ 1+ dup b > if 0: then dup ac! 0= 
+  nip>b >a ac@ 1+ push b > if 0: then push ac! 0= 
 ;
 
 ( c<name> -- ) 
@@ -21,7 +21,7 @@
     compile (def)
 
     edp             ( -- EDP )
-    dup             ( -- EDP EDP )
+    push            ( -- EDP EDP )
     ,               ( -- EDP )
     ['] @e ,
     ['] !e ,
@@ -73,7 +73,7 @@
 \ divide n1 by n2 giving the remainder n3
 : mod ( n1 n2 -- n3 )
     /mod
-    drop
+    pop
 ;
 
 
@@ -88,7 +88,7 @@
 \      a+
 \      1-           ( c u-1 )
 \    repeat
-\    2drop
+\    pop2
 \ ;
 
 
@@ -101,13 +101,13 @@
 \ only accepts positive values
 : spaces ( n -- )
     \ make sure a positive number
-    dup 0> and
+    push 0> and
     begin
     ?while
       space
       1- 
     repeat
-    drop
+    pop
 ;
 
 \ pointer to current write position
@@ -152,7 +152,7 @@ var hld
 
 \ Pictured Numeric Output: convert PNO buffer into an string
 : #> ( u1 -- addr count )
-    drop hld @ pad over -
+    pop hld @ pad over -
 ;
 
 \ place a - in HLD if n is negative
@@ -187,7 +187,7 @@ var hld
 
 \ singed PNO with single cell numbers
 : .  ( n -- )
-    dup      ( n n )
+    push      ( n n )
     abs      ( n n' )
     0        ( n n' 0 ) \ not right aligned
     .r
@@ -203,11 +203,11 @@ var hld
     2over   ( limit counter-2 limit counter-2 )
     <>      ( limit counter-2 flag )
     while 
-      dup     ( limit counter-2 counter-2 )
+      push    ( limit counter-2 counter-2 )
       @       ( limit counter-2 val )
       u.      ( limit counter-2 )
     repeat   
-    2drop
+    pop2
 ;
 
 \ numbers that get used a lot

@@ -5,7 +5,7 @@
 \ skip everything up to the closing bracket on the same line
 : (
     $29 parse
-    2drop
+    pop2
 ; immediate
 
 
@@ -61,7 +61,7 @@
 \ search dictionary for name, returns XT
 : '  ( "<spaces>name" -- XT )
     'f
-    drop
+    pop
 ;
 
 ( -- ) ( C: "<space>name" -- )
@@ -80,5 +80,3 @@
 : find
     pname findw
 ;
-
-
