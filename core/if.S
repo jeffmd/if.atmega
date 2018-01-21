@@ -7,6 +7,7 @@
 ; they may be moved to the core dictionary if needed
 
 .include "interrupt.S"
+.include "coreinline.S"
 .include "minimum.S"
 .include "asm.S"
 

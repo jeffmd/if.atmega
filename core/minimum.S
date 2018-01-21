@@ -214,7 +214,8 @@ forthword_ CATCH, 0, "catch"
     call EXEC
     ; restore handler
     ; r> handler !
-    call R_FROM         ; ( hxt ) (R: callerret SP )
+    push_
+    rpop_               ; ( hxt ) (R: callerret SP )
     rcall HANDLER       ; ( hxt haddr )
     call STORE          ; ( )
     rpopx_              ; ( ) (R: callerret)
@@ -230,10 +231,12 @@ forthword_ THROW, 0, "throw"
     rcall HANDLER      ; ( haddr )
     call FETCH         ; ( RP_handler )
     call RP_STORE      ; ( ) (R: callerret SP hxt)
-    call R_FROM        ; ( hxt ) (R: callerret SP )
+    push_
+    rpop_              ; ( hxt ) (R: callerret SP )
     rcall HANDLER      ; ( hxt haddr )
     call STORE         ; ( )
-    call R_FROM        ; ( SP ) (R: callerret )
+    push_
+    rpop_              ; ( SP ) (R: callerret )
     call SP_STORE      ; ( ... )
     jmp ONE
 
@@ -312,7 +315,8 @@ NUMBERSIGN_HASSIGN:
       call TO_R
       call ONE
       call SLASHSTRING
-      call R_FROM
+      push_
+      rpop_
       ret
 
 ; ( u1 c-addr1 len1 -- u2 c-addr2 len2 )
@@ -354,7 +358,8 @@ forthword_ NUMBER, 0, "num"
     call TO_R               ; ( addr len ) (R: base flagsign)
     rcall PRAEFIX
     rcall NUMBERSIGN        ; ( addr len flagsign2 )
-    call R_FROM             ; ( addr len flagsign2 flagsign ) (R: base )
+    push_
+    rpop_                   ; ( addr len flagsign2 flagsign ) (R: base )
     call OR                 ; ( addr len flagsign' )
     call TO_R               ; ( addr len ) (R: base flagsign')
     call ZERO               ; ( addr len 0 ) starting value
@@ -376,7 +381,8 @@ PFA_NUMBER2:
 PFA_NUMBER1:
     pop_                   ; ( n )  (R: base flagsign' )
     ; incorporate sign into number
-    call R_FROM             ; ( n flagsign' ) (R: base )
+    push_
+    rpop_                  ; ( n flagsign' ) (R: base )
     iszero_
     pop_
     breq PFA_NUMBER4
@@ -384,7 +390,8 @@ PFA_NUMBER1:
 PFA_NUMBER4:
     call TRUE               ; ( n true ) (R: base )
 PFA_NUMBER5:
-    call R_FROM             ; ( n true base ) (R: )
+    push_
+    rpop_                   ; ( n true base ) (R: )
     rjmp BASESTORE          ; ( n true )
 
 

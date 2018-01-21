@@ -30,8 +30,10 @@ forthword_ RD_K, 0, "Rd,k,"
     swapnib_             ;( 0000kkkk0000kkkk Rd' )
     anditos_ 0x00f0      ;( kk dddd0000 )
     call OR              ;( 0000kkkkddddkkkk )
-    call R_FROM          ;( 0kdk opcode )
-    call R_FROM          ;( 0kdk opcode mask )
+    push_
+    rpop_                ;( 0kdk opcode )
+    push_
+    rpop_                ;( 0kdk opcode mask )
     rcall MASKNOT        ;( ops )
     jmp COMMA            ;( )
 
@@ -55,8 +57,10 @@ forthword_ P_b_, 0, "P,b,"
     doliteral_ 3  ; ( b P 3 )
     call LSHIFT   ; ( 0bbb PPPPP000)
     call OR       ; ( PPPPPbbb )
-    call R_FROM   ; ( PPPPPbbb opcode )
-    call R_FROM   ; ( PPPPPbbb opcode mask)
+    push_
+    rpop_         ; ( PPPPPbbb opcode )
+    push_
+    rpop_         ; ( PPPPPbbb opcode mask)
     rcall MASKNOT ; ( inst )
     jmp COMMA   ; PPbb opcode mask mask! to flash
 

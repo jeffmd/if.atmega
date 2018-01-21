@@ -225,9 +225,10 @@ PFA_SCOMMA1:
 
 PFA_SCOMMA2:
     pop_              ; (  )
-    rcall R_FROM       ; ( rem ) (R: )
+    push_
+    rpop_             ; ( rem ) (R: )
     ; if
-    iszero_         ; ( )
+    iszero_           ; ( )
     pop_
     breq PFA_SCOMMA3
       rcall ACFETCH    ; ( c1 )
@@ -307,7 +308,8 @@ forthword_ NFATOXTF, 0, "nfa>xtf"
     rcall TO_R                  ; ( nfa ) (R: xtflags)
     rcall NFA2LFA               ; ( lfa )
     oneplus_   ; lfa>xt         ; ( xt )
-    rcall R_FROM                ; ( xt xtflags )
+    push_
+    rpop_                       ; ( xt xtflags )
 
 NFATOXTF_EXIT:
     ret

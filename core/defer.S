@@ -45,7 +45,8 @@ forthword_ DOVALUE, DIS_CALL_OPT, "(val)"
     ; Top of return stack has return address of caller
     ; return address is actually the address of the value
     ; won't be returning to this address
-    rcall R_FROM        ; ( raddr ) (R: raddr -- )
+    push_
+    rpop_               ; ( raddr ) (R: raddr -- )
     rjmp DEFX           ; ( n )
 
 ; ( i*x -- j*x )
@@ -55,7 +56,8 @@ forthword_ DODEFER, DIS_CALL_OPT, "(def)"
     ; top of return stack has return address of caller
     ; return address is data for defer so pop it onto data stack
     ; will not be returning to the caller
-    rcall R_FROM         ; ( raddr ) (R: raddr -- )
+    push_
+    rpop_                ; ( raddr ) (R: raddr -- )
     rcall DEFX           ; ( n )
     ; EXEC the defer
     rjmp EXEC

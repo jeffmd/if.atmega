@@ -121,7 +121,8 @@ PFA_TYPE1:
     oneminus_        ; ( n-1 )
     rjmp PFA_TYPE1
 PFA_TYPE2:
-    rjmp DPOP
+    pop_
+    ret
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -355,12 +356,14 @@ FINDNFA_CHECK:
     breq FINDNFA_NEXT
       ; we found the string
       rcall DPOP2               ; ( )
-      rcall R_FROM              ; ( nfa )
+      push_
+      rpop_                     ; ( nfa )
       ret
     ; <then>
 FINDNFA_NEXT:
       ; next try
-      rcall R_FROM
+      push_
+      rpop_
       rcall NFA2LFA
       rcall FETCHI
       ; <repeat>
@@ -404,10 +407,12 @@ FINDW_BEGIN:
       rcall TO_R        ; ( addr len ) ( R: idx )
       rcall TWOOVER     ; ( addr len addr len ) ( R: idx )
       ; get next wordlist in array
-      rcall R_FROM      ; ( addr len addr len idx ) ( R: )
+      push_
+      rpop_             ; ( addr len addr len idx ) ( R: )
       rpush_            ; ( addr len addr len idx ) ( R: idx)
       rcall FINDWI
-      rcall R_FROM      ; ( addr len nfa idx ) ( R: )
+      push_
+      rpop_             ; ( addr len nfa idx ) ( R: )
       rcall SWAP        ; ( addr len idx nfa )
       iszero_
       ; end loop if word found
@@ -433,7 +438,8 @@ forthword_ DOSLIT, 0, "(slit)"
 
   ; get return address to get string length, calculate string address start,
   ; and calculate return address
-  rcall R_FROM   ; ( raddr )  (R: raddr -- )
+  push_
+  rpop_           ; ( raddr )  (R: raddr -- )
   push_           ; ( raddr raddr )
   ; get the string length
   rcall FETCHI   ; ( raddr slength )
@@ -536,8 +542,10 @@ forthword_ RECX, 0, "recx"
     ; test if its a word
     rcall REC_WORD        ; ( flag ) ( R: len addr )
     rcall TO_A            ; ( ) A: flag
-    rcall R_FROM          ; ( addr ) (R: n len )
-    rcall R_FROM          ; ( addr len ) (R: n )
+    push_
+    rpop_                 ; ( addr ) (R: n len )
+    push_
+    rpop_                 ; ( addr len ) (R: n )
     rcall A_              ; ( addr len flag ) A:  
     ; <if>
     iszero_               ; ( addr len )
@@ -549,8 +557,10 @@ forthword_ RECX, 0, "recx"
     ; test if its a number
     rcall REC_NUM         ; ( flag ) ( R: len addr )
     rcall TO_A            ; ( ) A: flag
-    rcall R_FROM          ; ( addr ) (R: n len )
-    rcall R_FROM          ; ( addr len ) (R: n )
+    push_
+    rpop_                 ; ( addr ) (R: n len )
+    push_
+    rpop_                 ; ( addr len ) (R: n )
     rcall A_              ; ( addr len flag ) A:  
     iszero_               ; ( addr len )
     pop_
