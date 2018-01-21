@@ -328,36 +328,6 @@ forthword_ PLUS, 0, "+"
     adc wh, xrh
     ret
 
-
-; ( n1 -- n2) 
-; Arithmetics
-; 1-complement of TOS
-forthword_ NOT, INLINE_OPT, "not"
-    not_
-    ret
-
-; ( ddddkkkk -- kkkkdddd )
-; Arithmetics
-; swap nibbles in lower half of TOS
-forthword_ SWAPNIB, INLINE_OPT, "swnib"
-    swapnib_
-    ret
-
-; ( n1 -- n2 ) 
-; Arithmetics
-; arithmetic shift right
-forthword_ TWOSLASH, INLINE_OPT, "2/"
-    twoslash_
-    ret
-
-; ( n1 -- n2 ) 
-; Arithmetics
-; arithmetic shift left, filling with zero
-forthword_ TWOSTAR, INLINE_OPT, "2*"
-    twostar_
-    ret
-
-
 ; ( n1 n2 -- n3 ) 
 ; Logic
 ; bitwise and
