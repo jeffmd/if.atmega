@@ -13,16 +13,19 @@
 ; initialize usart
 forthword_ USART, 0, "+usart"
 
-  doliteral_ USART_B_VALUE
-  doliteral_ USART_B
+  lit_ USART_B_VALUE
+  push_
+  lit_ USART_B
   call CSTORE
 
-  doliteral_ USART_C_VALUE
-  doliteral_ USART_C | bm_USARTC_en
+  lit_ USART_C_VALUE
+  push_
+  lit_ USART_C | bm_USARTC_en
   call CSTORE
 
-  doliteral_ UBRR_VAL
-  doliteral_ BAUDRATE_HIGH
+  lit_ UBRR_VAL
+  push_
+  lit_ BAUDRATE_HIGH
   call HSTORE
 
   call XT_USART_INIT_RX

@@ -10,7 +10,7 @@ ram_tib: .space TIBSIZE
 ; System Variable
 ; terminal input buffer address
 forthword_ TIB, 0, "tib"
-    doliteral_ ram_tib
+    lit_ ram_tib
     ret
 
 .pushsection .noinit
@@ -20,7 +20,7 @@ ram_sharptib: .space 2
 ; ( -- addr )
 ; variable holding the number of characters in TIB
 forthword_ SHARPTIB, 0, "#tib"
-    doliteral_ ram_sharptib
+    lit_ ram_sharptib
     ret
 
 ; ( -- a-addr )
@@ -56,16 +56,16 @@ forthword_ KEY, 0, "key"
 ; ( -- )
 ; cause subsequent output appear at the beginning of the next line
 forthword_ CR, 0, "cr"
-    doliteral_ 13
+    lit_ 13
     rcall EMIT
-    rcall TEN
+    ten_
     rjmp EMIT
     
 ; ( -- 32 )
 ; put ascii code of the blank/space character to the stack
 
 forthword_ BL, 0, "bl"
-    doliteral_ 32
+    bl_
     ret
     
 ; ( -- f )
@@ -91,7 +91,7 @@ PFA_ITYPE1:
     breq PFA_ITYPE2
     rcall AFETCHI     ; ( len c1c2 )
     aplus_            ; a+
-    push_              ; ( len c1c2 c1c2 )
+    push_             ; ( len c1c2 c1c2 )
     rcall EMIT        ; ( len c1c2 )
     highbyte_         ; ( len c2c1 )
     rcall EMIT        ; ( len )
@@ -111,7 +111,7 @@ PFA_ITYPE3:
 ; ( addr n -- )
 ; print a RAM based string
 forthword_ TYPE, 0, "type"
-    niptoa_          ; ( n ) A: addr
+    popa_          ; ( n ) A: addr
 PFA_TYPE1:
     iszero_
     breq PFA_TYPE2
@@ -146,15 +146,15 @@ forthword_ SLASHSTRING, 0, "/$"
 
 forthword_ CSKIP, 0, "cskip"
     rcall TO_B           ; ( addr1 n1 ) B: c
-    niptoa_              ; ( n1 ) A: addr1
-    push_                 ; ( n1 n1 )
+    popa_                ; ( n1 ) A: addr1
+    push_                ; ( n1 n1 )
 PFA_CSKIP1:
-    iszero_        ; ( n1 n')
+    iszero_              ; ( n1 n')
     breq PFA_CSKIP2
     rcall ACFETCH        ; ( n1 n' c' )
     aplus_
-    cp wl, bl          ; ( n1 n' c' )
-    pop_                ; ( n1 n' )
+    cp wl, bl            ; ( n1 n' c' )
+    pop_                 ; ( n1 n' )
     brne PFA_CSKIP2
     oneminus_
     rjmp PFA_CSKIP1
@@ -206,7 +206,7 @@ forthword_ ICOMPARE, 0, "icmp"
 
     ; strings are not the same length
     nip2_
-    zerotos_                 ; ( 0 )
+    zero_                 ; ( 0 )
     ret
 
     ; then
@@ -232,7 +232,7 @@ PFA_ICOMPARE_LOOP:
     ; that means: if the flash cell is less $0100, than mask the
     ; high byte in the ram cell
     push_                     ; ( r-addr r-cc f-cc f-cc )
-    doliteral_ 0x100         ; ( r-addr r-cc f-cc f-cc 0x100 )
+    lit_ 0x100         ; ( r-addr r-cc f-cc f-cc 0x100 )
     rcall ULESS              ; ( r-addr r-cc f-cc flag)
     ; if
     iszero_
@@ -249,7 +249,7 @@ PFA_ICOMPARE_LASTCELL:
     breq PFA_ICOMPARE_NEXTLOOP
 
     ; strings don't match
-    zerotos_                 ; ( 0 )
+    zero_                 ; ( 0 )
     ret
 
     ; then
@@ -375,7 +375,7 @@ FINDNFA_NEXT:
 ; search root wordlists for the name from string addr/len
 forthword_ FINDROOT, 0, "froot"
     ; put root wid on stack
-    doliteral_  pm(VE_WIPE) 
+    lit_  pm(VE_WIPE) 
     ; search root
     rjmp FINDNFA_BEGIN
 
@@ -683,10 +683,10 @@ forthword_ RESET, 0, "rst"
 forthword_ QUIT, 0, "quit"
     ; reset data stack
     call SP0
-    rcall SP_STORE
+    str_sp_
     ; reset return stack pointers
     call RP0
-    rcall RP_STORE
+    str_rp_
     rcall RESET    
     rjmp DOTASKS
     
@@ -696,7 +696,7 @@ forthword_ QUIT, 0, "quit"
 forthword_ DOINTERPRET, 0, "(interp)"
       ; input buffer has something so try to interpret it
       ; setup exception handling in case of error
-  doliteral_ pm(INTERPRET)
+  lit_ pm(INTERPRET)
   call CATCH
   ; check to make sure no throws
   ; <if>
@@ -789,16 +789,17 @@ ACCEPT_checkdelete:
     pop_                ; ( k )
     brne ACCEPT_dodelete
     ; at the beginning of the line, ignore this character
-    pop_
-    rjmp ZERO
+    zero_
+    ret
 
 ACCEPT_dodelete:
     andi wl, 8
-    push_                 ; ( k k )
+    push_                ; ( k k )
     rcall EMIT           ; ( k )
-    rcall BL             ; ( k bl )
-    rcall EMIT           ; ( k )
-    rcall EMIT           ; ( )
+    bl_                  ; ( k bl )
+    rcall EMIT           ; ( k ? )
+    pop_                 ; ( K )
+    rcall EMIT           ; ( ? )
     ; decrease cursor position by one
     rcall TRUE           ; ( -1 )
     rcall SHARPTIB       ; ( -1 #tibaddr )
@@ -809,9 +810,8 @@ ACCEPT_checkcontrol:
     ; check for remaining control characters, replace them with blank
     cpi wl, 32         ; ( k k bl )
     brge ACCEPT_echo
-    pop_
     ; replace control key with a space
-    rcall BL
+    bl_
 
 ACCEPT_echo:
     ; emit the key
@@ -827,13 +827,13 @@ ACCEPT_echo:
 
 ACCEPT_checkmaxinput:
     ; check if max number of char input
-    doliteral_ TIBSIZE   ; ( tibsize )
     rcall SHARPTIB       ; ( tibsize #tibaddr )
     rcall FETCH          ; ( tibsize #tib)
-    rcall MINUS          ; ( tibsize-#tib)
+    str_y_               ; ( #tib ) Y: #tib
+    lit_ TIBSIZE         ; ( tibsize )
+    minusy_              ; ( tibsize-#tib)
     ; <if>
     iszero_              ; ( )
-    pop_
     breq ACCEPT_atmaxinput
     rjmp ZERO
     
@@ -848,7 +848,9 @@ forthword_ REFILLTIB, 0, "reftib"
     rcall ACCEPT         ; ( f )
     iszero_        ; ( f )
     breq REFILLTIB_exit
+    push_
     rjmp CR
+    pop_
     
 REFILLTIB_exit:
     ret

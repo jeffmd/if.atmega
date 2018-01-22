@@ -5,10 +5,9 @@ forthword_ TX_POLL, 0, "tx-poll"
   ; wait for data ready
   rcall TXQ_POLL
   iszero_
-  pop_
   breq TX_POLL
   ; send to usart
-  doliteral_ USART_DATA
+  lit_ USART_DATA
   jmp CSTORE
 
 ; ( -- f) MCU
@@ -16,7 +15,8 @@ forthword_ TX_POLL, 0, "tx-poll"
 ; check if a character can be send using register poll
 forthword_ TXQ_POLL, 0, "tx?-poll"
   ;rcall PAUSE
-  doliteral_ USART_A
+  lit_ USART_A
   call CFETCH
-  doliteral_ bm_USART_TXRD
+  push_
+  lit_ bm_USART_TXRD
   jmp AND

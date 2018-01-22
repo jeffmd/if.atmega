@@ -5,23 +5,23 @@ forthword_ RX_POLL, 0, "rx-poll"
   ; wait for data ready
   rcall RXQ_POLL
   iszero_
-  pop_
   breq RX_nodata
   ; get character from usart
-  doliteral_ USART_DATA
+  lit_ USART_DATA
   jmp CFETCH
   
 RX_nodata:
-  jmp ZERO
+  zero_
+  ret
 
 ; ( -- f)
 ; MCU
 ; check if a character has been received by usart using register poll
 forthword_ RXQ_POLL, 0, "rx?-poll"
   ;rcall PAUSE
-  doliteral_ bm_USART_RXRD
+  lit_ bm_USART_RXRD
   push_
-  doliteral_ USART_A
+  lit_ USART_A
   call CFETCH
   call AND
   jmp EQUAL

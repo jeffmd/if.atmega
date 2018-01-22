@@ -62,7 +62,7 @@ forthword_ DECIMAL, 0, "decimal"
 ; Numeric IO
 ; set base for number conversion to 16
 forthword_ HEX, 0, "hex"
-    doliteral_ 16
+    lit_ 16
     rjmp BASESTORE
     
 
@@ -126,7 +126,7 @@ forthword_ PNIB, 0, ".h"
 ; ( n -- )
 ; simple 16 bit hex print    
 forthword_ PHEX, 0, ".$"
-    doliteral_ '$
+    lit_ '$
     call EMIT
     push_
     highbyte_
@@ -244,12 +244,12 @@ forthword_ THROW, 0, "throw"
 ; ( -- )
 ; send Ctrl-Q (XON) to resume transmission
 ;forthword_ XON, 0, "XON"
-;    doliteral_ 17
+;    lit_ 17
 ;    rjmp EMIT
 
 ; send Ctrl-S (XOFF) to pause transmission
 ;forthword_ XOFF, 0, "XOFF"
-;    doliteral_ 19
+;    lit_ 19
 ;    rjmp EMIT
 
 
@@ -309,7 +309,7 @@ NUMBERSIGN:        ; ( addr len -- )
     call CFETCH    ; ( addr len char )
     cpi wl, '-
     breq NUMBERSIGN_HASSIGN
-      zerotos_
+      zero_
       ret
 NUMBERSIGN_HASSIGN:
       call TO_R
@@ -375,7 +375,7 @@ forthword_ NUMBER, 0, "num"
 PFA_NUMBER2:
 	nip_                    ; ( addr' )  (R: base flagsign' )
 	rpopx_                  ; ( addr' ) (R: base )
-	zerotos_                ; ( 0 ) (R: base )
+	zero_                   ; ( 0 ) (R: base )
     rjmp PFA_NUMBER5
 
 PFA_NUMBER1:
@@ -405,7 +405,7 @@ ram_user1: .space SYSUSERSIZE
 ; ( -- ram_mcusr )
 ; get mcusro addr. this is the mcusr read and stored when cold executes.
 forthword_ RAM_MCUSRO, 0, "mcusro"
-    doliteral_ ram_mcusro
+    lit_ ram_mcusro
     ret
 
 ; ( -- )
@@ -442,8 +442,8 @@ forthword_ COLD, 0, "cold"
 ; initialize if.atmega further. EXECs turnkey operation and go to quit
 forthword_ WARM, 0, "warm"
     rcall INITUSER
-    doliteral_ pm(NOOP)
-    doliteral_ pm(PAUSE)
+    lit_ pm(NOOP)
+    lit_ pm(PAUSE)
     call DEFERSTORE
     ; init DP in ram from eeprom
     call RESET
@@ -464,14 +464,14 @@ forthword_ WARM, 0, "warm"
 ; Stack
 ; start address of the data stack
 forthword_ SP0, 0, "sp0"
-    doliteral_ stackstart
+    lit_ stackstart
     ret
     
 ; ( -- addr)
 ; Stack
 ; start address of return stack
 forthword_ RP0, 0, "rp0"
-    doliteral_ rstackstart
+    lit_ rstackstart
     ret
 
 
@@ -642,15 +642,15 @@ PFA_QSTACKERROR:
 ; System Value
 ; address of the default user area content in eeprom
 forthword_ EEUSER, 0, "ee-u"
-  doliteral_ EE_INITUSER
+  lit_ EE_INITUSER
   ret
 
 ; ( e-addr r-addr len -- )
 ; Memory
 ; copy len cells from eeprom to ram
 forthword_ EE2RAM, 0, "ee>r"
-    niptoa_              ; ( e-addr len ) A: r-addr
-    niptob_              ; ( len ) B: e-addr
+    popa_              ; ( e-addr len ) A: r-addr
+    popb_              ; ( len ) B: e-addr
 PFA_EE2RAM_1:
     ; <begin>
     ; <while>
@@ -676,7 +676,7 @@ PFA_EE2RAM_2:
 forthword_ INITUSER, 0, "i-u"
     rcall EEUSER
     call UP_FETCH
-    doliteral_ SYSUSERSIZE
+    lit_ SYSUSERSIZE
     twoslash_
     rjmp EE2RAM
     

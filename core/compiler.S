@@ -21,7 +21,7 @@ ram_CURRENT: .space 2
 ; System Variable
 ; current vocabulary for new words 
 forthword_ CURRENT, 0, "current"
-    doliteral_ ram_CURRENT
+    lit_ ram_CURRENT
     ret
 
 .pushsection .noinit
@@ -34,7 +34,7 @@ ram_CONTEXT: .space 2 * 5 ; 5 wordlists max
 ; current vocabulary for searching
 ; array of wordlists
 forthword_ CONTEXT, 0, "context"
-    doliteral_ ram_CONTEXT
+    lit_ ram_CONTEXT
     ret
 
 .pushsection .noinit
@@ -45,7 +45,7 @@ COLON_SMUDGE: .space 2
 ; System Variable
 ; system SMUDGE. Get flash name address of current word being compiled. 
 forthword_ SMUDGE, 0, "smudge"
-    doliteral_ COLON_SMUDGE
+    lit_ COLON_SMUDGE
     ret
 
 
@@ -57,7 +57,7 @@ ram_dp: .space 2
 ; System Value
 ; address of the next free dictionary cell
 forthword_ DPSHARP, 0, "dp#"
-  doliteral_ ram_dp
+  lit_ ram_dp
   ret
 
 ; ( -- f-addr )
@@ -72,7 +72,7 @@ forthword_ DP, 0, "dp"
 ; backup DP to eeprom
 forthword_ DPSTOREE, 0, "dp!e"
   rcall DP
-  doliteral_ EE_DP
+  lit_ EE_DP
   rjmp STOREE 
 
 ; ( addr -- )
@@ -86,7 +86,7 @@ forthword_ DPSTORE, 0, "dp!"
 ; Compiler
 ; fetch DP from eeprom and put in ram
 forthword_ DPFETCHE, 0, "dp@e"
-  doliteral_ EE_DP
+  lit_ EE_DP
   rcall FETCHE 
   rjmp DPSTORE
 
@@ -152,7 +152,7 @@ TAILOPT_CALL:
     ; assume <64k address space so can directly replace first part of instruction, don't need to read it in
     ; bit 1 of high word low byte must be cleared.
     ; write in 0x940C at DP-2
-    doliteral_ 0x940C  ; ( 0x940c )
+    lit_ 0x940C  ; ( 0x940c )
     rcall DP            ; ( 0x940c DP )
     twominus_          ; ( 0x940c DP-2 )
     rjmp STOREI        ; (  )
@@ -209,7 +209,7 @@ forthword_ DOSCOMMA, 0, "(s,)"
     rcall COMMA        ; ( addr len )
     rcall BTOW         ; ( addr len/2 rem )
     rcall TO_R         ; ( addr len/2 ) (R: rem )
-    niptoa_            ; ( len/2 ) A: addr
+    popa_              ; ( len/2 ) A: addr
 
     ; begin
 PFA_SCOMMA1:
@@ -277,7 +277,7 @@ forthword_ INLINE, 0, "inline"
     sbr fflags, 1<<DIS_CALL_OPT_FB
     ; find the ret word, want count to ret
     ; count will be number of words to inline
-    doliteral_ 0x9508        ; ( start 0x9508 )
+    lit_ 0x9508        ; ( start 0x9508 )
     rcall FINDI              ; ( start count )
 
     ; dp swap dup dp+ itoi
@@ -321,7 +321,7 @@ NFATOXTF_EXIT:
 ; other vocabularies
 forthword_ ONLY, IMMEDIATE_EN, "only"
     ; forth vocab always takes slot 0
-    doliteral_ EE_FORTHWORDLIST
+    lit_ EE_FORTHWORDLIST
     push_
     rcall CONTEXT
     rcall STORE

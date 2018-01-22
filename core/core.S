@@ -255,70 +255,6 @@ forthword_ GREATERZERO, 0, "0>"
     sbiw wl, 0
     rjmp PFA_GREATERDONE
 
-; ( -- 0 ) 
-; Arithmetics
-; set TOS to 0
-forthword_ ZEROSET, INLINE_OPT, "0:"
-    zerotos_
-    ret
-
-; ( -- 0 ) 
-; Arithmetics
-; place a value 0 on TOS
-forthword_ ZERO, 0, "0"
-    push_
-PFA_ZERO1:
-    zerotos_
-    ret
-
-; ( -- 1 ) 
-; Arithmetics
-; place a value 1 on TOS
-forthword_ ONE, 0, "1"
-    push_
-    ldi wh, 0
-    ldi wl, 1
-    ret
-
-; ( -- 2 ) 
-; Arithmetics
-; place a value 2 on TOS
-forthword_ TWO, 0, "2"
-    push_
-    ldi wh, 0
-    ldi wl, 2
-    ret
-
-; ( -- 10 ) 
-; Arithmetics
-; place a value 10 on TOS
-forthword_ TEN, 0, "10"
-    push_
-    ldi wh, 0
-    ldi wl, 10
-    ret
-
-; ( -- -1 ) 
-; Arithmetics
-; leaves the value -1 (true) on TOS
-forthword_ TRUE, 0, "true"
-    push_
-PFA_TRUE1:
-    ser wl
-    ser wh
-    ret
-
-
-; ( n1|u1 n2|u2 -- n3|u3 ) 
-; Arithmetics
-; subtract n2 from n1
-forthword_ MINUS, 0, "-"
-    popx_
-    sub xrl, wl
-    sbc xrh, wh
-    movw wl, xrl
-    ret
-
 ; ( n1 n2 -- n3) 
 ; Arithmetics
 ; add n1 and n2
@@ -408,7 +344,6 @@ PFA_RSHIFT2:
 ; current return stack pointer address
 ; must be called, don't use jmp to optimize
 forthword_ RP_FETCH, DIS_CALL_OPT, "rp@"
-    push_
     in wl, SPL
     in wh, SPH
     ; don't include return address
@@ -434,17 +369,15 @@ forthword_ RP_STORE, DIS_CALL_OPT, "rp!"
 ; (  -- addr ) 
 ; Stack
 ; current data stack pointer
-forthword_ SP_FETCH, INLINE_OPT, "sp@"
-    push_
-    movw wl, YL
+forthword_ SP_FETCH, INLINE_OPT, "sp"
+    sp_
     ret
 
 ; ( addr -- i*x) 
 ; Stack
 ; set data stack pointer to addr
-forthword_ SP_STORE, INLINE_OPT, "sp!"
-    movw YL, wl
-    pop_
+forthword_ SP_STORE, INLINE_OPT, "!sp"
+    str_sp_
     ret
 
 ; ( n1 -- n2 ) 
@@ -492,7 +425,6 @@ forthword_ STOREE, 0, "!e"
     mov wl, wh
     rcall PFA_STOREE1
     out_ SREG, yrl
-    pop_
     ret
     
 PFA_STOREE1:
@@ -710,7 +642,7 @@ ZSTORE:
 ; write 0 to RAM memory at addr.    
 forthword_ ZEROSTORE, 0, "0!"
     movw ZL, wl
-    zerotos_
+    zero_
     rjmp ZSTORE
 
 ; ( n addr -- ) 
@@ -825,7 +757,6 @@ forthword_ STOREU, 0, "!u"
 ; Read memory pointed to by register A (Extended VM)
 forthword_ AFETCH, 0, "a@"
     movw ZL, al
-    push_
     rjmp ZFETCH
 
 ; ( -- n2 ) 
@@ -833,7 +764,6 @@ forthword_ AFETCH, 0, "a@"
 ; Read program memory pointed to by register A (Extended VM)
 forthword_ AFETCHI, 0, "a@i"
     movw ZL, al
-    push_
     rjmp ZFETCHI
 
 
@@ -852,42 +782,8 @@ forthword_ AFETCHI, 0, "a@i"
 ; Read a byte from ram pointed to by register A (Extended VM)
 forthword_ ACFETCH, 0, "ac@"
     movw ZL, al
-    push_
     rjmp ZCFETCH
 
-
-; ( n -- ) A: n
-; Extended VM
-; Move TOS to A register (Extended VM)
-forthword_ TO_A, INLINE_OPT, ">a"
-    str_a_
-    pop_
-    ret
-
-; ( n -- ) B: n
-; Extended VM
-; Move TOS to B register (Extended VM)
-forthword_ TO_B, INLINE_OPT, ">b"
-    str_b_
-    pop_
-    ret
-
-
-; ( -- n ) 
-; Extended VM
-; read the A register (Extended VM)
-forthword_ A_, INLINE_OPT, "a"
-    push_
-    movw wl, al
-    ret
-
-; ( -- n ) 
-; Extended VM
-; read the B register (Extended VM)
-forthword_ B_, INLINE_OPT, "b"
-    push_
-    movw wl, bl
-    ret
 
 ; ( n -- )
 ; Extended VM
@@ -931,7 +827,7 @@ forthword_ BTOW, 0, "btow"
 ; Memory
 ; copy flash memory.  Assumes no overlap.
 forthword_ ITOI, 0, "itoi"
-    niptoa_         ; ( start count ) A: dest
+    popa_         ; ( start count ) A: dest
 ITOI_B:
     iszero_   ; ( start count )
     breq ITOI_END
@@ -958,23 +854,28 @@ ITOI_END:
 forthword_ WIPE, 0, "WIPE"
     ; reset forth dictionary, here, edp, dp to original burn state
     ; set EE_DP to DPSTART
-    doliteral_ pm(DPSTART)
-    doliteral_ EE_DP
+    lit_ pm(DPSTART)
+    push_
+    lit_ EE_DP
     rcall STOREE
     ; set EE_HERE to HERESTART
-    doliteral_ HERESTART
-    doliteral_ EE_HERE
+    lit_ HERESTART
+    push_
+    lit_ EE_HERE
     rcall STOREE
     ; set EE_EDP to EDPSTART
-    doliteral_ EDPSTART
-    doliteral_ EE_EDP
+    lit_ EDPSTART
+    push_
+    lit_ EE_EDP
     rcall STOREE
     ; set EE_TURNKEY to NOOP
-    doliteral_ pm(NOOP)
-    doliteral_ EE_TURNKEY
+    lit_ pm(NOOP)
+    push_
+    lit_ EE_TURNKEY
     rcall STOREE
     ; set EE_FORTHWORDLIST to 0
-    rcall ZERO
-    doliteral_ EE_FORTHWORDLIST
+    zero_
+    push_
+    lit_ EE_FORTHWORDLIST
     rcall STOREE
     jmp COLD

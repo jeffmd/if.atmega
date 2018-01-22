@@ -88,6 +88,18 @@
   ; SP is used to hold the Forth VM return stack pointer and is the hardware stack pointer for the MCU
 
 ; Inline macros
+
+.macro rp_
+    in wl, SPL
+    in wh, SPH
+.endm
+
+.macro str_rp_
+    out SPL, wl
+    out SPH, wh
+.endm
+
+
 .macro rpush_ ; put copy of tos on return stack
     push wl
     push wh
@@ -305,47 +317,55 @@
     st -Y, wl
 .endm
 
-.macro pop_ ; load tos, (drop)
-    ld wl, Y+
-    ld wh, Y+
+.macro sp_
+    movw wl, YL
 .endm
 
-.macro pusha_ ; save WR on data stack
+.macro str_sp_
+    movw YL, wl
+.endm
+
+.macro pusha_
     st -Y, ah
     st -Y, al
 .endm
 
-.macro pushb_ ; save WR on data stack
+.macro pushb_
     st -Y, bh
     st -Y, bl
 .endm
 
-.macro pushx_ ; save WR on data stack
+.macro pushx_ 
     st -Y, xrh
     st -Y, xrl
 .endm
 
-.macro pushy_ ; save WR on data stack
+.macro pushy_ 
     st -Y, yrh
     st -Y, yrl
 .endm
 
-.macro popa_ ; load tos, (drop)
+.macro pop_ 
+    ld wl, Y+
+    ld wh, Y+
+.endm
+
+.macro popa_ 
     ld al, Y+
     ld ah, Y+
 .endm
 
-.macro popb_ ; load tos, (drop)
+.macro popb_ 
     ld bl, Y+
     ld bh, Y+
 .endm
 
-.macro popx_ ; load tos, (drop)
+.macro popx_ 
     ld xrl, Y+
     ld xrh, Y+
 .endm
 
-.macro popy_ ; load tos, (drop)
+.macro popy_ 
     ld yrl, Y+
     ld yrh, Y+
 .endm
@@ -360,6 +380,26 @@
 
 .macro nip3_
     adiw YL, 6
+.endm
+
+.macro minusa_
+    sub wl, al
+    sbc wh, ah
+.endm
+
+.macro minusb_
+    sub wl, bl
+    sbc wh, bh
+.endm
+
+.macro minusx_
+    sub wl, xrl
+    sbc wh, xrh
+.endm
+
+.macro minusy_
+    sub wl, yrl
+    sbc wh, yrh
 .endm
 
 .macro oneplus_
@@ -396,6 +436,7 @@
     rol wh
 .endm
 
+
 .macro highbyte_
   mov wl, wh
 .endm
@@ -410,9 +451,49 @@
     sbiw wl, 0
 .endm
 
-.macro zerotos_
+.macro zero_
     clr wl
     clr wh
+.endm
+
+.macro zero_a_
+    clr al
+    clr ah
+.endm
+
+.macro zero_b_
+    clr bl
+    clr bh
+.endm
+
+.macro zero_x_
+    clr xrl
+    clr xrh
+.endm
+
+.macro zero_y_
+    clr yrl
+    clr yrh
+.endm
+
+.macro one_
+  lit_ 1
+.endm
+
+.macro two_
+  lit_ 2
+.endm
+
+.macro four_
+  lit_ 4
+.endm
+
+.macro ten_
+  lit_ 10
+.endm
+
+.macro bl_
+  lit_ 32
 .endm
 
 .macro anditos_ val
@@ -425,10 +506,29 @@
     ori wl, lo8(\val)
 .endm
 
-.macro doliteral_ val
-    push_
+.macro lit_ val
     ldi wl, lo8(\val) 
     ldi wh, hi8(\val) 
+.endm
+
+.macro lit_a_ val
+    ldi al, lo8(\val) 
+    ldi bh, hi8(\val) 
+.endm
+
+.macro lit_b_ val
+    ldi bl, lo8(\val) 
+    ldi bh, hi8(\val) 
+.endm
+
+.macro lit_x_ val
+    ldi xrl, lo8(\val) 
+    ldi xrh, hi8(\val) 
+.endm
+
+.macro lit_y_ val
+    ldi yrl, lo8(\val) 
+    ldi yrh, hi8(\val) 
 .endm
 
 .macro zerohigh_
@@ -442,17 +542,6 @@
 .macro swapnib_
     swap wl
 .endm
-
-.macro niptoa_
-    ld al, Y+
-    ld ah, Y+
-.endm
-
-.macro niptob_
-  ld bl, Y+
-  ld bh, Y+
-.endm
-
 
 .macro aplus_
   movw al, ZL

@@ -22,7 +22,7 @@ forthword_ RD_K, 0, "Rd,k,"
     call TO_R            ;( Rd k8 ) (R: mask opcode )
     zerohigh_            ;( Rd 00k8 )
     push_                 ;( Rd 00k8 00k8 )
-    doliteral_ 4         ;( Rd 00k8 00k8 4 )
+    lit_ 4         ;( Rd 00k8 00k8 4 )
     call LSHIFT          ;( Rd 00k8 0000kkkk.kkkk0000 )
     call OR              ;( Rd 0000kkkk.kkkkkkkk )
     anditos_ 0x0f0f      ;( Rd 0000kkkk0000kkkk )
@@ -42,8 +42,8 @@ forthword_ RD_K, 0, "Rd,k,"
 ; ex: 2 FF ldi,  R2<--#FF
 
 forthword_ LDI, 0, "ldi,"
-    doliteral_ 0xE000     ;( reg n 0xe000 )
-    doliteral_ 0xF000     ;( reg n 0xe000 0xf000 )
+    lit_ 0xE000     ;( reg n 0xe000 )
+    lit_ 0xF000     ;( reg n 0xe000 0xf000 )
     rjmp  RD_K            ;( )
 
 ; Operands P-port,bit
@@ -54,7 +54,7 @@ forthword_ P_b_, 0, "P,b,"
     call TO_R     ; ( P b ) (R: -- mask opcode)
     anditos_ 7    ; ( P b )
     call SWAP     ; ( b P )
-    doliteral_ 3  ; ( b P 3 )
+    lit_ 3  ; ( b P 3 )
     call LSHIFT   ; ( 0bbb PPPPP000)
     call OR       ; ( PPPPPbbb )
     push_
@@ -68,32 +68,32 @@ forthword_ P_b_, 0, "P,b,"
 ; Assembler
 ;   ( Port bit -- )
 forthword_ CBI_C, 0, "cbi,"
-    doliteral_ 0x9800
-    doliteral_ 0xff00
+    lit_ 0x9800
+    lit_ 0xff00
     rjmp P_b_
  
 ; Set bit in I/O port
 ; Assembler
 ;   ( Port bit -- )
 forthword_ SBI_C, 0, "sbi,"
-    doliteral_ 0x9a00
-    doliteral_ 0xff00
+    lit_ 0x9a00
+    lit_ 0xff00
     rjmp P_b_
 
 ; Skip next instruction if bit in I/O port is clear
 ; Assembler
 ;   ( Port bit -- )
 forthword_ SBIC_C, 0, "sbic,"
-    doliteral_ 0x9900
-    doliteral_ 0xff00
+    lit_ 0x9900
+    lit_ 0xff00
     rjmp P_b_
 
 ; Skip next instruction if bit in I/O port is set
 ; Assembler
 ;   ( Port bit -- )
 forthword_ SBIS_C, 0, "sbis,"
-    doliteral_ 0x9b00
-    doliteral_ 0xff00
+    lit_ 0x9b00
+    lit_ 0xff00
     rjmp P_b_
 
 
@@ -103,15 +103,15 @@ forthword_ SBIS_C, 0, "sbis,"
 
 forthword_ LIT, 0, "lit"
     ; compile push tos
-    doliteral_ 0x939a     ;( n 0x939a )
+    lit_ 0x939a     ;( n 0x939a )
     call COMMA
-    doliteral_ 0x938a     ;( n 0x938a )
+    lit_ 0x938a     ;( n 0x938a )
     call COMMA
-    doliteral_ wl       ;( n wl )
+    lit_ wl       ;( n wl )
     call OVER             ;( n wl n )
     rcall LDI             ;( n )
     call BYTESWAP         ;( n' )
-    doliteral_ wh       ;( n' wh )
+    lit_ wh       ;( n' wh )
     call SWAP             ;( wh n' )
     rjmp LDI              ;(  )
 
@@ -120,7 +120,7 @@ forthword_ LIT, 0, "lit"
 ; ( -- )
 
 forthword_ RET_C, 0, "ret,"
-    doliteral_ 0x9508     ;( 0x9508 )
+    lit_ 0x9508     ;( 0x9508 )
     jmp COMMA
     
 ; compile rjmp
@@ -221,7 +221,7 @@ forthword_ CALLC, 0, "callc"
     cbr fflags, 1<<LAST_RCALL_FB ; clear rcall flag bit
     sbr fflags, 1<<LAST_CALL_FB ; set call flag bit
 
-    doliteral_ 0x940e   ; ( xt 0x940e )
+    lit_ 0x940e   ; ( xt 0x940e )
     call COMMA          ; ( xt )
     jmp COMMA
 
@@ -229,11 +229,11 @@ forthword_ CALLC, 0, "callc"
 ; ( -- )
 forthword_ BRNZ1_COMPILE, 0, "brnz1,"
     ;compile brne 1w : F409
-    doliteral_ 0xf409
+    lit_ 0xf409
     jmp COMMA
 
 ; iszero inline
 ; ( f -- f )
 forthword_ ISZERO_COMPILE, 0, "?0?,"
-    doliteral_ 0x9700
+    lit_ 0x9700
     jmp COMMA

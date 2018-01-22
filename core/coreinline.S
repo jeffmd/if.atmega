@@ -158,32 +158,117 @@ forthword_ TWOSTAR, INLINE_OPT, "2*"
     twostar_
     ret
 
-; ( n -- n ) A: n
-; Extended VM
-; copy TOS to A register (Extended VM)
+; ( n1|u1 -- n1-y|u1-y )
+; subtract y from n1
+Forthword_ MINUSY, INLINE_OPT, "-y"
+  minusy_
+  ret
+
+; ( n1|u1 -- n1-x|u1-x )
+; subtract x from n1
+Forthword_ MINUSX, INLINE_OPT, "-x"
+  minusx_
+  ret
+
+; ( n1|u1 -- n1-a|u1-a )
+; subtract a from n1
+Forthword_ MINUSA, INLINE_OPT, "-a"
+  minusa_
+  ret
+
+; ( n1|u1 -- n1-b|u1-b )
+; subtract b from n1
+Forthword_ MINUSB, INLINE_OPT, "-b"
+  minusb_
+  ret
+
+; ( -- 0 ) 
+; Arithmetics
+; set TOS to 0
+forthword_ ZERO, INLINE_OPT, "0"
+    zero_
+    ret
+
+; ( -- 1 ) 
+; Arithmetics
+; place a value 1 on TOS
+forthword_ ONE, INLINE_OPT, "1"
+    ldi wh, 0
+    ldi wl, 1
+    ret
+
+; ( -- 2 ) 
+; Arithmetics
+; place a value 2 on TOS
+forthword_ TWO, INLINE_OPT, "2"
+    ldi wh, 0
+    ldi wl, 2
+    ret
+
+; ( -- 10 ) 
+; Arithmetics
+; place a value 10 on TOS
+forthword_ TEN, INLINE_OPT, "10"
+    ldi wh, 0
+    ldi wl, 10
+    ret
+
+; ( -- -1 ) 
+; Arithmetics
+; leaves the value -1 (true) on TOS
+forthword_ TRUE, INLINE_OPT, "true"
+    ser wl
+    ser wh
+    ret
+
+; ( n -- ) A: n
+; copy WR to A register
 forthword_ STR_A, INLINE_OPT, "!a"
     str_a_
     ret
 
-; ( n -- n ) B: n
-; Extended VM
-; copy TOS to B register (Extended VM)
+; ( n -- ) B: n
+; copy WR to B register
 forthword_ STR_B, INLINE_OPT, "!b"
     str_b_
     ret
 
-; ( n1 n2 -- n2 ) A: n1
+; ( -- n ) 
 ; Extended VM
-; Remove next on stack and write to A register (Extended VM)
-forthword_ NIPTOA, INLINE_OPT, "nip>a"
-    niptoa_
+; load A register into WR
+forthword_ A_, INLINE_OPT, "a"
+    movw wl, al
+    ret
+
+; ( -- n ) 
+; Extended VM
+; load B register into WR
+forthword_ B_, INLINE_OPT, "b"
+    movw wl, bl
+    ret
+
+; ( n1 n2 -- n2 ) A: n1
+; Remove next on stack and write to A register
+forthword_ POPA, INLINE_OPT, "pop.a"
+    popa_
     ret
 
 ; ( n1 n2 -- n2 ) B: n1
-; Extended VM
-; Remove next on stack and write to B register (Extended VM)
-forthword_ NIPTOB, INLINE_OPT, "nip>b"
-    niptob_
+; Remove next on stack and write to B register
+forthword_ POPB, INLINE_OPT, "pop.b"
+    popb_
+    ret
+
+; ( n1 n2 -- n2 ) X: n1
+; Remove next on stack and write to X register
+forthword_ POPX, INLINE_OPT, "pop.x"
+    popx_
+    ret
+
+; ( n1 n2 -- n2 ) Y: n1
+; Remove next on stack and write to Y register
+forthword_ POPY, INLINE_OPT, "pop.y"
+    popy_
     ret
 
 ; ( -- )
