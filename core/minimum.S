@@ -404,7 +404,7 @@ ram_user1: .space SYSUSERSIZE
 
 ; ( -- ram_mcusr )
 ; get mcusro addr. this is the mcusr read and stored when cold executes.
-forthword_ RAM_MCUSRO, 0, "mcusro"
+forthword_ RAM_MCUSRO, INLINE_OPT, "mcusro"
     lit_ ram_mcusro
     ret
 
@@ -412,8 +412,8 @@ forthword_ RAM_MCUSRO, 0, "mcusro"
 ; System
 ; start up if.atmega.
 forthword_ COLD, 0, "cold"
-    in_ r10, MCUSR
-    clr r11
+    in_ yrl, MCUSR
+    clr yrh
     clr zerol
     out_ MCUSR, zerol
     ; init first user data area
@@ -431,9 +431,8 @@ forthword_ COLD, 0, "cold"
     ldi YL, lo8(stackstart)
     ldi YH, hi8(stackstart)
     push_
-    movw wl, r10
     rcall RAM_MCUSRO
-    call STORE
+    call YWSTORE
     rjmp WARM
 
 
@@ -443,6 +442,7 @@ forthword_ COLD, 0, "cold"
 forthword_ WARM, 0, "warm"
     rcall INITUSER
     lit_ pm(NOOP)
+    push_
     lit_ pm(PAUSE)
     call DEFERSTORE
     ; init DP in ram from eeprom
@@ -676,8 +676,9 @@ PFA_EE2RAM_2:
 forthword_ INITUSER, 0, "i-u"
     rcall EEUSER
     call UP_FETCH
-    lit_ SYSUSERSIZE
-    twoslash_
+    push_
+    lit_ SYSUSERSIZE/2
+    ;twoslash_
     rjmp EE2RAM
     
 

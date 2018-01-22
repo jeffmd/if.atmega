@@ -625,25 +625,22 @@ ZFETCH:
     ld wh, Z+
     ret
 
-; ( n addr -- ) 
+; ( addr Y:n -- ) 
 ; Memory
-; write n to RAM memory at addr, low byte first
-forthword_ STORE, 0, "!"
+; write value in Y to RAM memory at addr in WR, low byte first
+forthword_ YWSTORE, 0, "y.!"
     movw ZL, wl
-    pop_
 
 ZSTORE:
-    st Z+, wl
-    st Z+, wh
-    pop_
+    st Z, yrl
+    std Z+1, yrh
     ret
 
 ; ( addr -- )
 ; write 0 to RAM memory at addr.    
 forthword_ ZEROSTORE, 0, "0!"
-    movw ZL, wl
-    zero_
-    rjmp ZSTORE
+    zero_a_
+    rjmp YWSTORE
 
 ; ( n addr -- ) 
 ; addr is high address
