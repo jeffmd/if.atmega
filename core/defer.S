@@ -7,7 +7,6 @@
 ; runtime part of user
 ; get the address of the user var which is located at the return address of the caller
 forthword_ DOUSER, DIS_CALL_OPT, "(user)"
-    push_
     pop ZH
     pop ZL
     rcall ZDFETCHI
@@ -45,7 +44,6 @@ forthword_ DOVALUE, DIS_CALL_OPT, "(val)"
     ; Top of return stack has return address of caller
     ; return address is actually the address of the value
     ; won't be returning to this address
-    push_
     rpop_               ; ( raddr ) (R: raddr -- )
     rjmp DEFX           ; ( n )
 

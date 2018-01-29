@@ -3,12 +3,14 @@
 ; check availability and send one character to the terminal using register poll
 forthword_ TX_POLL, 0, "tx-poll"
   ; wait for data ready
+  str_y_
+TX_POLL_TRY:
   rcall TXQ_POLL
   iszero_
-  breq TX_POLL
+  breq TX_POLL_TRY
   ; send to usart
   lit_ USART_DATA
-  jmp CSTORE
+  jmp YWCSTORE
 
 ; ( -- f) MCU
 ; MCU
@@ -17,6 +19,5 @@ forthword_ TXQ_POLL, 0, "tx?-poll"
   ;rcall PAUSE
   lit_ USART_A
   call CFETCH
-  push_
-  lit_ bm_USART_TXRD
-  jmp AND
+  lit_x_ bm_USART_TXRD
+  jmp ANDX

@@ -43,6 +43,70 @@ forthword_ NIP3, INLINE_OPT, "nip3"
     nip3_
     ret
 
+; (  -- addr )
+; Stack
+; current data stack pointer
+forthword_ SP_FETCH, INLINE_OPT, "sp"
+    sp_
+    ret
+
+; ( addr -- i*x)
+; Stack
+; set data stack pointer to addr
+forthword_ SP_STORE, INLINE_OPT, "!sp"
+    str_sp_
+    ret
+
+; (  -- n)
+; Stack
+; current return stack pointer address
+; must be called, don't use jmp to optimize
+forthword_ RP_FETCH, INLINE_OPT, "rp"
+    rp_
+    ret
+
+; ( n -- n ) (R: -- n )
+; Stack
+; copy TOS to TOR
+forthword_ RPUSH, INLINE_OPT, "rpush"
+    rpush_
+    ret
+
+; ( n -- n ) (R: -- n )
+; Stack
+; push X onto return stack
+forthword_ RPUSHX, INLINE_OPT, "rpush.x"
+    rpush_x_
+    ret
+
+; ( n -- n ) (R: -- n )
+; Stack
+; push Y onto return stack
+forthword_ RPUSHY, INLINE_OPT, "rpush.y"
+    rpush_y_
+    ret
+
+; ( n -- n ) (R: -- n )
+; Stack
+; push A onto return stack
+forthword_ RPUSHA, INLINE_OPT, "rpush.a"
+    rpush_a_
+    ret
+
+; ( n -- n ) (R: -- n )
+; Stack
+; push B onto return stack
+forthword_ RPUSHB, INLINE_OPT, "rpush.b"
+    rpush_b_
+    ret
+
+; ( n -- n ) (R: -- n )
+; Stack
+; push SP onto return stack
+forthword_ RPUSHSP, INLINE_OPT, "rpush.sp"
+    rpush_sp_
+    ret
+
 ; ( -- n ) (R: n --)
 ; Stack
 ; move TOR to TOS
@@ -54,7 +118,60 @@ forthword_ RPOP, INLINE_OPT, "rpop"
 ; Stack
 ; pop TOR into X
 forthword_ RPOPX, INLINE_OPT, "rpop.x"
-    rpopx_
+    rpop_x_
+    ret
+
+; ( -- ) (R: n -- )
+; Stack
+; pop TOR into Y
+forthword_ RPOPY, INLINE_OPT, "rpop.y"
+    rpop_y_
+    ret
+
+; ( -- ) (R: n -- )
+; Stack
+; pop TOR into A
+forthword_ RPOPA, INLINE_OPT, "rpop.a"
+    rpop_a_
+    ret
+
+; ( -- ) (R: n -- )
+; Stack
+; pop TOR into B
+forthword_ RPOPB, INLINE_OPT, "rpop.b"
+    rpop_b_
+    ret
+
+; ( -- ) (R: n -- )
+; Stack
+; pop TOR into SP
+forthword_ RPOPSP, INLINE_OPT, "rpop.sp"
+    rpop_sp_
+    ret
+
+; ( -- addr )
+; System Variable
+; get user area pointer
+forthword_ UP_FETCH, INLINE_OPT, "up"
+    push_
+    movw wl, upl
+    ret
+
+; ( addr -- )
+; System Variable
+; set user area pointer
+forthword_ UP_STORE, INLINE_OPT, "!up"
+    movw upl, wl
+    pop_
+    ret
+
+; ( n1 -- n2 )
+; Arithmetics
+; exchange the bytes of the TOS
+forthword_ BYTESWAP, INLINE_OPT, "><"
+    mov xrl, wh
+    mov wh, wl
+    mov wl, xrl
     ret
 
 ; ( n -- n) 
@@ -137,6 +254,34 @@ forthword_ NOT, INLINE_OPT, "not"
     not_
     ret
 
+; ( n1 X:n2 -- n3 )
+; Logic
+; bitwise and with X register
+forthword_ ANDX, INLINE_OPT, "and.x"
+    and_x_
+    ret
+
+; ( n1 n2 -- n3 )
+; Logic
+; logical or
+forthword_ ORX, INLINE_OPT, "or.x"
+    or_x_
+    ret
+
+; ( n1 n2 -- n3)
+; Logic
+; exclusive or
+forthword_ XORX, INLINE_OPT, "xor.x"
+    xor_x_
+    ret
+
+; ( n1 Y:n2 -- n3 )
+; Logic
+; bitwise and with Y register
+forthword_ ANDY, INLINE_OPT, "and.y"
+    and_y_
+    ret
+
 ; ( ddddkkkk -- kkkkdddd )
 ; Arithmetics
 ; swap nibbles in lower half of TOS
@@ -158,28 +303,43 @@ forthword_ TWOSTAR, INLINE_OPT, "2*"
     twostar_
     ret
 
+; ( n1 X:n2 -- n3)
+; Arithmetics
+; add n1 and n2
+forthword_ PLUSX, INLINE_OPT, "+x"
+    plus_x_
+    ret
+
+; ( n1 Y:n2 -- n3)
+; Arithmetics
+; add n1 and n2
+forthword_ PLUSY, INLINE_OPT, "+y"
+    plus_y_
+    ret
+
+
 ; ( n1|u1 -- n1-y|u1-y )
 ; subtract y from n1
 Forthword_ MINUSY, INLINE_OPT, "-y"
-  minusy_
+  minus_y_
   ret
 
 ; ( n1|u1 -- n1-x|u1-x )
 ; subtract x from n1
 Forthword_ MINUSX, INLINE_OPT, "-x"
-  minusx_
+  minus_x_
   ret
 
 ; ( n1|u1 -- n1-a|u1-a )
 ; subtract a from n1
 Forthword_ MINUSA, INLINE_OPT, "-a"
-  minusa_
+  minus_a_
   ret
 
 ; ( n1|u1 -- n1-b|u1-b )
 ; subtract b from n1
 Forthword_ MINUSB, INLINE_OPT, "-b"
-  minusb_
+  minus_b_
   ret
 
 ; ( -- 0 ) 
@@ -193,32 +353,28 @@ forthword_ ZERO, INLINE_OPT, "0"
 ; Arithmetics
 ; place a value 1 on TOS
 forthword_ ONE, INLINE_OPT, "1"
-    ldi wh, 0
-    ldi wl, 1
+    one_
     ret
 
 ; ( -- 2 ) 
 ; Arithmetics
 ; place a value 2 on TOS
 forthword_ TWO, INLINE_OPT, "2"
-    ldi wh, 0
-    ldi wl, 2
+    two_
     ret
 
 ; ( -- 10 ) 
 ; Arithmetics
 ; place a value 10 on TOS
 forthword_ TEN, INLINE_OPT, "10"
-    ldi wh, 0
-    ldi wl, 10
+    ten_
     ret
 
 ; ( -- -1 ) 
 ; Arithmetics
 ; leaves the value -1 (true) on TOS
 forthword_ TRUE, INLINE_OPT, "true"
-    ser wl
-    ser wh
+    true_
     ret
 
 ; ( n -- ) A: n
@@ -237,43 +393,48 @@ forthword_ STR_B, INLINE_OPT, "!b"
 ; Extended VM
 ; load A register into WR
 forthword_ A_, INLINE_OPT, "a"
-    movw wl, al
+    a_
     ret
 
 ; ( -- n ) 
 ; Extended VM
 ; load B register into WR
 forthword_ B_, INLINE_OPT, "b"
-    movw wl, bl
+    b_
     ret
 
 ; ( n1 n2 -- n2 ) A: n1
 ; Remove next on stack and write to A register
 forthword_ POPA, INLINE_OPT, "pop.a"
-    popa_
+    pop_a_
     ret
 
 ; ( n1 n2 -- n2 ) B: n1
 ; Remove next on stack and write to B register
 forthword_ POPB, INLINE_OPT, "pop.b"
-    popb_
+    pop_b_
     ret
 
 ; ( n1 n2 -- n2 ) X: n1
 ; Remove next on stack and write to X register
 forthword_ POPX, INLINE_OPT, "pop.x"
-    popx_
+    pop_x_
     ret
 
 ; ( n1 n2 -- n2 ) Y: n1
 ; Remove next on stack and write to Y register
 forthword_ POPY, INLINE_OPT, "pop.y"
-    popy_
+    pop_y_
     ret
 
 ; ( -- )
-; Extended VM
-; update register A with post increment from last memory operation (Extended VM)
-forthword_ APLUS, INLINE_OPT, "a+"
-    aplus_
+; add 1 to register A 
+forthword_ APLUS1, INLINE_OPT, "a+1"
+    aplus1_
+    ret
+
+; ( -- )
+; add 2 to register A
+forthword_ APLUS2, INLINE_OPT, "a+2"
+    aplus2_
     ret

@@ -33,8 +33,9 @@ forthword_ HERE, 0, "here"
 ; Numeric IO
 ; save base
 forthword_ BASESTORE, 0, "base!"
+    str_y_
     rcall BASE
-    jmp STORE
+    jmp YWSTORE
 
 ; ( n -- )
 ; Numeric IO
@@ -48,14 +49,14 @@ forthword_ BASEFETCH, 0, "base@"
 ; set base for number conversion to 2
 
 forthword_ BIN, 0, "bin"
-    call TWO
+    two_
     rjmp BASESTORE
 
 ; ( -- )
 ; Numeric IO
 ; set base for numeric conversion to 10
 forthword_ DECIMAL, 0, "decimal"
-    call TEN
+    ten_
     rjmp BASESTORE
 
 ; ( -- )
@@ -126,28 +127,30 @@ forthword_ PNIB, 0, ".h"
 ; ( n -- )
 ; simple 16 bit hex print    
 forthword_ PHEX, 0, ".$"
-    lit_ '$
-    call EMIT
-    push_
-    highbyte_
-    swapnib_
-    rcall PNIB
-    push_
-    highbyte_
-    rcall PNIB
-    push_
-    swapnib_
-    rcall PNIB
-    push_
-    rcall PNIB
-    zerohigh_
-    ldi wl, 32
+    push_        ; ( n n )
+    lit_ '$      ; ( n $ )
+    call EMIT    ; ( n ? )
+    d0_          ; ( n n )
+    highbyte_    ; ( n n.h )
+    swapnib_     ; ( n n.h' )
+    rcall PNIB   ; ( n ? )
+    d0_          ; ( n n )
+    highbyte_    ; ( n n.h )
+    rcall PNIB   ; ( n ? )
+    d0_          ; ( n n )
+    swapnib_     ; ( n n' )
+    rcall PNIB   ; ( n ? )
+    pop_         ; ( n )
+    rcall PNIB   ; ( ? )
+    bl_          ; ( bl )
     jmp EMIT
     
 
-; ( c -- (number|) flag )
+; ( c -- [number] flag )
 ; Numeric IO
-; tries to convert a character to a number, set flag accordingly
+; tries to convert a character to a number, 
+; returns the converted number and flag is true
+; if can't convert then no number returned and flag is false
 forthword_ DIGITQ, 0, "digit?"
     sbiw wl, 0x30
     cpi wl, 10
@@ -155,20 +158,20 @@ forthword_ DIGITQ, 0, "digit?"
     sbiw wl, 7
     cpi wl, 10
     brge PFA_DIGITQ0
-    pop_
-    jmp ZERO
+    zero_
+    ret
 
 PFA_DIGITQ0:
-    push_
+    call DPUSH2
     rcall BASEFETCH
     call UGREATEREQUAL
     iszero_
-    pop_
-    breq PFA_DIGITQ2
-    pop_
-    jmp ZERO
+    breq PFA_DIGITQ_DONE
+    nip_
+    zero_
+    ret
 
-PFA_DIGITQ2:
+PFA_DIGITQ_DONE:
     jmp TRUE
 
 ; ( u1 u2 -- flag )
@@ -201,24 +204,24 @@ forthword_ HANDLER, 0, "handle"
 
 forthword_ CATCH, 0, "catch"
     ; sp@ >r
-    call SP_FETCH       ; ( xt SP )
-    call TO_R           ; ( xt ) (R: ret -- callerret SP )
+    rpush_sp_           ; ( xt ) (R: ret SP )
+    push_               ; ( xt xt )
     ; handler @ >r
     rcall HANDLER       ; ( xt haddr )
     call FETCH          ; ( xt hxt )
-    call TO_R           ; ( xt ) (R: callerret SP hxt )
+    rpush_              ; ( xt hxt ) (R: ret SP hxt )
     ; rp@ handler !
-    call RP_FETCH       ; ( xt RP ) (R: callerret SP hxt)
-    rcall HANDLER       ; ( xt RP haddr )
-    call STORE          ; ( xt )
+    rp_str_y_           ; ( xt hxt Y:RP )
+    rcall HANDLER       ; ( xt haddr )
+    call YWSTORE        ; ( xt haddr )
+    pop_                ; ( xt )
     call EXEC
     ; restore handler
     ; r> handler !
-    push_
-    rpop_               ; ( hxt ) (R: callerret SP )
-    rcall HANDLER       ; ( hxt haddr )
-    call STORE          ; ( )
-    rpopx_              ; ( ) (R: callerret)
+    rpop_y_             ; ( Y:hxt ) (R: callerret SP )
+    rcall HANDLER       ; ( haddr )
+    call YWSTORE        ; ( haddr )
+    rnip_               ; ( ) (R: callerret)
     jmp ZERO
 
 ; ( $addr len -- )
@@ -229,15 +232,12 @@ forthword_ CATCH, 0, "catch"
 forthword_ THROW, 0, "throw"
     call ITYPE
     rcall HANDLER      ; ( haddr )
-    call FETCH         ; ( RP_handler )
-    call RP_STORE      ; ( ) (R: callerret SP hxt)
-    push_
-    rpop_              ; ( hxt ) (R: callerret SP )
-    rcall HANDLER      ; ( hxt haddr )
-    call STORE         ; ( )
-    push_
-    rpop_              ; ( SP ) (R: callerret )
-    call SP_STORE      ; ( ... )
+    str_x_             ; ( haddr X:haddr )
+    call FETCH         ; ( hxt )
+    str_rp_            ; ( hxt ) (R: callerret SP hxt)
+    rpop_              ; ( hxt Y:hxt ) (R: callerret SP )
+    call XSTORE        ; ( hxt )
+    rpop_sp_           ; ( SP ) (R: callerret )
     jmp ONE
 
 
@@ -259,25 +259,21 @@ forthword_ THROW, 0, "throw"
 ; set the BASE value depending on the character
 ;forthword_ SETBASE, 0, "setbase"
 SETBASE:        ; ( c -- )
-    mov xrl, wl
-    pop_
-    cpi xrl, '$
+    cpi wl, '$
     brne PFA_SETBASE0
     rjmp HEX
 
 PFA_SETBASE0:
-    cpi xrl, '%
+    cpi wl, '%
     brne PFA_SETBASE1
     rjmp BIN
 
 PFA_SETBASE1:
-    cpi xrl, '&
+    cpi wl, '&
     brne PFA_SETBASE2
     rjmp DECIMAL
 
 PFA_SETBASE2:        ; ( error)
-    push_
-    movw wl, xrl
     call EMIT
     call DOSLIT
     ascii_ " bad base!"
@@ -288,17 +284,17 @@ PFA_SETBASE2:        ; ( error)
 ; skip a numeric prefix character
 ;forthword_ PRAEFIX, 0, "praefix"
 PRAEFIX:        ; ( adr1 len1 -- adr2 len2 )
-    call OVER
-    call CFETCH
-    cpi wl, 0x30 
+    call OVER          ;( adr1 len1 adr1 )
+    call CFETCH        ;( adr1 len1 c )
+    cpi wl, 0x30       
     brlo PFA_PRAEFIX0
     ; no praefix
-    pop_
+    pop_              ;( adr1 len1 )
     ret
 
 PFA_PRAEFIX0:
     rcall SETBASE
-    call ONE
+    one_
     jmp SLASHSTRING
 
 ; (addr len -- addr len flag) Numeric IO
@@ -312,8 +308,8 @@ NUMBERSIGN:        ; ( addr len -- )
       zero_
       ret
 NUMBERSIGN_HASSIGN:
-      call TO_R
-      call ONE
+      rpush_
+      one_
       call SLASHSTRING
       push_
       rpop_
@@ -327,7 +323,7 @@ forthword_ TO_NUMBER, 0, ">num"
     breq PFA_TO_NUMBER1
         call OVER            ; ( u adr len adr)
         call CFETCH          ; ( u adr len char)
-        rcall DIGITQ         ; ( u adr len digit flag)
+        rcall DIGITQ         ; ( u adr len [digit] flag)
         iszero_
         pop_
         brne PFA_TO_NUMBER2
@@ -374,7 +370,7 @@ forthword_ NUMBER, 0, "num"
     ; error in string to number conversion
 PFA_NUMBER2:
 	nip_                    ; ( addr' )  (R: base flagsign' )
-	rpopx_                  ; ( addr' ) (R: base )
+	rpop_x_                 ; ( addr' ) (R: base )
 	zero_                   ; ( 0 ) (R: base )
     rjmp PFA_NUMBER5
 
@@ -616,10 +612,9 @@ forthword_ RP0, 0, "rp0"
 ; number of single-cell values contained in the data stack before n was placed on the stack.
 forthword_ DEPTH, 0, "depth"
     rcall SP0
-    call SP_FETCH
-    call MINUS
+    minus_sp_
     twoslash_
-    oneminus_
+    ;oneminus_
     ret
 
 ; ( --  )
@@ -649,8 +644,8 @@ forthword_ EEUSER, 0, "ee-u"
 ; Memory
 ; copy len cells from eeprom to ram
 forthword_ EE2RAM, 0, "ee>r"
-    popa_              ; ( e-addr len ) A: r-addr
-    popb_              ; ( len ) B: e-addr
+    pop_a_             ; ( e-addr len ) A: r-addr
+    pop_b_             ; ( len ) B: e-addr
 PFA_EE2RAM_1:
     ; <begin>
     ; <while>
@@ -660,7 +655,7 @@ PFA_EE2RAM_1:
     push_                 ; ( len e-addr e-addr )
     call FETCHE          ; ( len e-addr n )
     call ASTORE          ; ( len e-addr )
-    aplus_
+    aplus2_
     twoplus_             ; ( len e-addr+2 )
     call TO_B            ; ( len ) B: e-addr+2
     oneminus_            ; ( len-1 )
@@ -893,7 +888,7 @@ ABS_exit:
 ; ( -- icell )
 ; push instruction cell size 
 forthword_ ICELL, INLINE_OPT, "icell"
-    call ONE
+    one_
     ret
   
 ; ( n -- n-icell )
@@ -911,7 +906,7 @@ forthword_ ICELLP, INLINE_OPT, "icell+"
 ; ( -- dcell )
 ; push data cell size 
 forthword_ DCELL, INLINE_OPT, "dcell"
-    call TWO
+    two_
     ret
   
 ; ( n -- n-dcell )

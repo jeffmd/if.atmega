@@ -68,6 +68,18 @@ forthword_ BL, 0, "bl"
     bl_
     ret
     
+; ( -- )
+; ignore remaining text to end of line
+Forthword_ COMMENT, IMMEDIATE_EN, "\\"
+  push_      ; preserve WR
+  rcall STIB
+  str_y_
+  nip_
+  rcall G_IN  ; skip to end of input buffer
+  rcall YWSTORE
+  pop_      
+  ret
+
 ; ( -- f )
 ; refills the input buffer
 forthword_ REFILL, 0, "refill"
@@ -79,49 +91,61 @@ forthword_ REFILL, 0, "refill"
 ; ( addr n --  )
 ; reads string from flash and prints it
 forthword_ ITYPE, 0, "itype"
+    rpush_a_
+    rpush_b_
     rcall BTOW        ; ( addr len/2 rem )
-    rcall TO_B        ; ( addr len/2 ) B: rem
-    rcall SWAP        ; ( len/2 addr )
-    twostar_          ; ( len/2 addr*2 )
-    rcall TO_A        ; ( len/2 ) A: addr*2
+    str_b_            ; ( addr len/2 rem B:rem )
+    pop_              ; ( addr len/2 )
+    d0_str_a_         ; ( addr len/2 A:addr )
+    a_star_2_         ; ( addr len/2 A:addr*2 )
     ; begin
 PFA_ITYPE1:
     ; ?while
     iszero_
     breq PFA_ITYPE2
+    str_d0_           ; ( len len )
     rcall AFETCHI     ; ( len c1c2 )
-    aplus_            ; a+
+    aplus2_           
     push_             ; ( len c1c2 c1c2 )
-    rcall EMIT        ; ( len c1c2 )
+    rcall EMIT        ; ( len c1c2 ? )
+    pop_              ; ( len c1c2 )
     highbyte_         ; ( len c2c1 )
-    rcall EMIT        ; ( len )
-    oneminus_         ; ( len-1 )
+    rcall EMIT        ; ( len ? )
+    d0_               ; ( len len )
+    oneminus_         ; ( len len-1 )
     ; repeat
     rjmp PFA_ITYPE1
 
 PFA_ITYPE2:
-    pop_             ; ( )
+    pop_              ; ( )
     cp bl, zerol      ; ( )
     breq PFA_ITYPE3
       rcall AFETCHI
       rjmp EMIT
+      
 PFA_ITYPE3:
+    rpop_b_
+    rpop_a_
     ret
     
 ; ( addr n -- )
 ; print a RAM based string
 forthword_ TYPE, 0, "type"
-    popa_          ; ( n ) A: addr
+    rpush_a_
+    d0_str_a_        ; ( addr n ) A: addr
 PFA_TYPE1:
     iszero_
     breq PFA_TYPE2
+    str_d0_          ; ( n n )
     rcall ACFETCH    ; ( n c )
-    aplus_           ; a+
-    rcall EMIT       ; ( n )
-    oneminus_        ; ( n-1 )
+    aplus1_          ; a+1
+    rcall EMIT       ; ( n ? )
+    d0_              ; ( n n )
+    oneminus_        ; ( n n-1 )
     rjmp PFA_TYPE1
 PFA_TYPE2:
     pop_
+    rpop_a_
     ret
     
 
@@ -129,63 +153,71 @@ PFA_TYPE2:
 ; ( addr1 u1 n -- addr2 u2 )
 ; String
 ; adjust string from addr1 to addr1+n, reduce length from u1 to u2 by n
-forthword_ SLASHSTRING, 0, "/$"
-    rcall OVER    ; ( -- addr1 u1 n u1 )
-    call MIN      ; ( -- addr1 u1 n|u1 )
-    rcall ROT     ; ( -- u1 n addr1 )
-    rcall OVER    ; ( -- u1 n addr1 n )
-    rcall PLUS    ; ( -- u1 n addr2 )
-    rcall RROT    ; ( -- addr2 u1 n )
-    rjmp MINUS    ; ( -- addr2 u2)
-
-
-
+forthword_ SLASHSTRING, 0, "/$"    
+    rcall OVER    ; ( addr1 u1 n u1 )
+    call MIN      ; ( addr1 u1 n' )
+    str_y_        ; ( addr1 u1 n' Y:n' )
+    d1_           ; ( addr1 u1 addr1 )
+    plus_y_       ; ( addr1 u1 Y:addr1+n' )
+    str_d1_       ; ( addr2 u1 addr2 )
+    pop_          ; ( addr2 u1 )
+    minus_y_      ; ( addr2 u1-n' )
+    ret
+        
 ; ( addr1 n1 c -- n2 )
 ; String
 ; skips leading occurances in string at addr1/n1 leaving n2 as an index pointing to the 1st non-c character
-
 forthword_ CSKIP, 0, "cskip"
-    rcall TO_B           ; ( addr1 n1 ) B: c
-    popa_                ; ( n1 ) A: addr1
-    push_                ; ( n1 n1 )
+    str_y_               ; ( addr1 n1 c Y:c )
+    d1_str_x_            ; ( addr1 n1 c X:addr1 )
+    d0_                  ; ( addr1 n1 n1 )
+    str_d1_              ; ( n1 n1 n1 )
+    
 PFA_CSKIP1:
-    iszero_              ; ( n1 n')
+    iszero_              ; ( n1 n n')
     breq PFA_CSKIP2
-    rcall ACFETCH        ; ( n1 n' c' )
-    aplus_
-    cp wl, bl            ; ( n1 n' c' )
-    pop_                 ; ( n1 n' )
+    str_d0_              ; ( n1 n' n' )
+    rcall XCFETCH        ; ( n1 n' c' )
+    xplus1_
+    cp wl, yl            ; ( n1 n' c' )
     brne PFA_CSKIP2
-    oneminus_
+    d0_                  ; ( n1 n' n' )
+    oneminus_            ; ( n1 n' n'-1 )
     rjmp PFA_CSKIP1
 
 PFA_CSKIP2:
-    rjmp MINUS           ; ( n1-n' )
+    pop_y_               ; ( n1 c' Y:n' )
+    pop_                 ; ( n1 )
+    minus_y_             ; ( n1-n' )
+    ret
     
 
 ; ( addr1 n1 c -- addr1 n2 )
 ; String
 ; Scan string at addr1/n1 for the first occurance of c, leaving addr1 n2,
 ; char at n2 is first c character
-
 forthword_ CSCAN, 0, "cscan"
-    rcall TO_B           ; ( addr1 n1 ) B: c
-    rcall OVER           ; ( addr1 n1 addr1 )
-    rcall TO_A           ; ( addr1 n1 ) A: addr1
-    push_                 ; ( addr1 n1 n1 )
+    str_y_               ; ( addr1 n1 c Y:c )
+    d1_str_x_            ; ( addr1 n1 c X:addr1 )
+    rcall OVER           ; ( addr1 n1 c n1 )
+    
 PFA_CSCAN1:
-    iszero_        ; ( addr1 n1 n')
+    iszero_              ; ( addr1 n1 n' n')
     breq PFA_CSCAN2
-    rcall ACFETCH        ; ( addr1 n1 n' c' )
-    aplus_
-    cp wl, bl          ; ( addr1 n1 n' c' )
-    pop_                ; ( addr1 n1 n' )
+    str_d0_              ; ( addr1 n1 n' n' )
+    rcall XCFETCH        ; ( addr1 n1 n' c' )
+    xplus1_
+    cp wl, yl            ; ( addr1 n1 n' c' )
     breq PFA_CSCAN2
-    oneminus_
+    d0_                  ; ( addr1 n1 n' n' )
+    oneminus_            ; ( addr1 n1 n' n'-1 )
     rjmp PFA_CSCAN1
 
 PFA_CSCAN2:
-    rjmp MINUS           ; ( addr1 n1-n' )
+    pop_y_               ; ( addr1 n1 c' Y:n' )
+    pop_                 ; ( addr1 n1 )
+    minus_y_             ; ( addr1 n1-n' )
+    ret
     
 
 
@@ -227,7 +259,7 @@ PFA_ICOMPARE_LOOP:
     push_                     ; ( r-addr r-addr )
     rcall FETCH              ; ( r-addr r-cc )
     rcall AFETCHI            ; ( r-addr r-cc f-cc )
-    aplus_
+    aplus2_
     ; flash strings are zero-padded at the last cell
     ; that means: if the flash cell is less $0100, than mask the
     ; high byte in the ram cell
@@ -281,7 +313,8 @@ forthword_ ICOUNT, 0, "$l"
 ; String
 ; Adjust the source addr using >in.
 forthword_ SRCIN, 0, "srcin"
-    rcall STIB         ; ( srcaddr len )
+    rcall STIB           ; ( srcaddr len )
+    push_                ; ( srcaddr len len )
     rcall G_IN           ; ( srcaddr len ginaddr )
     rcall FETCH          ; ( srcaddr len gin)
     rjmp SLASHSTRING     ; ( srcaddr' len' )
@@ -292,25 +325,27 @@ forthword_ SRCIN, 0, "srcin"
 ; skip space in input source.
 forthword_ SKIPBL, 0, "skipbl"
     rcall SRCIN          ; ( srcaddr len )
-    rcall BL             ; ( srcaddr' len' c )
+    push_
+    bl_                  ; ( srcaddr len c )
     rcall CSKIP          ; ( n2 )
 
     ; adjust >IN
-    rcall G_IN           ; ( n2 ginaddr )
-    rjmp PLUSSTORE       ; (  )
+    str_y_               ; ( n2 Y:n2 )
+    rcall G_IN           ; ( ginaddr )
+    rjmp YWPLUSSTORE     ; ( ? )
 
 
 ; ( char "ccc<char>" -- c-addr u )
 ; String
 ; in input buffer parse ccc delimited string by the delimiter char.
 forthword_ PARSE, 0, "parse"
-    rcall SRCIN      ; ( -- c addr len)
-    rcall ROT        ; ( -- addr' len' c)
-    rcall CSCAN      ; ( -- len'')
-    push_             ; ( -- addr' len'' len'')
-    oneplus_         ; ( -- addr' len'' len''+1 )
-    rcall G_IN       ; ( -- addr' len'' len''+1 >in)
-    rjmp PLUSSTORE   ; ( -- addr' len'')
+    rcall SRCIN      ; ( c addr len)
+    rcall ROT        ; ( addr' len' c)
+    rcall CSCAN      ; ( len'')
+    push_             ; ( addr' len'' len'')
+    oneplus_         ; ( addr' len'' len''+1 )
+    rcall G_IN       ; ( addr' len'' len''+1 >in)
+    rjmp PLUSSTORE   ; ( addr' len'')
 
 
 ; ( "<name>" -- c-addr len )
@@ -769,24 +804,25 @@ ACCEPT_checkeol:
     ret
 
 ACCEPT_checkreturn:
-    cpi wl, 13         ; ( k k 13 )
+    cpi wl, 13         ; ( k )
     ; <if>
     brne ACCEPT_checkdelete
     ret
 
 ACCEPT_checkdelete:
     ; check delete
-    cpi wl, 127        ; ( k k 8 )
+    cpi wl, 127        ; ( k )
     ; <if>
     brne ACCEPT_checkcontrol
     ; delete previous character
     ; check beginning of line
     ; if cursor is 0 then at begining of input
-    rcall SHARPTIB
-    rcall FETCH          ; ( k #tib )
+    push_              ; ( k k )
+    rcall SHARPTIB     ; ( k #tib )
+    rcall FETCH        ; ( k tib )
     ; <if>
-    iszero_             ; ( k tib )
-    pop_                ; ( k )
+    iszero_            ; ( k tib )
+    pop_               ; ( k )
     brne ACCEPT_dodelete
     ; at the beginning of the line, ignore this character
     zero_
@@ -795,35 +831,36 @@ ACCEPT_checkdelete:
 ACCEPT_dodelete:
     andi wl, 8
     push_                ; ( k k )
-    rcall EMIT           ; ( k )
+    rcall EMIT           ; ( k ? )
     bl_                  ; ( k bl )
     rcall EMIT           ; ( k ? )
     pop_                 ; ( K )
     rcall EMIT           ; ( ? )
     ; decrease cursor position by one
     rcall TRUE           ; ( -1 )
-    rcall SHARPTIB       ; ( -1 #tibaddr )
-    rcall PLUSSTORE      ; ( )
+    str_y_               ; ( true Y:true )
+    rcall SHARPTIB       ; ( #tibaddr )
+    rcall YPLUSSTORE     ; ( )
     rjmp ACCEPT_checkmaxinput
 
 ACCEPT_checkcontrol:
     ; check for remaining control characters, replace them with blank
-    cpi wl, 32         ; ( k k bl )
+    cpi wl, 32           ; ( k )
     brge ACCEPT_echo
     ; replace control key with a space
-    bl_
+    bl_                  ; ( bl_ )
 
 ACCEPT_echo:
     ; emit the key
-    push_                 ; ( k k)
-    rcall EMIT           ; ( k)
+    push_                ; ( k k )
+    rcall EMIT           ; ( k ? )
     ; now store the key in the input buffer
     rcall STIB           ; ( k tibaddr #tib)
     rcall PLUS           ; ( k tibaddr+#tib ) 
     rcall CSTORE         ; ( )
 
-    rcall SHARPTIB       ; ( 1 #tibaddr )
-    rcall ONEPLUSSTORE   ; ( )
+    rcall SHARPTIB       ; ( #tibaddr )
+    rcall ONEPLUSSTORE   ; ( ? )
 
 ACCEPT_checkmaxinput:
     ; check if max number of char input
@@ -831,7 +868,7 @@ ACCEPT_checkmaxinput:
     rcall FETCH          ; ( tibsize #tib)
     str_y_               ; ( #tib ) Y: #tib
     lit_ TIBSIZE         ; ( tibsize )
-    minusy_              ; ( tibsize-#tib)
+    minus_y_             ; ( tibsize-#tib)
     ; <if>
     iszero_              ; ( )
     breq ACCEPT_atmaxinput
@@ -846,7 +883,7 @@ ACCEPT_atmaxinput:
 ; refills the input buffer - flag is true if buffer has something
 forthword_ REFILLTIB, 0, "reftib"
     rcall ACCEPT         ; ( f )
-    iszero_        ; ( f )
+    iszero_              ; ( f )
     breq REFILLTIB_exit
     push_
     rjmp CR

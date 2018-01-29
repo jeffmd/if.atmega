@@ -13,18 +13,16 @@
 ; initialize usart
 forthword_ USART, 0, "+usart"
 
-  lit_ USART_B_VALUE
-  push_
+  lit_y_ USART_B_VALUE
   lit_ USART_B
-  call CSTORE
+  call YWCSTORE
 
-  lit_ USART_C_VALUE
-  push_
+  lit_y_ USART_C_VALUE
   lit_ USART_C | bm_USARTC_en
-  call CSTORE
+  call YWCSTORE
 
   lit_ UBRR_VAL
-  push_
+  PUSH_
   lit_ BAUDRATE_HIGH
   call HSTORE
 

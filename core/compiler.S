@@ -72,6 +72,7 @@ forthword_ DP, 0, "dp"
 ; backup DP to eeprom
 forthword_ DPSTOREE, 0, "dp!e"
   rcall DP
+  push_
   lit_ EE_DP
   rjmp STOREE 
 
@@ -79,8 +80,9 @@ forthword_ DPSTOREE, 0, "dp!e"
 ; System Value
 ; store address of the next free dictionary cell
 forthword_ DPSTORE, 0, "dp!"
+  str_y_
   rcall DPSHARP
-  rjmp STORE
+  rjmp YWSTORE
 
 ; ( -- )
 ; Compiler
@@ -94,8 +96,9 @@ forthword_ DPFETCHE, 0, "dp@e"
 ; Dictionary
 ; add offset to 16 bit (dictionary pointer) DP
 forthword_ DPPLUS, 0, "dp+"
+  str_y_
   rcall DPSHARP
-  rjmp PLUSSTORE
+  rjmp YPLUSSTORE
 
 ; ( -- )
 ; Dictionary
@@ -113,7 +116,6 @@ forthword_ TAILOPT, 0, ";opt"
     rcall SMUDGE
     rcall FETCH
     iszero_
-    pop_
     brne TAILOPT_OPT
     ret
     
@@ -209,7 +211,7 @@ forthword_ DOSCOMMA, 0, "(s,)"
     rcall COMMA        ; ( addr len )
     rcall BTOW         ; ( addr len/2 rem )
     rcall TO_R         ; ( addr len/2 ) (R: rem )
-    popa_              ; ( len/2 ) A: addr
+    pop_a_             ; ( len/2 ) A: addr
 
     ; begin
 PFA_SCOMMA1:
@@ -217,7 +219,7 @@ PFA_SCOMMA1:
     iszero_      ; ( len )
     breq PFA_SCOMMA2
     rcall AFETCH       ; ( len c1c2 )
-    aplus_
+    aplus2_
     rcall COMMA        ; ( len )
     oneminus_          ; ( len-1 )
     ; repeat
@@ -253,7 +255,7 @@ forthword_ FINDI, 0, "findi"
     ; begin
 FINDI_BEGIN:
       rcall AFETCHI  ; ( start val )
-      aplus_
+      aplus2_
       push_
       movw wl, bl  ; ( start val match )
       rcall EQUAL    ; ( start flag )

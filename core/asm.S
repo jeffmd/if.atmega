@@ -6,14 +6,13 @@
 ; Store src to dest thru mask, FF00 0551 0333 mask! u. FD11
 ;( dest1 src mask -- dest2 )
 forthword_ MASKNOT, 0, "mask!" 
-    call ROT          ;( src mask dest1 )
-    call OVER         ;( src mask dest1 mask )
-    not_              ;( src mask dest1 !mask )
-    call AND          ;( src mask dest1' )
-    call RROT         ;( dest1' src mask )
-    call AND          ;( dest1' src' )
-    jmp OR            ;( dest1'|src' )
-
+    pop_y_            ;( dest1 mask Y:src )
+    y_and_            ;( dest1 mask Y:src' )
+    pop_x_            ;( mask X:dest1 )
+    not_              ;( mask' )
+    and_x_            ;( dest1' )
+    or_y_             ;( dest2 )
+    ret
 
 ; Operands Rd,constant 8bit
 ; Rd,k,     ( Rd k8 opcode mask -- xxxx.kkkk.dddd.kkkk )

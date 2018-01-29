@@ -10,23 +10,19 @@
   upl = 4 ; ram user area 
   uph = 5
 
-  ; not to be used in ISR
-  ; address A
-  al = 6
-  ah = 7
-  ; address B
-  bl = 8
-  bh = 9
-  
+
   ; registers 10, 11, 12, 13 not used except in interrupt service routines
-  isrt0 = 10
-  isrt1 = 11
-  isrt2 = 12
-  isrt3 = 13
+  isrt0 = 8
+  isrt1 = 9
+  isrt2 = 10
+  isrt3 = 11
   
   ; not to be used in ISR
-  temp4 = 14
-  temp5 = 15
+  temp4 = 12
+  temp5 = 13
+  ; not to be used in ISR
+  temp6 = 14
+  temp7 = 15
 
   ; registers used for Next on Stack (NOS) and local storage
   ; these registers get saved during an Interrupt Service Routine
@@ -34,10 +30,20 @@
   xrh = 17 ; high byte of NOS or X
   yrl = 18 ; low byte of Y
   yrh = 19 ; high byte of Y
-
+  
   ; not to be used in ISR
-  temp6 = 20
-  temp7 = 21
+  ; address A
+  al = 20
+  ah = 21
+  ; address B
+  bl = 6
+  bh = 7
+  
+; forth flags register
+  fflags = 22
+  
+; always has zero / cleared
+  zerol = 23
 
 ; header flags
 .set HFLAGS, 0xFF00
@@ -70,22 +76,15 @@
 ; if bit 0 and 1 are cleared then last instruction was an inline or tail call optimization was disabled by word
 ; bit 2 : disable tail call optimization
 .set DIS_CALL_OPT_FB, 2
-
-; forth flags register
-  fflags = 22
-  
-; always has zero / cleared
-  zerol = 23
   
   ; parameter working register [wreg]
   wl = 24
   wh = 25
 
-
   ; XL (26), XH (27) general purpose addressing
   ; YL (28), YH (29) holds the Forth VM Parameter/Data stack pointer
   ; ZL (30), ZH (31) are used as memory pointer
-  ; SP is used to hold the Forth VM return stack pointer and is the hardware stack pointer for the MCU
+  ; SP is used to hold the return stack pointer and is the hardware stack pointer for the MCU
 
 ; Inline macros
 
@@ -94,9 +93,29 @@
     in wh, SPH
 .endm
 
+.macro rp_str_x_
+    in xrl, SPL
+    in xrh, SPH
+.endm
+
+.macro rp_str_y_
+    in yrl, SPL
+    in yrh, SPH
+.endm
+
 .macro str_rp_
     out SPL, wl
     out SPH, wh
+.endm
+
+.macro x_str_rp_
+    out SPL, xrl
+    out SPH, xrh
+.endm
+
+.macro y_str_rp_
+    out SPL, yrl
+    out SPH, yrh
 .endm
 
 
@@ -105,24 +124,29 @@
     push wh
 .endm
 
-.macro rpusha_ 
+.macro rpush_a_ 
     push al
     push ah
 .endm
 
-.macro rpushb_ 
+.macro rpush_b_ 
     push bl
     push bh
 .endm
 
-.macro rpushx_ 
+.macro rpush_x_ 
     push xrl
     push xrh
 .endm
 
-.macro rpushy_ 
+.macro rpush_y_ 
     push yrl
     push yrh
+.endm
+
+.macro rpush_sp_ 
+    push YL
+    push YH
 .endm
 
 .macro rpop_
@@ -130,24 +154,34 @@
     pop wl
 .endm
 
-.macro rpopa_ 
+.macro rpop_a_ 
     pop ah
     pop al
 .endm
 
-.macro rpopb_ 
+.macro rpop_b_ 
     pop bh
     pop bl
 .endm
 
-.macro rpopx_ 
+.macro rpop_x_ 
     pop xrh
     pop xrl
 .endm
 
-.macro rpopy_
+.macro rpop_y_
     pop yrh
     pop yrl
+.endm
+
+.macro rpop_sp_
+    pop YH
+    pop YL
+.endm
+
+.macro rnip_
+    pop temp4
+    pop temp4
 .endm
 
 .macro str_d0_
@@ -325,22 +359,22 @@
     movw YL, wl
 .endm
 
-.macro pusha_
+.macro push_a_
     st -Y, ah
     st -Y, al
 .endm
 
-.macro pushb_
+.macro push_b_
     st -Y, bh
     st -Y, bl
 .endm
 
-.macro pushx_ 
+.macro push_x_ 
     st -Y, xrh
     st -Y, xrl
 .endm
 
-.macro pushy_ 
+.macro push_y_ 
     st -Y, yrh
     st -Y, yrl
 .endm
@@ -350,22 +384,22 @@
     ld wh, Y+
 .endm
 
-.macro popa_ 
+.macro pop_a_ 
     ld al, Y+
     ld ah, Y+
 .endm
 
-.macro popb_ 
+.macro pop_b_ 
     ld bl, Y+
     ld bh, Y+
 .endm
 
-.macro popx_ 
+.macro pop_x_ 
     ld xrl, Y+
     ld xrh, Y+
 .endm
 
-.macro popy_ 
+.macro pop_y_ 
     ld yrl, Y+
     ld yrh, Y+
 .endm
@@ -382,24 +416,159 @@
     adiw YL, 6
 .endm
 
-.macro minusa_
+.macro and_x_
+    and wl, xrl
+    and wh, xrh
+.endm
+
+.macro x_and_
+    and xrl, wl
+    and xrh, wh
+.endm
+
+.macro and_y_
+    and wl, yrl
+    and wh, yrh
+.endm
+
+.macro y_and_
+    and yrl, wl
+    and yrh, wh
+.endm
+
+.macro and_a_
+    and wl, al
+    and wh, ah
+.endm
+
+.macro and_b_
+    and wl, bl
+    and wh, bh
+.endm
+
+.macro or_x_
+    or wl, xrl
+    or wh, xrh
+.endm
+
+.macro x_or_
+    or xrl, wl
+    or xrh, wh
+.endm
+
+.macro or_y_
+    or wl, yrl
+    or wh, yrh
+.endm
+
+.macro y_or_
+    or yrl, wl
+    or yrh, wh
+.endm
+
+.macro xor_x_
+    eor wl, xrl
+    eor wh, xrh
+.endm
+
+.macro plus_x_
+    add wl, xrl
+    adc wh, xrh
+.endm
+
+.macro x_plus_
+    add xrl, wl
+    adc xrh, wh
+.endm
+
+.macro plus_y_
+    add wl, yrl
+    adc wh, yrh
+.endm
+
+.macro y_plus_
+    add yrl, wl
+    adc yrh, wh
+.endm
+
+.macro plus_a_
+    add wl, al
+    adc wh, ah
+.endm
+
+.macro a_plus_
+    add al, wl
+    adc ah, wh
+.endm
+
+.macro plus_b_
+    add wl, bl
+    adc wh, bh
+.endm
+
+.macro b_plus_
+    add bl, wl
+    adc bh, wh
+.endm
+
+.macro plus_sp_
+    add wl, YL
+    adc wh, YH
+.endm
+
+.macro sp_plus_
+    add YL, wl
+    adc YH, wh
+.endm
+
+.macro minus_a_
     sub wl, al
     sbc wh, ah
 .endm
 
-.macro minusb_
+.macro a_minus_
+    sub al, wl
+    sbc ah, wh
+.endm
+
+.macro minus_b_
     sub wl, bl
     sbc wh, bh
 .endm
 
-.macro minusx_
+.macro b_minus_
+    sub bl, wl
+    sbc bh, wh
+.endm
+
+.macro minus_x_
     sub wl, xrl
     sbc wh, xrh
 .endm
 
-.macro minusy_
+.macro x_minus_
+    sub xrl, wl
+    sbc xrh, wh
+.endm
+
+.macro minus_y_
     sub wl, yrl
     sbc wh, yrh
+.endm
+
+.macro y_minus_
+    sub yrl, wl
+    sbc yrh, wh
+.endm
+
+.macro minus_sp_
+    sub wl, YL
+    sbc wh, YH
+.endm
+
+.macro sp_minus_
+    sub YL, wl
+    sbc YH, wh
 .endm
 
 .macro oneplus_
@@ -431,11 +600,50 @@
     ror wl
 .endm
 
+.macro x_slash_2_
+    asr xrh
+    ror xrl
+.endm
+
+.macro y_slash_2_
+    asr yrh
+    ror yrl
+.endm
+
+.macro a_slash_2_
+    asr ah
+    ror al
+.endm
+
+.macro b_slash_2_
+    asr bh
+    ror bl
+.endm
+
 .macro twostar_
     lsl wl
     rol wh
 .endm
 
+.macro x_star_2_
+    lsl xrl
+    rol xrh
+.endm
+
+.macro y_star_2_
+    lsl yrl
+    rol yrh
+.endm
+
+.macro a_star_2_
+    lsl al
+    rol ah
+.endm
+
+.macro b_star_2_
+    lsl bl
+    rol bh
+.endm
 
 .macro highbyte_
   mov wl, wh
@@ -446,9 +654,70 @@
     com wh
 .endm
 
+.macro x_not_
+    com xrl
+    com xrh
+.endm
+
+.macro y_not_
+    com yrl
+    com yrh
+.endm
+
+.macro a_not_
+    com al
+    com ah
+.endm
+
+.macro b_not_
+    com bl
+    com bh
+.endm
 
 .macro iszero_
     sbiw wl, 0
+.endm
+
+.macro x_iszero_
+    sbiw xrl, 0
+.endm
+
+.macro y_iszero_
+    sbiw yrl, 0
+.endm
+
+.macro a_iszero_
+    sbiw al, 0
+.endm
+
+.macro b_iszero_
+    movw XL, bl
+    sbiw XL, 0
+.endm
+
+.macro true_
+    ser wl
+    ser wh
+.endm
+
+.macro x_true_
+    ser xrl
+    ser xrh
+.endm
+
+.macro y_true_
+    ser yrl
+    ser yrh
+.endm
+
+.macro a_true_
+    ser al
+    ser ah
+.endm
+
+.macro b_true_
+    ser bl
+    ser bh
 .endm
 
 .macro zero_
@@ -456,22 +725,22 @@
     clr wh
 .endm
 
-.macro zero_a_
+.macro a_zero_
     clr al
     clr ah
 .endm
 
-.macro zero_b_
+.macro b_zero_
     clr bl
     clr bh
 .endm
 
-.macro zero_x_
+.macro x_zero_
     clr xrl
     clr xrh
 .endm
 
-.macro zero_y_
+.macro y_zero_
     clr yrl
     clr yrh
 .endm
@@ -517,8 +786,9 @@
 .endm
 
 .macro lit_b_ val
-    ldi bl, lo8(\val) 
-    ldi bh, hi8(\val) 
+    ldi XL, lo8(\val) 
+    ldi XH, hi8(\val)
+    movw bl, XL
 .endm
 
 .macro lit_x_ val
@@ -543,8 +813,88 @@
     swap wl
 .endm
 
-.macro aplus_
-  movw al, ZL
+.macro xplus1_
+  subi xrl, lo8(-1)
+  sbci xrh, hi8(-1)
+.endm
+
+.macro yplus1_
+  subi yrl, lo8(-1)
+  sbci yrh, hi8(-1)
+.endm
+
+.macro aplus1_
+  subi al, lo8(-1)
+  sbci ah, hi8(-1)
+.endm
+
+.macro bplus1_
+  movw XL, bl
+  adiw XL, 1
+  movw bl, XL
+.endm
+
+.macro xminus1_
+  subi xrl, lo8(1)
+  sbci xrh, hi8(1)
+.endm
+
+.macro yminus1_
+  subi yrl, lo8(1)
+  sbci yrh, hi8(1)
+.endm
+
+.macro aminus1_
+  subi al, lo8(1)
+  sbci ah, hi8(1)
+.endm
+
+.macro bminus1_
+  movw XL, bl
+  sbiw XL, 1
+  movw bl, XL
+.endm
+
+.macro aplus2_
+  subi al, lo8(-2)
+  sbci ah, hi8(-2)
+.endm
+
+.macro bplus2_
+  movw XL, bl
+  adiw XL, 2
+  movw bl, XL
+.endm
+
+.macro xplus2_
+  subi xrl, lo8(-2)
+  sbci xrh, hi8(-2)
+.endm
+
+.macro yplus2_
+  subi yrl, lo8(-2)
+  sbci yrh, hi8(-2)
+.endm
+
+.macro aminus2_
+  subi al, lo8(2)
+  sbci ah, hi8(2)
+.endm
+
+.macro bminus2_
+  movw XL, bl
+  sbiw XL, 2
+  movw bl, XL
+.endm
+
+.macro xminus2_
+  subi xrl, lo8(2)
+  sbci xrh, hi8(2)
+.endm
+
+.macro yminus2_
+  subi yrl, lo8(2)
+  sbci yrh, hi8(2)
 .endm
 
 .macro str_a_

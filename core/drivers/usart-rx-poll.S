@@ -11,7 +11,6 @@ forthword_ RX_POLL, 0, "rx-poll"
   jmp CFETCH
   
 RX_nodata:
-  zero_
   ret
 
 ; ( -- f)
@@ -19,9 +18,7 @@ RX_nodata:
 ; check if a character has been received by usart using register poll
 forthword_ RXQ_POLL, 0, "rx?-poll"
   ;rcall PAUSE
-  lit_ bm_USART_RXRD
-  push_
   lit_ USART_A
   call CFETCH
-  call AND
-  jmp EQUAL
+  lit_x_ bm_USART_RXRD
+  jmp ANDX
