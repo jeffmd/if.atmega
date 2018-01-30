@@ -7,8 +7,10 @@
 ; they may be moved to the core dictionary if needed
 
 ;.include "interrupt.S"
-.include "coreinline.S"
+;.include "coreinline.S"
 ;.include "minimum.S"
+;.include "math.S"
+;.include "number.S"
 .include "kernel_lowmem.S"
 ;.include "asm.S"
 
@@ -21,7 +23,7 @@ DPSTART:
 .include "cout.S"
 ;.include "interpret.S"
 .include "kernel_highmem.S"
-.include "string.S"
+;.include "string.S"
 ;.include "compiler.S"
 .include "defer.S"
 .include "core.S"

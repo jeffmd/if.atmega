@@ -444,3 +444,45 @@ forthword_ APLUS1, INLINE_OPT, "a+1"
 forthword_ APLUS2, INLINE_OPT, "a+2"
     aplus2_
     ret
+
+; ( -- icell )
+; push instruction cell size 
+forthword_ ICELL, INLINE_OPT, "icell"
+    one_
+    ret
+  
+; ( n -- n-icell )
+; add instruction cell size to n
+forthword_ ICELLM, INLINE_OPT, "icell-"
+    oneminus_
+    ret
+    
+; ( n -- n+icell )
+; add instruction cell size to n
+forthword_ ICELLP, INLINE_OPT, "icell+"
+    oneplus_
+    ret
+  
+; ( -- dcell )
+; push data cell size 
+forthword_ DCELL, INLINE_OPT, "dcell"
+    two_
+    ret
+  
+; ( n -- n-dcell )
+; add data cell size to n
+forthword_ DCELLM, INLINE_OPT, "dcell-"
+    twominus_
+    ret
+    
+; ( n -- n+dcell )
+; add data cell size to n
+forthword_ DCELLP, INLINE_OPT, "dcell+"
+    twoplus_
+    ret
+  
+; ( n -- n*dcell )
+; multipley data cell size by n
+forthword_ DCELLS, INLINE_OPT, "dcell*"
+    twostar_
+    ret
