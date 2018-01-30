@@ -370,6 +370,12 @@ forthword_ TEN, INLINE_OPT, "10"
     ten_
     ret
 
+; ( -- 32 )
+; put ascii code of the blank/space character to the stack
+forthword_ BL, INLINE_OPT, "bl"
+    bl_
+    ret
+    
 ; ( -- -1 ) 
 ; Arithmetics
 ; leaves the value -1 (true) on TOS

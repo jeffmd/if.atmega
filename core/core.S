@@ -794,10 +794,6 @@ ITOI_END:
     pop_
     ret
 
-.include "interpret.S"
-.include "compiler.S"
-.include "defer.S"
-
 
 ; must be last word in core
 forthword_ WIPE, 0, "WIPE"

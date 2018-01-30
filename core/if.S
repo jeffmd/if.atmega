@@ -6,16 +6,24 @@
 ; this dictionary area contains optional/application words
 ; they may be moved to the core dictionary if needed
 
-.include "interrupt.S"
+;.include "interrupt.S"
 .include "coreinline.S"
-.include "minimum.S"
-.include "asm.S"
+;.include "minimum.S"
+.include "kernel_lowmem.S"
+;.include "asm.S"
 
 ;**********
 DPSTART:
 
 .org NRWW_START_ADDR * 2, 0xff
 ; upper part of the dictionary that can not be modified once programmed
+.include "cin.S"
+.include "cout.S"
+;.include "interpret.S"
+.include "kernel_highmem.S"
+.include "string.S"
+;.include "compiler.S"
+.include "defer.S"
 .include "core.S"
 
 FLASHLAST:
