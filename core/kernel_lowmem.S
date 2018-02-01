@@ -70,15 +70,12 @@ forthword_ COLD, 0, "cold"
     clr zerol
     out_ MCUSR, zerol
     ; init first user data area
-    ldi ZL, lo8(ram_user1)
-    ldi ZH, hi8(ram_user1)
-    movw upl, ZL
+    lit_ ram_user1
+    movw upl, wl
     ; init return stack pointer
-	; using the MCU SP registers
-    ldi xrl, lo8(rstackstart)
-    out_ SPL,xrl
-    ldi xrh, hi8(rstackstart)
-    out_ SPH,xrh
+	  ; using the MCU SP registers
+    lit_ rstackstart
+    str_rp_
 
     ; init parameter stack pointer
     ldi YL, lo8(stackstart)
@@ -100,15 +97,15 @@ forthword_ WARM, 0, "warm"
     call DEFERSTORE
     ; init DP in ram from eeprom
     call RESET
-    call ONLY
+    ;**call ONLY
     rcall USART
     rcall INTON
-    call DOSLIT
-    ascii_ "if.atmega 0.1"
-    call ITYPE
+    ;**call DOSLIT
+    ;**ascii_ "if.atmega 0.1"
+    ;**call ITYPE
     call CR
     
-    rcall TURNKEY
+    ;**rcall TURNKEY
     jmp QUIT
 
 
@@ -161,28 +158,34 @@ forthword_ EEUSER, 0, "ee-u"
   ret
 
 ; ( e-addr r-addr len -- )
+; len: number of words to transfer
 ; Memory
 ; copy len cells from eeprom to ram
 forthword_ EE2RAM, 0, "ee>r"
-    pop_a_             ; ( e-addr len ) A: r-addr
-    pop_b_             ; ( len ) B: e-addr
+    rpush_a_
+    rpush_b_
+    pop_a_             ; ( e-addr len A:r-addr )
+    d0_str_b_          ; ( e-addr len B:e-addr )
+    
 PFA_EE2RAM_1:
     ; <begin>
     ; <while>
     iszero_
     breq PFA_EE2RAM_2
-    call B_              ; (len e-addr)
-    push_                 ; ( len e-addr e-addr )
-    call FETCHE          ; ( len e-addr n )
-    call ASTORE          ; ( len e-addr )
+    str_d0_              ; ( len len )
+    b_                   ; ( len e-addr)
+    call FETCHE          ; ( len n )
+    call ASTORE          ; ( len n )
     aplus2_
-    twoplus_             ; ( len e-addr+2 )
-    call TO_B            ; ( len ) B: e-addr+2
-    oneminus_            ; ( len-1 )
+    bplus2_            
+    d0_                  ; ( len len )
+    oneminus_            ; ( len len-1 )
     ; <repeat>
     rjmp PFA_EE2RAM_1
 
 PFA_EE2RAM_2:
+    rpop_b_
+    rpop_a_
     jmp DPOP
 
 ; ( -- )
@@ -190,8 +193,8 @@ PFA_EE2RAM_2:
 ; setup the default user area from eeprom
 forthword_ INITUSER, 0, "i-u"
     rcall EEUSER
-    call UP_FETCH
     push_
+    push_up_
     lit_ SYSUSERSIZE/2
     ;twoslash_
     rjmp EE2RAM

@@ -379,6 +379,11 @@
     st -Y, yrl
 .endm
 
+.macro push_up_
+    st -Y, uph
+    st -Y, upl
+.endm
+
 .macro pop_ 
     ld wl, Y+
     ld wh, Y+
@@ -471,6 +476,41 @@
     eor wh, xrh
 .endm
 
+.macro x_xor_
+    eor xrl, wl
+    eor xrh, wh
+.endm
+
+.macro xor_y_
+    eor wl, yrl
+    eor wh, yrh
+.endm
+
+.macro y_xor_
+    eor yrl, wl
+    eor yrh, wh
+.endm
+
+.macro xor_a_
+    eor wl, al
+    eor wh, ah
+.endm
+
+.macro a_xor_
+    eor al, wl
+    eor ah, wh
+.endm
+
+.macro xor_b_
+    eor wl, bl
+    eor wh, bh
+.endm
+
+.macro b_xor_
+    eor bl, wl
+    eor bh, wh
+.endm
+
 .macro plus_x_
     add wl, xrl
     adc wh, xrh
@@ -519,6 +559,11 @@
 .macro sp_plus_
     add YL, wl
     adc YH, wh
+.endm
+
+.macro plus_up_
+    add wl, upl
+    adc wh, uph
 .endm
 
 .macro minus_a_

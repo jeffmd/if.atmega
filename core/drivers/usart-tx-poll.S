@@ -20,4 +20,5 @@ forthword_ TXQ_POLL, 0, "tx?-poll"
   lit_ USART_A
   call CFETCH
   lit_x_ bm_USART_TXRD
-  jmp ANDX
+  and_x_
+  ret

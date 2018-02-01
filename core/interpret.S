@@ -448,37 +448,3 @@ DOINTERPRET_ok:
   rcall G_IN               ; ( 1 >inaddr )
   rcall ONEPLUSSTORE       ; ( )
   rjmp PROMPTOK
-
-; ( -- )
-; System
-; send the READY prompt to the command line
-forthword_ PROMPTRDY, 0, ".>"
-    rcall CR
-    rcall DOSLIT
-    ascii_ "> "
-    rjmp ITYPE
-
-; ( -- )
-; System
-; send the READY prompt to the command line
-forthword_ PROMPTCOMPILE, 0, ".:"
-    rcall CR
-    rcall DOSLIT
-    ascii_ ": "
-    rjmp ITYPE
-
-; ( -- )
-; System
-; send the OK prompt to the command line
-forthword_ PROMPTOK, 0, ".ok"
-    rcall DOSLIT
-    ascii_ " ok"
-    rjmp ITYPE
-
-; ( n -- )
-; System
-; process the error prompt
-forthword_ PROMPTERROR, 0, ".??"
-	rcall DOSLIT
-	ascii_ " ?? "
-    rjmp ITYPE

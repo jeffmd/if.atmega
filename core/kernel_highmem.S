@@ -1,5 +1,51 @@
 ; kernel_highmem.S
 
+; ( -- addr )
+; System Variable
+; system state variable. 0 is interpret mode. Not 0 is compile mode
+forthword_ STATE, 0, "state"
+    call DOUSER
+    .word USER_STATE
+    ret
+
+forthword_ STATEFETCH, 0, "state@"
+    rcall STATE
+    rjmp FETCH
+
+; ( -- )
+; System
+; send the READY prompt to the command line
+forthword_ PROMPTRDY, 0, ".>"
+    rcall CR
+    rcall DOSLIT
+    ascii_ "> "
+    rjmp ITYPE
+
+; ( -- )
+; System
+; send the READY prompt to the command line
+forthword_ PROMPTCOMPILE, 0, ".:"
+    rcall CR
+    rcall DOSLIT
+    ascii_ ": "
+    rjmp ITYPE
+
+; ( -- )
+; System
+; send the OK prompt to the command line
+forthword_ PROMPTOK, 0, ".ok"
+    rcall DOSLIT
+    ascii_ " ok"
+    rjmp ITYPE
+
+; ( n -- )
+; System
+; process the error prompt
+forthword_ PROMPTERROR, 0, ".??"
+	rcall DOSLIT
+	ascii_ " ?? "
+    rjmp ITYPE
+
 ; ( -- )
 ; System
 ; check if a ready prompt is required
@@ -23,22 +69,12 @@ forthword_ DOREFILL, 0, "(refill)"
   rcall G_IN               ; ( >inaddr )
   rcall FETCH              ; ( >in )
   iszero_                  ; ( )
-  pop_
   breq DOREFILL_do
     rjmp INRESET
     
 DOREFILL_do:
   ; refill the input buffer
   rcall REFILL              ; ( f )
-  ; <if>
-  iszero_
-  pop_
-  breq DOREFILL_end
-    ; there is something in the input buffer, try interpreting it      
-    rjmp DOINTERPRET
-
-DOREFILL_end:
-  ; <then>
   ret      
     
 ; ( -- )
@@ -47,8 +83,8 @@ DOREFILL_end:
 forthword_ PAUSE, 0, "pause"
     call DODEFER
     .word USER_PAUSE
-    addr_ FETCHU
-    addr_ STOREU
+    addr_ UPFETCH
+    addr_ UPSTORE
 
 ; ( -- )
 ; System
@@ -56,20 +92,29 @@ forthword_ PAUSE, 0, "pause"
 forthword_ DOTASKS, 0, "(tasks)"
     ; <begin>
     rcall DOREFILL
-    rcall PAUSE
+    ; <if>
+    iszero_
+    breq DOTASKS_N1
+      ; there is something in the input buffer, try interpreting it      
+      ;**rjmp DOINTERPRET
+
+DOTASKS_N1:
+    ; <then>
+    ;rcall PAUSE
     ; <again>
     rjmp DOTASKS
 
 ; ( -- )
-; reset input source
+; reset compiler state
 forthword_ RESET, 0, "rst"
-    rcall SMUDGE
-    rcall ZEROSTORE
+    ;**rcall SMUDGE
+    ;**rcall ZEROSTORE
     ; restore dp from eeprom
-    rcall DPFETCHE
+    ;**rcall DPFETCHE
     ; switch to interpret mode
-    rjmp LBRACKET
-
+    ;**rjmp LBRACKET
+    ret
+    
 ; ( -- )
 ; System
 ; reset stacks and start over again
@@ -82,3 +127,33 @@ forthword_ QUIT, 0, "quit"
     str_rp_
     rcall RESET    
     rjmp DOTASKS
+
+; must be last word in highmem of kernel/core
+forthword_ WIPE, 0, "WIPE"
+    ; reset forth dictionary, here, edp, dp to original burn state
+    ; set EE_DP to DPSTART
+    lit_ pm(DPSTART)
+    push_
+    lit_ EE_DP
+    rcall STOREE
+    ; set EE_HERE to HERESTART
+    lit_ HERESTART
+    push_
+    lit_ EE_HERE
+    rcall STOREE
+    ; set EE_EDP to EDPSTART
+    lit_ EDPSTART
+    push_
+    lit_ EE_EDP
+    rcall STOREE
+    ; set EE_TURNKEY to NOOP
+    lit_ pm(NOOP)
+    push_
+    lit_ EE_TURNKEY
+    rcall STOREE
+    ; set EE_FORTHWORDLIST to 0
+    zero_
+    push_
+    lit_ EE_FORTHWORDLIST
+    rcall STOREE
+    jmp COLD

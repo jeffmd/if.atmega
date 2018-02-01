@@ -5,8 +5,8 @@
 forthword_ EMIT, 0, "emit"
     call DODEFER
     .word USER_EMIT
-    addr_ FETCHU
-    addr_ STOREU
+    addr_ UPFETCH
+    addr_ UPSTORE
 
 ; ( -- )
 ; cause subsequent output appear at the beginning of the next line

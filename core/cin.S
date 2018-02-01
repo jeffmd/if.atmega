@@ -40,8 +40,8 @@ forthword_ STIB, 0, "stib"
 forthword_ KEY, 0, "key"
     call DODEFER
     .word USER_KEY
-    addr_ FETCHU
-    addr_ STOREU
+    addr_ UPFETCH
+    addr_ UPSTORE
 
 ; ( -- )
 ; Reset the input buffer
@@ -68,8 +68,8 @@ forthword_ SRCIN, 0, "srcin"
 forthword_ REFILL, 0, "refill"
     call DODEFER
     .word USER_REFILL
-    addr_ FETCHU
-    addr_ STOREU
+    addr_ UPFETCH
+    addr_ UPSTORE
 
 ; ( -- flag )
 ; System
@@ -125,7 +125,7 @@ ACCEPT_dodelete:
     pop_                 ; ( K )
     rcall EMIT           ; ( ? )
     ; decrease cursor position by one
-    rcall TRUE           ; ( -1 )
+    call TRUE           ; ( -1 )
     str_y_               ; ( true Y:true )
     rcall SHARPTIB       ; ( #tibaddr )
     rcall YPLUSSTORE     ; ( )
@@ -144,27 +144,29 @@ ACCEPT_echo:
     rcall EMIT           ; ( k ? )
     ; now store the key in the input buffer
     rcall STIB           ; ( k tibaddr #tib)
-    rcall PLUS           ; ( k tibaddr+#tib ) 
-    rcall CSTORE         ; ( )
+    pop_y_               ; ( k #tib Y:tibaddr )
+    plus_y_              ; ( k tibaddr+#tib ) 
+    pop_y_               ; ( tibaddr+#tib )
+    rcall YWCSTORE       ; ( ? )
 
     rcall SHARPTIB       ; ( #tibaddr )
     rcall ONEPLUSSTORE   ; ( ? )
 
 ACCEPT_checkmaxinput:
     ; check if max number of char input
-    rcall SHARPTIB       ; ( tibsize #tibaddr )
-    rcall FETCH          ; ( tibsize #tib)
+    rcall SHARPTIB       ; ( #tibaddr )
+    rcall FETCH          ; ( #tib)
     str_y_               ; ( #tib ) Y: #tib
     lit_ TIBSIZE         ; ( tibsize )
     minus_y_             ; ( tibsize-#tib)
     ; <if>
     iszero_              ; ( )
     breq ACCEPT_atmaxinput
-    rjmp ZERO
+    jmp ZERO
     
 ACCEPT_atmaxinput:
     ; max number of characters in input buffer so have it processed
-    rjmp TRUE
+    jmp TRUE
 
 ; ( -- f )
 ; System

@@ -6,10 +6,11 @@
 ; this dictionary area contains optional/application words
 ; they may be moved to the core dictionary if needed
 
-;.include "interrupt.S"
-;.include "coreinline.S"
+.include "interrupt.S"
+.include "coreinline.S"
 ;.include "minimum.S"
-;.include "math.S"
+.include "math.S"
+;.include "mathadv.S"
 ;.include "number.S"
 .include "kernel_lowmem.S"
 ;.include "asm.S"
@@ -22,11 +23,11 @@ DPSTART:
 .include "cin.S"
 .include "cout.S"
 ;.include "interpret.S"
-.include "kernel_highmem.S"
-;.include "string.S"
+.include "core.S"
+.include "string.S"
 ;.include "compiler.S"
 .include "defer.S"
-.include "core.S"
+.include "kernel_highmem.S"
 
 FLASHLAST:
 

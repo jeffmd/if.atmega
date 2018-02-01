@@ -152,17 +152,15 @@ forthword_ RPOPSP, INLINE_OPT, "rpop.sp"
 ; ( -- addr )
 ; System Variable
 ; get user area pointer
-forthword_ UP_FETCH, INLINE_OPT, "up"
-    push_
+forthword_ UP_, INLINE_OPT, "up"
     movw wl, upl
     ret
 
 ; ( addr -- )
 ; System Variable
 ; set user area pointer
-forthword_ UP_STORE, INLINE_OPT, "!up"
+forthword_ STOREUP, INLINE_OPT, "!up"
     movw upl, wl
-    pop_
     ret
 
 ; ( n1 -- n2 )

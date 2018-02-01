@@ -21,4 +21,5 @@ forthword_ RXQ_POLL, 0, "rx?-poll"
   lit_ USART_A
   call CFETCH
   lit_x_ bm_USART_RXRD
-  jmp ANDX
+  and_x_
+  ret

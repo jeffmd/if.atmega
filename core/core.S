@@ -112,7 +112,9 @@ forthword_ R_FETCHPLUS, DIS_CALL_OPT, "r>r+"
 ; Compare
 ; flag is true if n1 is not equal to n2
 forthword_ NOTEQUAL, 0, "<>"
-    rjmp XOR
+    pop_y_
+    xor_y_
+    ret
 
 ; ( n -- flag )
 ; Compare
@@ -139,6 +141,14 @@ forthword_ EQUAL, 0, "="
 PFA_EQUALDONE:
     brne PFA_ZERO1
     rjmp PFA_TRUE1
+
+PFA_ZERO1:
+    zero_
+    ret
+    
+PFA_TRUE1:
+    true_
+    ret
 
 ; ( n1 n2 -- flag)
 ; Compare
@@ -585,18 +595,17 @@ forthword_ ONEPLUSCSTORE, 0, "1+c!"
 ; ( index -- n )
 ; Memory
 ; read 1 cell from user RAM address + index
-forthword_ FETCHU, 0, "@u"
-    rcall UP_FETCH
-    rcall PLUS
+forthword_ UPFETCH, 0, "up@"
+    plus_up_
     rjmp FETCH
 
 ; ( n index -- )
 ; Memory
 ; write n to user RAM memory at addr, low byte first
-forthword_ STOREU, 0, "!u"
-    rcall UP_FETCH
-    rcall PLUS
-    rjmp STORE
+forthword_ UPSTORE, 0, "up!"
+    plus_up_
+    pop_y_
+    rjmp YWSTORE
 
 
 ; ( -- n2 )
@@ -793,34 +802,3 @@ ITOI_END:
     rpop_a_
     pop_
     ret
-
-
-; must be last word in core
-forthword_ WIPE, 0, "WIPE"
-    ; reset forth dictionary, here, edp, dp to original burn state
-    ; set EE_DP to DPSTART
-    lit_ pm(DPSTART)
-    push_
-    lit_ EE_DP
-    rcall STOREE
-    ; set EE_HERE to HERESTART
-    lit_ HERESTART
-    push_
-    lit_ EE_HERE
-    rcall STOREE
-    ; set EE_EDP to EDPSTART
-    lit_ EDPSTART
-    push_
-    lit_ EE_EDP
-    rcall STOREE
-    ; set EE_TURNKEY to NOOP
-    lit_ pm(NOOP)
-    push_
-    lit_ EE_TURNKEY
-    rcall STOREE
-    ; set EE_FORTHWORDLIST to 0
-    zero_
-    push_
-    lit_ EE_FORTHWORDLIST
-    rcall STOREE
-    jmp COLD

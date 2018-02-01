@@ -11,8 +11,7 @@ forthword_ DOUSER, DIS_CALL_OPT, "(user)"
     pop ZL
     rcall ZDFETCHI
     ; calculate user address
-    add wl, upl
-    adc wh, uph
+    plus_up_
     ret
 
 ; ( defaddr -- deferval defaddr )
@@ -74,7 +73,7 @@ forthword_ DEFERFETCH, 0, "def@"
 forthword_ DEFERSTORE, 0, "def!"
     ; skip past call to get to data
     twoplus_                 ; ( xt1 xt2+2 )
-    rcall DEFGET              ; ( st1 defaddr xt2+2 )
+    rcall DEFGET             ; ( st1 defaddr xt2+2 )
     ; skip past data address and deferfetch section to get
     ; to deferstore section
     twoplus_                 ; ( xt1 defaddr xt2+4 )

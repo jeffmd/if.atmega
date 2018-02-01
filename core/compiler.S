@@ -1,18 +1,6 @@
 ; dict_compiler.inc - basic compiler words
 
 
-; ( -- addr )
-; System Variable
-; system state variable. 0 is interpret mode. Not 0 is compile mode
-forthword_ STATE, 0, "state"
-    call DOUSER
-    .word USER_STATE
-    ret
-
-forthword_ STATEFETCH, 0, "state@"
-    rcall STATE
-    rjmp FETCH
-
 .pushsection .noinit
 ram_CURRENT: .space 2
 .popsection
