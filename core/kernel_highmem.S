@@ -42,8 +42,8 @@ forthword_ PROMPTOK, 0, ".ok"
 ; System
 ; process the error prompt
 forthword_ PROMPTERROR, 0, ".??"
-	rcall DOSLIT
-	ascii_ " ?? "
+	  rcall DOSLIT
+	  ascii_ " ?? "
     rjmp ITYPE
 
 ; ( -- )
@@ -96,25 +96,14 @@ forthword_ DOTASKS, 0, "(tasks)"
     iszero_
     breq DOTASKS_N1
       ; there is something in the input buffer, try interpreting it      
-      ;**rjmp DOINTERPRET
+      ;**rcall DOINTERPRET
 
 DOTASKS_N1:
     ; <then>
-    ;rcall PAUSE
+    rcall PAUSE
     ; <again>
     rjmp DOTASKS
 
-; ( -- )
-; reset compiler state
-forthword_ RESET, 0, "rst"
-    ;**rcall SMUDGE
-    ;**rcall ZEROSTORE
-    ; restore dp from eeprom
-    ;**rcall DPFETCHE
-    ; switch to interpret mode
-    ;**rjmp LBRACKET
-    ret
-    
 ; ( -- )
 ; System
 ; reset stacks and start over again
@@ -125,7 +114,7 @@ forthword_ QUIT, 0, "quit"
     ; reset return stack pointers
     call RP0
     str_rp_
-    rcall RESET    
+    ;**rcall RESET    
     rjmp DOTASKS
 
 ; must be last word in highmem of kernel/core

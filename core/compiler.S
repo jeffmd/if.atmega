@@ -277,6 +277,15 @@ forthword_ INLINE, 0, "inline"
     rcall DPPLUS             ; ( start dp count )
     rjmp ITOI
 
+; ( -- )
+; reset compiler state
+forthword_ RESET, 0, "rst"
+    rcall SMUDGE
+    rcall ZEROSTORE
+    ; restore dp from eeprom
+    rcall DPFETCHE
+    ; switch to interpret mode
+    rjmp LBRACKET
 
 ; ( nfa -- lfa )
 ; System
