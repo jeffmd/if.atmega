@@ -100,9 +100,9 @@ forthword_ WARM, 0, "warm"
     ;**call ONLY
     rcall USART
     rcall INTON
-    ;**call DOSLIT
-    ;**ascii_ "if.atmega 0.1"
-    ;**call ITYPE
+    call DOSLIT
+    ascii_ "if.atmega 0.1"
+    call ITYPE
     call CR
     
     ;**rcall TURNKEY

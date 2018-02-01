@@ -45,11 +45,11 @@ PFA_ITYPE1:
     rjmp PFA_ITYPE1
 
 PFA_ITYPE2:
-    pop_              ; ( )
-    cp bl, zerol      ; ( )
+    pop_              ; ( ? )
+    cp bl, zerol      ; ( ? )
     breq PFA_ITYPE3
       rcall AFETCHI
-      rjmp EMIT
+      rcall EMIT
       
 PFA_ITYPE3:
     rpop_b_
