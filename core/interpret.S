@@ -25,13 +25,13 @@ forthword_ CSKIP, 0, "cskip"
 PFA_CSKIP1:
     iszero_              ; ( n1 n n')
     breq PFA_CSKIP2
-    str_d0_              ; ( n1 n' n' )
     rcall XCFETCH        ; ( n1 n' c' )
     xplus1_
     cp wl, yl            ; ( n1 n' c' )
     brne PFA_CSKIP2
     d0_                  ; ( n1 n' n' )
     oneminus_            ; ( n1 n' n'-1 )
+    str_d0_              ; ( n1 n' n' )
     rjmp PFA_CSKIP1
 
 PFA_CSKIP2:
@@ -51,9 +51,9 @@ forthword_ CSCAN, 0, "cscan"
     rcall OVER           ; ( addr1 n1 c n1 )
     
 PFA_CSCAN1:
+    str_d0_              ; ( addr1 n1 n' n' )
     iszero_              ; ( addr1 n1 n' n')
     breq PFA_CSCAN2
-    str_d0_              ; ( addr1 n1 n' n' )
     rcall XCFETCH        ; ( addr1 n1 n' c' )
     xplus1_
     cp wl, yl            ; ( addr1 n1 n' c' )
