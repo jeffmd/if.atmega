@@ -17,27 +17,26 @@ Forthword_ COMMENT, IMMEDIATE_EN, "\\"
 ; String
 ; skips leading occurances in string at addr1/n1 leaving n2 as an index pointing to the 1st non-c character
 forthword_ CSKIP, 0, "cskip"
+    rpush_a_
     str_y_               ; ( addr1 n1 c Y:c )
-    d1_str_x_            ; ( addr1 n1 c X:addr1 )
-    d0_                  ; ( addr1 n1 n1 )
-    str_d1_              ; ( n1 n1 n1 )
+    d1_str_a_            ; ( addr1 n1 c A:addr1 )
+    pop_x_               ; ( addr1 c X:n1 )
+    x_str_d0_            ; ( n1 c )
     
 PFA_CSKIP1:
-    iszero_              ; ( n1 n n')
+    x_iszero_            ; ( n1 n')
     breq PFA_CSKIP2
-    rcall XCFETCH        ; ( n1 n' c' )
-    xplus1_
-    cp wl, yl            ; ( n1 n' c' )
+    rcall ACFETCH        ; ( n1 c' )
+    aplus1_
+    cp wl, yl            ; ( n1 c' )
     brne PFA_CSKIP2
-    d0_                  ; ( n1 n' n' )
-    oneminus_            ; ( n1 n' n'-1 )
-    str_d0_              ; ( n1 n' n' )
+    xminus1_             ; ( n1 c X:n'-1 )
     rjmp PFA_CSKIP1
 
 PFA_CSKIP2:
-    pop_y_               ; ( n1 c' Y:n' )
+    rpop_a_
     pop_                 ; ( n1 )
-    minus_y_             ; ( n1-n' )
+    minus_x_             ; ( n1-n' )
     ret
     
 
@@ -46,26 +45,25 @@ PFA_CSKIP2:
 ; Scan string at addr1/n1 for the first occurance of c, leaving addr1 n2,
 ; char at n2 is first c character
 forthword_ CSCAN, 0, "cscan"
+    rpush_a_
     str_y_               ; ( addr1 n1 c Y:c )
-    d1_str_x_            ; ( addr1 n1 c X:addr1 )
-    rcall OVER           ; ( addr1 n1 c n1 )
+    d1_str_a_            ; ( addr1 n1 c A:addr1 )
+    d0_str_x_            ; ( addr1 n1 c X:n1 )
     
 PFA_CSCAN1:
-    str_d0_              ; ( addr1 n1 n' n' )
-    iszero_              ; ( addr1 n1 n' n')
+    x_iszero_            ; ( addr1 n1 c )
     breq PFA_CSCAN2
-    rcall XCFETCH        ; ( addr1 n1 n' c' )
-    xplus1_
-    cp wl, yl            ; ( addr1 n1 n' c' )
+    rcall ACFETCH        ; ( addr1 n1 c' )
+    aplus1_
+    cp wl, yl            ; ( addr1 n1 c' )
     breq PFA_CSCAN2
-    d0_                  ; ( addr1 n1 n' n' )
-    oneminus_            ; ( addr1 n1 n' n'-1 )
+    xminus1_             ; ( addr1 n1 c' X:n'-1 )
     rjmp PFA_CSCAN1
 
 PFA_CSCAN2:
-    pop_y_               ; ( addr1 n1 c' Y:n' )
+    rpop_a_
     pop_                 ; ( addr1 n1 )
-    minus_y_             ; ( addr1 n1-n' )
+    minus_x_             ; ( addr1 n1-n' )
     ret
     
 ; ( r-addr r-len f-addr f-len --  f)
