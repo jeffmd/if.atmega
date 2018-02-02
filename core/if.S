@@ -22,7 +22,8 @@ DPSTART:
 ; upper part of the dictionary that can not be modified once programmed
 .include "cin.S"
 .include "cout.S"
-;.include "interpret.S"
+.include "interpret.S"
+;.include "dictionary.S"
 .include "core.S"
 .include "string.S"
 ;.include "compiler.S"

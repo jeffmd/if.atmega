@@ -291,7 +291,6 @@ PFA_STOREE2: ; estore_wait_low_spm:
     out_ EEDR, wl
     sbi EECR,EEMPE
     sbi EECR,EEPE
-
     ret
 
 ; ( e-addr - n)
@@ -305,11 +304,9 @@ forthword_ FETCHE, 0, "@e"
     in_ wl, EEDR
 
     adiw ZL, 1
-
     rcall FETCHE_READ
     in_  wh, EEDR
     out_ SREG, yrl
-    adiw ZL, 1
     ret
 
 FETCHE_READ:

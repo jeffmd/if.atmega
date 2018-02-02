@@ -32,6 +32,7 @@ forthword_ G_IN, 0, ">in"
 ; address and current length of the input buffer
 forthword_ STIB, 0, "stib"
     rcall TIB
+    push_
     rcall SHARPTIB
     rjmp FETCH
 
@@ -47,11 +48,10 @@ forthword_ KEY, 0, "key"
 ; Reset the input buffer
 forthword_ INRESET, 0, "in_"
     rcall G_IN             ; ( >inaddr )
-    rcall ZEROSTORE        ; (  )
+    rcall ZEROSTORE        ; ( ? )
     ; reset input buffer cursor position
     rcall SHARPTIB         ; ( #tibaddr )
-    rcall ZEROSTORE        ; ( )
-    rjmp QP_RD
+    rjmp ZEROSTORE         ; ( )
 
 ; ( -- srcaddr len  )
 ; String
@@ -125,10 +125,9 @@ ACCEPT_dodelete:
     pop_                 ; ( K )
     rcall EMIT           ; ( ? )
     ; decrease cursor position by one
-    call TRUE           ; ( -1 )
-    str_y_               ; ( true Y:true )
+    y_true_              ; ( Y:true )
     rcall SHARPTIB       ; ( #tibaddr )
-    rcall YPLUSSTORE     ; ( )
+    rcall YPLUSSTORE     ; ( #tibaddr )
     rjmp ACCEPT_checkmaxinput
 
 ACCEPT_checkcontrol:

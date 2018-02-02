@@ -3,33 +3,6 @@
 ; in low flash
 
 
-; ( -- e-addr )
-; System Value
-; address of the next free address in eeprom
-forthword_ EDP, 0, "edp"
-    call DOVALUE
-    .word EE_EDP
-    addr_ FETCHE
-    addr_ STOREE
-
-; ( -- addr )
-; System Value
-; address of the next free data space (RAM) cell
-forthword_ HERE, 0, "here"
-    call DOVALUE
-    .word EE_HERE
-    addr_ FETCHE
-    addr_ STOREE    
-
-; ( -- n*y )
-; System Value
-; Deferred action during startup/reset
-
-forthword_ TURNKEY, 0, "turnkey"
-    call DODEFER
-    .word EE_TURNKEY
-    addr_ FETCHE
-    addr_ STOREE
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

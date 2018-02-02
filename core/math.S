@@ -4,14 +4,14 @@
 ; Compare
 ; compare two values leave the smaller one
 forthword_ MIN, 0, "min"
-    call TWOOVER
-    call GREATER
+    call TWOOVER    ; ( n1 n2 n1 n2 )
+    call GREATER    ; ( n1 n2 flag )
     ; <if>
 MIN_TEST:
     iszero_
-    pop_
+    pop_            ; ( n1 n2 )
     breq MIN_exit
-      call SWAP
+      call SWAP     ; ( n2 n1 )
       
 MIN_exit:
     pop_

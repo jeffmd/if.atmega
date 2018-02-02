@@ -54,14 +54,13 @@ forthword_ QP_RD, 0, "?prd"
     ; output ready prompt if in interpret mode
     ; <-if>
     iszero_
-    pop_
     brne QP_RD_exit
       rjmp PROMPTRDY
 QP_RD_exit:
     ; <then>
       rjmp PROMPTCOMPILE
 
-; ( -- )
+; ( -- flag )
 ; System
 ; wait for the input buffer to be refilled then interpret
 forthword_ DOREFILL, 0, "(refill)"
@@ -70,7 +69,9 @@ forthword_ DOREFILL, 0, "(refill)"
   rcall FETCH              ; ( >in )
   iszero_                  ; ( )
   breq DOREFILL_do
-    rjmp INRESET
+    rcall INRESET
+    rcall QP_RD
+
     
 DOREFILL_do:
   ; refill the input buffer
@@ -96,7 +97,7 @@ forthword_ DOTASKS, 0, "(tasks)"
     iszero_
     breq DOTASKS_N1
       ; there is something in the input buffer, try interpreting it      
-      ;**rcall DOINTERPRET
+      rcall DOINTERPRET
 
 DOTASKS_N1:
     ; <then>

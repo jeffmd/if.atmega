@@ -724,15 +724,18 @@
 .endm
 
 .macro x_iszero_
-    sbiw xrl, 0
+    movw XL, xrl
+    sbiw XL, 0
 .endm
 
 .macro y_iszero_
-    sbiw yrl, 0
+    movw XL, yrl
+    sbiw XL, 0
 .endm
 
 .macro a_iszero_
-    sbiw al, 0
+    movw XL, al
+    sbiw XL, 0
 .endm
 
 .macro b_iszero_
@@ -1020,6 +1023,17 @@
 8:
   .align 1
 .endm
+
+.macro slit_ str
+    call DOSLIT
+    ascii_ "\str"
+.endm
+
+.macro type_ str
+    slit_ "\str"
+    call ITYPE
+.endm
+
 
 .macro forthword_ lbl, flags, str 
 VE_\lbl:

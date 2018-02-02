@@ -1,5 +1,31 @@
 ; kernel_lowmem.S
 
+; ( -- e-addr )
+; System Value
+; address of the next free address in eeprom
+forthword_ EDP, 0, "edp"
+    call DOVALUE
+    .word EE_EDP
+    addr_ FETCHE
+    addr_ STOREE
+
+; ( -- addr )
+; System Value
+; address of the next free data space (RAM) cell
+forthword_ HERE, 0, "here"
+    call DOVALUE
+    .word EE_HERE
+    addr_ FETCHE
+    addr_ STOREE    
+
+; ( -- n*y )
+; System Value
+; Deferred action during startup/reset
+forthword_ TURNKEY, 0, "turnkey"
+    call DODEFER
+    .word EE_TURNKEY
+    addr_ FETCHE
+    addr_ STOREE
 
 ; USER variable used by catch/throw
 forthword_ HANDLER, 0, "handle"
@@ -11,14 +37,14 @@ forthword_ HANDLER, 0, "handle"
 ; setup handler to catch exceptions and then EXEC XT.
 
 forthword_ CATCH, 0, "catch"
-    ; sp@ >r
+    ; rpush.sp
     rpush_sp_           ; ( xt ) (R: ret SP )
     push_               ; ( xt xt )
-    ; handler @ >r
+    ; handler @ rpush
     rcall HANDLER       ; ( xt haddr )
     call FETCH          ; ( xt hxt )
     rpush_              ; ( xt hxt ) (R: ret SP hxt )
-    ; rp@ handler !
+    ; rp!y handler y.!
     rp_str_y_           ; ( xt hxt Y:RP )
     rcall HANDLER       ; ( xt haddr )
     call YWSTORE        ; ( xt haddr )
@@ -29,7 +55,7 @@ forthword_ CATCH, 0, "catch"
     rpop_y_             ; ( Y:hxt ) (R: callerret SP )
     rcall HANDLER       ; ( haddr )
     call YWSTORE        ; ( haddr )
-    rnip_               ; ( ) (R: callerret)
+    rnip_               ; ( ? ) (R: callerret)
     jmp ZERO
 
 ; ( $addr len -- )
@@ -105,7 +131,7 @@ forthword_ WARM, 0, "warm"
     call ITYPE
     call CR
     
-    ;**rcall TURNKEY
+    rcall TURNKEY
     jmp QUIT
 
 
@@ -113,14 +139,14 @@ forthword_ WARM, 0, "warm"
 ; ( -- addr)
 ; Stack
 ; start address of the data stack
-forthword_ SP0, 0, "sp0"
+forthword_ SP0, INLINE_OPT, "sp0"
     lit_ stackstart
     ret
     
 ; ( -- addr)
 ; Stack
 ; start address of return stack
-forthword_ RP0, 0, "rp0"
+forthword_ RP0, INLINE_OPT, "rp0"
     lit_ rstackstart
     ret
 
@@ -141,7 +167,6 @@ forthword_ QSTACK, 0, "?sp"
     rcall DEPTH
     call LESSZERO
     iszero_
-    pop_
     brne PFA_QSTACKERROR
     ret
 PFA_QSTACKERROR:
