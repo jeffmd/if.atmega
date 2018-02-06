@@ -69,7 +69,7 @@ PFA_CSCAN2:
 ; ( r-addr r-len f-addr f-len --  f)
 ; Memory
 ; compares string in RAM with string in flash
-forthword_ ICOMPARE, 0, "icmp"
+forthword_ ISTRCOMPARE, 0, "icmp"
     push_                    ; ( r-addr r-len f-addr f-len  f-len )
     d2_                      ; ( r-addr r-len f-addr f-len r-len )
     ; check if strings are same length
@@ -79,7 +79,8 @@ forthword_ ICOMPARE, 0, "icmp"
     breq PFA_ICOMPARE_SAMELEN
 
     ; strings are not the same length
-    nip3_
+    nip3_                    ; ( flag )
+    zero_                    ; ( 0 )
     ret
 
     ; then
@@ -96,8 +97,8 @@ PFA_ICOMPARE_SAMELEN:
     ; begin
 PFA_ICOMPARE_LOOP:
     ; while
-    x_iszero_                 ; ( ? )
-    breq PFA_ICOMPARE_DONE
+    x_iszero_                ; ( ? )
+    breq PFA_ICOMPARE_FOUND
     rcall BFETCH             ; ( r-cc )
     push_                    ; ( r-cc r-cc )
     rcall AFETCHI            ; ( r-cc f-cc )
@@ -119,13 +120,12 @@ PFA_ICOMPARE_LOOP:
     zerohigh_                ; ( f-cc 0:r-cc)
     ; then
 PFA_ICOMPARE_COMPCELL:
-    rcall NOTEQUAL           ; ( flag)
+    rcall NOTEQUAL           ; ( flag )
     ; if
-    iszero_                  ; ( r-addr )
+    iszero_                  ; ( flag )
     breq PFA_ICOMPARE_NEXTLOOP
-
-    ; strings don't match
-    ret
+      zero_                  ; ( 0 )
+      rjmp PFA_ICOMPARE_DONE
 
     ; then
 PFA_ICOMPARE_NEXTLOOP:
@@ -134,6 +134,9 @@ PFA_ICOMPARE_NEXTLOOP:
     ; repeat
     rjmp PFA_ICOMPARE_LOOP
 
+PFA_ICOMPARE_FOUND:
+    true_
+    
 PFA_ICOMPARE_DONE:
     ; strings are the same
     rpop_b_
@@ -187,7 +190,8 @@ forthword_ PNAME, 0, "pname"
 ; recognizer for integer numbers
 forthword_ REC_NUM, 0, "rec#"
     ; try converting to a number
-    ;**call NUMBER              ; ( [n] f )
+    nip_ ;**call NUMBER              ; ( [n] f )
+    zero_
     iszero_
     breq PFA_REC_NONUMBER
 
@@ -200,7 +204,7 @@ PFA_REC_NUMBER_OK:
     jmp TRUE                ; ( n true )
 
 PFA_REC_NONUMBER:
-    jmp ZERO                ; ( 0 )
+    ret               ; ( 0 )
 
 ; ( addr len -- f )
 ; Interpreter
@@ -208,13 +212,13 @@ PFA_REC_NONUMBER:
 ; will 
 forthword_ REC_WORD, 0, "recw"
 
-    ;**rcall FINDW
+    rcall FINDW           ; ( nfa )
     iszero_
     brne REC_WORD_FOUND
     ret
 
 REC_WORD_FOUND:
-    ;**rcall NFATOXTF
+    rcall NFATOXTF        ; ( xtf )
     ; check if compile only word
     sbrc wh, COMPILE_ONLY_FB 
         rjmp CHECK_IMMEDIATE
@@ -246,6 +250,7 @@ REC_WORD_CHECKSTATE:
         ; in compile mode so compile xt
  	    ;**call COMPILEXT
 	    jmp TRUE
+      
 REC_WORD_EXECUTE:
     pop_
     ; state is zero, EXEC xt
@@ -266,9 +271,9 @@ forthword_ RECX, 0, "recx"
     ; test if its a word
     rcall REC_WORD        ; ( flag ) ( R: len addr )
     str_y_                ; ( Y:flag )
-    rpop_                 ; ( addr ) (R: n len )
+    rpop_                 ; ( addr ) (R: len )
     push_                 ; ( addr addr )
-    rpop_                 ; ( addr len ) (R: n )
+    rpop_                 ; ( addr len ) (R: )
     ; <if>
     y_iszero_             ; ( addr len )
     brne RECX_DONE
@@ -278,14 +283,16 @@ forthword_ RECX, 0, "recx"
     ; test if its a number
     rcall REC_NUM         ; ( flag ) ( R: len addr )
     str_y_                ; ( Y:flag )
-    rpop_                 ; ( addr ) (R: n len )
+    rpop_                 ; ( addr ) (R: len )
     push_                 ; ( addr addr )
-    rpop_                 ; ( addr len ) (R: n )
+    rpop_                 ; ( addr len ) (R: )
     ; <if>
     y_iszero_             ; ( addr len )
     brne RECX_DONE
     ; not recognized so throw
+    push_
     rcall CR
+    pop_
     ; print unrecognized word
     rcall TYPE
     rcall DOSLIT
@@ -293,7 +300,7 @@ forthword_ RECX, 0, "recx"
     jmp THROW
     
 RECX_DONE:
-    jmp DPOP             ; ( )
+    ret             ; ( )
 
 ; ( -- ) (R: i*x - j*x )
 ; System
@@ -305,8 +312,8 @@ forthword_ INTERPRET, 0, "interp"
     iszero_             ; ( addr len )
     breq INTERPRET_END
 
-      pop_ ;rcall RECX         ; ( ? )
-      call QSTACK         ; ( ? )
+      rcall RECX        ; ( ? )
+      call QSTACK       ; ( ? )
       ; repeat
       rjmp INTERPRET
 

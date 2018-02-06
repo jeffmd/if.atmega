@@ -1,29 +1,4 @@
-; dict_compiler.inc - basic compiler words
-
-
-.pushsection .noinit
-ram_CURRENT: .space 2
-.popsection
-
-; ( -- addr ) 
-; System Variable
-; current vocabulary for new words 
-forthword_ CURRENT, 0, "current"
-    lit_ ram_CURRENT
-    ret
-
-.pushsection .noinit
-ram_CONTEXTidx: .space 1
-ram_CONTEXT: .space 2 * 5 ; 5 wordlists max
-.popsection
-
-; ( -- addr ) 
-; System Variable
-; current vocabulary for searching
-; array of wordlists
-forthword_ CONTEXT, 0, "context"
-    lit_ ram_CONTEXT
-    ret
+; compiler.S - basic compiler words
 
 .pushsection .noinit
 COLON_SMUDGE: .space 2
@@ -286,53 +261,3 @@ forthword_ RESET, 0, "rst"
     rcall DPFETCHE
     ; switch to interpret mode
     rjmp LBRACKET
-
-; ( nfa -- lfa )
-; System
-; get the link field address from the name field address
-forthword_ NFA2LFA, 0, "nfa>lfa"
-    rcall ICOUNT 
-    zerohigh_
-    rcall WALIGN
-    rjmp PLUS
-    
-; ( nfa -- [ 0 ] | [ xt xtflags] )
-; convert name field address to xt and xtflags
-forthword_ NFATOXTF, 0, "nfa>xtf"
-    iszero_              ; ( n )
-    breq NFATOXTF_EXIT
-
-    push_                        ; ( nfa nfa )
-    rcall FETCHI                ; ( nfa xtflags )
-    rcall TO_R                  ; ( nfa ) (R: xtflags)
-    rcall NFA2LFA               ; ( lfa )
-    oneplus_   ; lfa>xt         ; ( xt )
-    push_
-    rpop_                       ; ( xt xtflags )
-
-NFATOXTF_EXIT:
-    ret
-    
-    
-; ( -- ) 
-; Dictionary
-; set the context and current to root forth vocabulary and remove
-; other vocabularies
-forthword_ ONLY, IMMEDIATE_EN, "only"
-    ; forth vocab always takes slot 0
-    lit_ EE_FORTHWORDLIST
-    push_
-    rcall CONTEXT
-    rcall STORE
-    ; make current also forth vocab
-    rcall CURRENT
-    rcall STORE
-    ; move index to next slot
-    rcall ONE
-    rcall CONTEXT
-    oneminus_
-    rcall CSTORE
-    ; make second slot have no vocab
-    rcall CONTEXT
-    twoplus_
-    rjmp ZEROSTORE

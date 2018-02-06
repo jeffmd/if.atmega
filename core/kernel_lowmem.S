@@ -123,7 +123,7 @@ forthword_ WARM, 0, "warm"
     call DEFERSTORE
     ; init DP in ram from eeprom
     ;**call RESET
-    ;**call ONLY
+    call ONLY
     rcall USART
     rcall INTON
     call DOSLIT

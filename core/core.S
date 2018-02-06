@@ -58,6 +58,17 @@ forthword_ TWOOVER, 0, "2over"
     rcall OVER
     rjmp OVER
 
+# ( x1 x2 x3 -- x1 x2 x3 x1 x2 x3 )
+# Place a copy of x1, x2, x3 on top of the stack
+Forthword_ THREEOVER, 0, "3over"
+    push_
+    d2_
+    push_
+    d2_
+    push_
+    d2_
+    ret
+
 ; ( n n -- )
 ; Stack
 ; drop TOS twice
@@ -207,7 +218,7 @@ forthword_ GREATERZERO, 0, "0>"
 
 forthword_ WALIGN, 0, "w_"
     oneplus_
-  	andi wl, 0xfe
+  	;andi wl, 0xfe
     twoslash_
     ret
 
@@ -613,6 +624,7 @@ forthword_ AFETCH, 0, "a@"
 
 ; ( -- n2 )
 ; Read program memory pointed to by register A
+; note: address must be setup as byte address
 forthword_ AFETCHI, 0, "a@i"
     movw ZL, al
     rjmp ZFETCHI
@@ -667,6 +679,7 @@ forthword_ BFETCH, 0, "b@"
 
 ; ( -- n2 )
 ; Read program memory pointed to by register B
+; note: address must be setup as byte address
 forthword_ BFETCHI, 0, "b@i"
     movw ZL, bl
     rjmp ZFETCHI
@@ -700,6 +713,7 @@ forthword_ XFETCH, 0, "x@"
 
 ; ( -- n2 )
 ; Read program memory pointed to by register X
+; note: address must be setup as byte address
 forthword_ XFETCHI, 0, "x@i"
     movw ZL, xrl
     rjmp ZFETCHI
@@ -732,6 +746,7 @@ forthword_ YFETCH, 0, "y@"
 
 ; ( -- n2 )
 ; Read program memory pointed to by register Y
+; note: address must be setup as byte address
 forthword_ YFETCHI, 0, "y@i"
     movw ZL, yrl
     rjmp ZFETCHI
@@ -766,7 +781,7 @@ forthword_ BTOW, 0, "btow"
     twostar_     ; ( len/2 len' )
     str_y_       ; ( len/2 len' Y: len')
     x_           ; ( len/2 len )
-    minus_y_      ; ( len/2 rem )
+    minus_y_     ; ( len/2 rem )
     ret
 
 

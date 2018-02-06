@@ -3,8 +3,9 @@
 ; ( addr -- addr+1 n )
 ; Tools
 ; get string address and length information out of a counted string in flash
-forthword_ ICOUNT, 0, "$l"
+forthword_ ISTRLEN, 0, "$l"
     str_x_
+    x_star_2_
     oneplus_
     push_
     rjmp XFETCHI

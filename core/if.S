@@ -23,7 +23,7 @@ DPSTART:
 .include "cin.S"
 .include "cout.S"
 .include "interpret.S"
-;.include "dictionary.S"
+.include "dictionary.S"
 .include "core.S"
 .include "string.S"
 ;.include "compiler.S"
