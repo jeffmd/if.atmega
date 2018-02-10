@@ -32,6 +32,47 @@ forthword_ HANDLER, 0, "handle"
     call DOUSER
     .word USER_HANDLER
 
+; ( val -- char )
+; convert low byte of val to a printable hex character    
+forthword_ NHEX, 0, "#h"
+    zerohigh_
+    andi wl, 0x0F
+    cpi wl, 10
+    brlo NHEX_NEXT
+    adiw wl, 7
+    
+    ; <then>
+NHEX_NEXT:
+    adiw wl, 48  
+    ret            
+
+; ( n -- )
+; simple 4 bit hex print
+forthword_ PNIB, 0, ".h"
+    rcall NHEX
+    jmp EMIT
+    
+; ( n -- )
+; simple 16 bit hex print    
+forthword_ PHEX, 0, ".$"
+    push_        ; ( n n )
+    lit_ '$      ; ( n $ )
+    call EMIT    ; ( n ? )
+    d0_          ; ( n n )
+    highbyte_    ; ( n n.h )
+    swapnib_     ; ( n n.h' )
+    rcall PNIB   ; ( n ? )
+    d0_          ; ( n n )
+    highbyte_    ; ( n n.h )
+    rcall PNIB   ; ( n ? )
+    d0_          ; ( n n )
+    swapnib_     ; ( n n' )
+    rcall PNIB   ; ( n ? )
+    pop_         ; ( n )
+    rcall PNIB   ; ( ? )
+    bl_          ; ( bl )
+    jmp EMIT
+
 ; ( i*x xt -- j*x 0 | i*x n )
 ; Exceptions
 ; setup handler to catch exceptions and then EXEC XT.

@@ -38,9 +38,10 @@ forthword_ SWAP, 0, "swap"
     ;movw xrl, wl
     ;pop_
     ;pushx_
-    d0_str_y_
+    ld temp4, Y
+    ldd temp5, Y+1
     str_d0_
-    y_
+    movw wl, temp4
     ret
 
 ; ( x1 x2 -- x1 x2 x1 )
@@ -123,8 +124,10 @@ forthword_ R_FETCHPLUS, DIS_CALL_OPT, "r>r+"
 ; Compare
 ; flag is true if n1 is not equal to n2
 forthword_ NOTEQUAL, 0, "<>"
-    pop_y_
-    xor_y_
+    ld temp4, Y+
+    ld temp5, Y+
+    eor wl, temp4
+    eor wh, temp5
     ret
 
 ; ( n -- flag )
@@ -138,9 +141,10 @@ forthword_ EQUALZERO, 0, "0="
 ; ( n2 n1 -- n1 )
 ; compare top of stack and next on top of stack and sets mcu status register flags
 forthword_ NTCP, 0, "ntcp"
-    pop_x_
-    cp xrl, wl
-    cpc xrh, wh
+    ld temp4, Y+
+    ld temp5, Y+
+    cp temp4, wl
+    cpc temp5, wh
     ret
 
 ; ( n1 n2 -- flag )

@@ -25,15 +25,15 @@ forthword_ CSKIP, 0, "cskip"
     
 PFA_CSKIP1:
     x_iszero_            ; ( n1 n')
-    breq PFA_CSKIP2
+    breq PFA_CSKIP_DONE
     rcall ACFETCH        ; ( n1 c' )
     aplus1_
-    cp wl, yl            ; ( n1 c' )
-    brne PFA_CSKIP2
+    cp wl, yrl            ; ( n1 c' )
+    brne PFA_CSKIP_DONE
     xminus1_             ; ( n1 c X:n'-1 )
     rjmp PFA_CSKIP1
 
-PFA_CSKIP2:
+PFA_CSKIP_DONE:
     rpop_a_
     pop_                 ; ( n1 )
     minus_x_             ; ( n1-n' )
@@ -52,15 +52,15 @@ forthword_ CSCAN, 0, "cscan"
     
 PFA_CSCAN1:
     x_iszero_            ; ( addr1 n1 c )
-    breq PFA_CSCAN2
+    breq PFA_CSCAN_DONE
     rcall ACFETCH        ; ( addr1 n1 c' )
     aplus1_
-    cp wl, yl            ; ( addr1 n1 c' )
-    breq PFA_CSCAN2
+    cp wl, yrl            ; ( addr1 n1 c' )
+    breq PFA_CSCAN_DONE
     xminus1_             ; ( addr1 n1 c' X:n'-1 )
     rjmp PFA_CSCAN1
 
-PFA_CSCAN2:
+PFA_CSCAN_DONE:
     rpop_a_
     pop_                 ; ( addr1 n1 )
     minus_x_             ; ( addr1 n1-n' )
@@ -103,6 +103,7 @@ PFA_ICOMPARE_LOOP:
     push_                    ; ( r-cc r-cc )
     rcall AFETCHI            ; ( r-cc f-cc )
     xminus1_
+    
     ; if not last check then compare words
     brne PFA_ICOMPARE_COMPCELL
     ; flash strings are zero-padded at the last cell
@@ -124,6 +125,7 @@ PFA_ICOMPARE_COMPCELL:
     ; if
     iszero_                  ; ( flag )
     breq PFA_ICOMPARE_NEXTLOOP
+      ; not equal
       zero_                  ; ( 0 )
       rjmp PFA_ICOMPARE_DONE
 
@@ -135,10 +137,10 @@ PFA_ICOMPARE_NEXTLOOP:
     rjmp PFA_ICOMPARE_LOOP
 
 PFA_ICOMPARE_FOUND:
+    ; strings are the same
     true_
     
 PFA_ICOMPARE_DONE:
-    ; strings are the same
     rpop_b_
     rpop_a_
     ret
@@ -149,7 +151,7 @@ PFA_ICOMPARE_DONE:
 forthword_ SKIPBL, 0, "skipbl"
     rcall SRCIN          ; ( srcaddr len )
     push_
-    bl_                  ; ( srcaddr len c )
+    bl_                  ; ( srcaddr len bl )
     rcall CSKIP          ; ( n2 )
 
     ; adjust >IN
@@ -158,7 +160,7 @@ forthword_ SKIPBL, 0, "skipbl"
     rjmp YPLUSSTORE      ; ( ? )
 
 
-; ( char "ccc<char>" -- c-addr u )
+; ( char "ccc<char>" -- c-addr len )
 ; String
 ; in input buffer parse ccc delimited string by the delimiter char.
 forthword_ PARSE, 0, "parse"
@@ -180,9 +182,9 @@ forthword_ PARSE, 0, "parse"
 ; String
 ; In the SOURCE buffer parse whitespace delimited string. Returns string address within SOURCE.
 forthword_ PNAME, 0, "pname"   
-    rcall SKIPBL
-    bl_
-    rjmp PARSE
+    rcall SKIPBL     ; ( ? )
+    bl_              ; ( bl )
+    rjmp PARSE       ; ( c-addr len )
             
             
 ; ( addr len -- n f )
@@ -204,7 +206,7 @@ PFA_REC_NUMBER_OK:
     jmp TRUE                ; ( n true )
 
 PFA_REC_NONUMBER:
-    ret               ; ( 0 )
+    ret                     ; ( 0 )
 
 ; ( addr len -- f )
 ; Interpreter
@@ -218,12 +220,13 @@ forthword_ REC_WORD, 0, "recw"
     ret
 
 REC_WORD_FOUND:
-    rcall NFATOXTF        ; ( xtf )
+    rcall NFATOXTF        ; ( xt flag )
     ; check if compile only word
     sbrc wh, COMPILE_ONLY_FB 
         rjmp CHECK_IMMEDIATE
         
 CHECK_COMPILE_ONLY:
+    push_
     rcall STATEFETCH
     iszero_
     pop_
@@ -242,7 +245,8 @@ CHECK_IMMEDIATE:
 	    rjmp REC_WORD_EXECUTE
 
 REC_WORD_CHECKSTATE:
-        ; check state
+      ; check state
+      push_
 	    rcall STATEFETCH
 	    iszero_
       pop_
@@ -255,7 +259,6 @@ REC_WORD_EXECUTE:
     pop_
     ; state is zero, EXEC xt
     rcall EXEC
-REC_WORD_OK:
     jmp TRUE
 
 
@@ -300,6 +303,7 @@ forthword_ RECX, 0, "recx"
     jmp THROW
     
 RECX_DONE:
+    nip_
     ret             ; ( )
 
 ; ( -- ) (R: i*x - j*x )
@@ -311,7 +315,6 @@ forthword_ INTERPRET, 0, "interp"
     ; ?while
     iszero_             ; ( addr len )
     breq INTERPRET_END
-
       rcall RECX        ; ( ? )
       call QSTACK       ; ( ? )
       ; repeat

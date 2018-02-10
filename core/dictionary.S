@@ -43,11 +43,12 @@ forthword_ NFATOXTF, 0, "nfa>xtf"
 
     push_                       ; ( nfa nfa )
     rcall FETCHI                ; ( nfa xtflags )
-    rpush_                      ; ( nfa ) (R: xtflags)
+    rpush_
+    pop_                        ; ( nfa ) (R: xtflags)
     rcall NFA2LFA               ; ( lfa )
     oneplus_   ; lfa>xt         ; ( xt )
     push_                       ; ( xt xt )
-    rpop_                       ; ( xt xtflags )
+    rpop_                       ; ( xt xtflags ) (R: )
 
 NFATOXTF_EXIT:
     ret
@@ -70,13 +71,14 @@ FINDNFA_BEGIN:
     breq FINDNFA_DONE ; terminating, 0 found
 
     rpush_
-    d0_                         ; ( c-addr len c-addr ) (R: nfa )
+    d1_                         ; ( c-addr len c-addr ) (R: nfa )
     rcall OVER                  ; ( c-addr len c-addr len )
     push_                       ; ( c-addr len c-addr len len )
     rpop_                       ; ( c-addr len c-addr len nfa ) (R: )
     rpush_                      ; ( c-addr len c-addr len nfa ) (R: nfa )
     rcall ISTRLEN               ; ( c-addr len c-addr len f-addr len )
     zerohigh_                   ; ( c-addr len c-addr len f-addr 0:len )
+       
     rcall ISTRCOMPARE           ; ( c-addr len flag )
     ; <if>
     iszero_
@@ -133,6 +135,7 @@ forthword_ FINDW, 0, "findw"
 FINDW_BEGIN:
     iszero_
     brmi FINDLAST       ; ( addr len idx idx )
+      pop_              ; ( addr len idx )
       rcall THREEOVER   ; ( addr len idx addr len idx )
       rcall FINDWI      ; ( addr len idx nfa )
       iszero_

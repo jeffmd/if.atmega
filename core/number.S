@@ -43,49 +43,7 @@ forthword_ DECIMAL, 0, "decimal"
 ; set base for number conversion to 16
 forthword_ HEX, 0, "hex"
     lit_ 16
-    rjmp BASESTORE
-
-; ( val -- char )
-; convert low byte of val to a printable hex character    
-forthword_ NHEX, 0, "#h"
-    zerohigh_
-    andi wl, 0x0F
-    cpi wl, 10
-    brlo NHEX_NEXT
-    adiw wl, 7
-    
-    ; <then>
-NHEX_NEXT:
-    adiw wl, 48  
-    ret            
-
-; ( n -- )
-; simple 4 bit hex print
-forthword_ PNIB, 0, ".h"
-    rcall NHEX
-    jmp EMIT
-    
-; ( n -- )
-; simple 16 bit hex print    
-forthword_ PHEX, 0, ".$"
-    push_        ; ( n n )
-    lit_ '$      ; ( n $ )
-    call EMIT    ; ( n ? )
-    d0_          ; ( n n )
-    highbyte_    ; ( n n.h )
-    swapnib_     ; ( n n.h' )
-    rcall PNIB   ; ( n ? )
-    d0_          ; ( n n )
-    highbyte_    ; ( n n.h )
-    rcall PNIB   ; ( n ? )
-    d0_          ; ( n n )
-    swapnib_     ; ( n n' )
-    rcall PNIB   ; ( n ? )
-    pop_         ; ( n )
-    rcall PNIB   ; ( ? )
-    bl_          ; ( bl )
-    jmp EMIT
-    
+    rjmp BASESTORE    
 
 ; ( c -- [number] flag )
 ; Numeric IO
