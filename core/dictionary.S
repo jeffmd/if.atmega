@@ -111,7 +111,7 @@ FINDWI:
       twostar_          ; ( addr len idx*2)
       str_y_            ; ( addr len idx*2 Y:idx*2 )
       rcall CONTEXT     ; ( addr len context )
-      rcall YPLUSSTORE  ; ( addr len context' )
+      plus_y_           ; ( addr len context' )
       rcall FETCH       ; ( addr len wid )
       rjmp FINDNFA      ; ( nfa)
 
@@ -132,6 +132,7 @@ forthword_ FINDW, 0, "findw"
     oneminus_           ; ( addr len context-1 )
     rcall CFETCH        ; ( addr len idx )
     push_               ; ( addr len idx idx )
+    
 FINDW_BEGIN:
     iszero_
     brmi FINDLAST       ; ( addr len idx idx )

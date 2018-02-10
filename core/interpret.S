@@ -187,7 +187,7 @@ forthword_ PNAME, 0, "pname"
     rjmp PARSE       ; ( c-addr len )
             
             
-; ( addr len -- n f )
+; ( addr len -- [n] f )
 ; Interpreter
 ; recognizer for integer numbers
 forthword_ REC_NUM, 0, "rec#"
