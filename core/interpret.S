@@ -1,6 +1,20 @@
 ; dict_interpret.inc
 ; forth words that make up the forth interpreter
 
+
+.pushsection .noinit
+; interpreter register copy
+REG_BANK:
+WR: .space 2
+RA: .space 2
+RB: .space 2
+RX: .space 2
+RY: .space 2
+; litteral word defer
+Lit_Interpret: .space 2
+Lit_Compile: .space 2
+.popsection
+
 ; ( -- )
 ; ignore remaining text to end of line
 Forthword_ COMMENT, IMMEDIATE_EN, "\\"
@@ -256,9 +270,15 @@ REC_WORD_CHECKSTATE:
 	    jmp TRUE
       
 REC_WORD_EXECUTE:
-    pop_
+    lit_ WR          ; ( xt WR )
+    rcall FETCH      ; ( xt w )
+    rcall SWAP       ; ( w xt )
     ; state is zero, EXEC xt
-    rcall EXEC
+    rcall EXEC       ; ( w )
+    push_            ; ( w w )
+    lit_ WR          ; ( w WR )
+    pop_y_           ; ( WR Y:w )
+    rcall YWSTORE    ; ( WR )
     jmp TRUE
 
 

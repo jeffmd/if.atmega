@@ -175,8 +175,9 @@ forthword_ REFILLTIB, 0, "reftib"
     iszero_              ; ( f )
     breq REFILLTIB_exit
     push_
-    rjmp CR
+    rcall CR
     pop_
+    ret
     
 REFILLTIB_exit:
     ret

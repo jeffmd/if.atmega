@@ -82,7 +82,7 @@ FINDNFA_BEGIN:
     rcall ISTRCOMPARE           ; ( c-addr len flag )
     ; <if>
     iszero_
-    rpop_                       ; ( c-addr len nfa )
+    rpop_                       ; ( c-addr len nfa ) (R: )
     brne FINDNFA_DONE ; string is found
     ; <then>
 FINDNFA_NEXT:
