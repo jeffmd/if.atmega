@@ -446,9 +446,19 @@
     and wh, ah
 .endm
 
+.macro a_and_
+    and al, wl
+    and ah, wh
+.endm
+
 .macro and_b_
     and wl, bl
     and wh, bh
+.endm
+
+.macro b_and_
+    and bl, wl
+    and bh, wh
 .endm
 
 .macro or_x_
@@ -469,6 +479,26 @@
 .macro y_or_
     or yrl, wl
     or yrh, wh
+.endm
+
+.macro or_a_
+    or wl, al
+    or wh, ah
+.endm
+
+.macro a_or_
+    or al, wl
+    or ah, wh
+.endm
+
+.macro or_b_
+    or wl, bl
+    or wh, bh
+.endm
+
+.macro b_or_
+    or bl, wl
+    or bh, wh
 .endm
 
 .macro xor_x_

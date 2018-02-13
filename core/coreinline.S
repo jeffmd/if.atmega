@@ -14,11 +14,67 @@ forthword_ DPUSH, INLINE_OPT, "push"
     push_
     ret
 
+; ( n -- n n ) 
+; Stack
+; push A onto data stack
+forthword_ DPUSHA, INLINE_OPT, "push.a"
+    push_a_
+    ret
+
+; ( n -- n n ) 
+; Stack
+; push B onto data stack
+forthword_ DPUSHB, INLINE_OPT, "push.b"
+    push_b_
+    ret
+
+; ( n -- n n ) 
+; Stack
+; push X onto data stack
+forthword_ DPUSHX, INLINE_OPT, "push.x"
+    push_x_
+    ret
+
+; ( n -- n n ) 
+; Stack
+; push Y onto data stack
+forthword_ DPUSHY, INLINE_OPT, "push.y"
+    push_y_
+    ret
+
 ; ( n -- ) 
 ; Stack
-; drop TOS
+; pop from top of data stack into working register
 forthword_ DPOP, INLINE_OPT, "pop"
     pop_
+    ret
+
+; ( n -- A:n ) 
+; Stack
+; pop from top of data stack into A register
+forthword_ DPOP_A, INLINE_OPT, "pop.a"
+    pop_a_
+    ret
+
+; ( n -- B:n ) 
+; Stack
+; pop from top of data stack into B register
+forthword_ DPOP_B, INLINE_OPT, "pop.b"
+    pop_b_
+    ret
+
+; ( n -- X:n ) 
+; Stack
+; pop from top of data stack into X register
+forthword_ DPOP_X, INLINE_OPT, "pop.x"
+    pop_x_
+    ret
+
+; ( n -- Y:n ) 
+; Stack
+; pop from top of data stack into Y register
+forthword_ DPOP_Y, INLINE_OPT, "pop.y"
+    pop_y_
     ret
 
 ; ( n1 n2 -- n2) 
@@ -183,7 +239,7 @@ forthword_ ISZERO, INLINE_OPT, "0?"
 ; Arithmetics
 ; optimized increment
 
-forthword_ ONEPLUS, INLINE_OPT, "1+"
+forthword_ ONEPLUS, INLINE_OPT, "+1"
     oneplus_
     ret
 
@@ -191,35 +247,35 @@ forthword_ ONEPLUS, INLINE_OPT, "1+"
 ; Arithmetics
 ; optimized decrement
 
-forthword_ ONEMINUS, INLINE_OPT, "1-"
+forthword_ ONEMINUS, INLINE_OPT, "-1"
     oneminus_
     ret
 
 ; ( n1|u1 -- n2|u2 ) 
 ; Arithmetics
 ; optimized two increment
-forthword_ TWOPLUS, INLINE_OPT, "2+"
+forthword_ TWOPLUS, INLINE_OPT, "+2"
     twoplus_
     ret
 
 ; ( n1|u1 -- n2|u2 ) 
 ; Arithmetics
 ; optimized four increment
-forthword_ FOURPLUS, INLINE_OPT, "4+"
+forthword_ FOURPLUS, INLINE_OPT, "+4"
     fourplus_
     ret
 
 ; (S: n1 -- n2 )
 ; Arithmetics
 ; optimized 2 decrement
-forthword_ TWOMINUS, INLINE_OPT, "2-"
+forthword_ TWOMINUS, INLINE_OPT, "-2"
     twominus_
     ret
 
 ; (S: n1 -- n2 )
 ; Arithmetics
 ; optimized 4 decrement
-forthword_ FOURMINUS, INLINE_OPT, "4-"
+forthword_ FOURMINUS, INLINE_OPT, "-4"
     fourminus_
     ret
 
@@ -254,30 +310,170 @@ forthword_ NOT, INLINE_OPT, "not"
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
-; bitwise and with X register
-forthword_ ANDX, INLINE_OPT, "and.x"
+; bitwise W with X register, result in W
+forthword_ AND_X, INLINE_OPT, "&x"
     and_x_
     ret
 
-; ( n1 n2 -- n3 )
+; ( n1 X:n2 -- n3 )
 ; Logic
-; logical or
-forthword_ ORX, INLINE_OPT, "or.x"
-    or_x_
-    ret
-
-; ( n1 n2 -- n3)
-; Logic
-; exclusive or
-forthword_ XORX, INLINE_OPT, "xor.x"
-    xor_x_
+; bitwise W with X register, result in X
+forthword_ X_AND, INLINE_OPT, "x&"
+    x_and_
     ret
 
 ; ( n1 Y:n2 -- n3 )
 ; Logic
-; bitwise and with Y register
-forthword_ ANDY, INLINE_OPT, "and.y"
+; bitwise W with Y register, result in W
+forthword_ AND_Y, INLINE_OPT, "&y"
     and_y_
+    ret
+
+; ( n1 X:n2 -- n3 )
+; Logic
+; bitwise W with Y register, result in Y
+forthword_ Y_AND, INLINE_OPT, "y&"
+    x_and_
+    ret
+
+; ( n1 Y:n2 -- n3 )
+; Logic
+; bitwise and with A register
+forthword_ AND_A, INLINE_OPT, "&a"
+    and_a_
+    ret
+
+; ( n1 X:n2 -- n3 )
+; Logic
+; bitwise W with A register, result in A
+forthword_ A_AND, INLINE_OPT, "a&"
+    a_and_
+    ret
+
+; ( n1 Y:n2 -- n3 )
+; Logic
+; bitwise and with B register
+forthword_ AND_B, INLINE_OPT, "&b"
+    and_b_
+    ret
+
+; ( n1 X:n2 -- n3 )
+; Logic
+; bitwise W with B register, result in B
+forthword_ B_AND, INLINE_OPT, "b&"
+    b_and_
+    ret
+
+; ( n1 n2 -- n3 )
+; Logic
+; logical or with X register
+forthword_ OR_X, INLINE_OPT, "|x"
+    or_x_
+    ret
+
+; ( n1 X:n2 -- n1 X:n3 )
+; Logic
+; logical or W with X register, result in X
+forthword_ X_OR, INLINE_OPT, "x|"
+    x_or_
+    ret
+
+; ( n1 X:n2 -- n3 )
+; Logic
+; logical or with Y register
+forthword_ OR_Y, INLINE_OPT, "|y"
+    or_y_
+    ret
+
+; ( n1 Y:n2 -- n1 Y:n3 )
+; Logic
+; logical or W with Y register, result in Y
+forthword_ Y_OR, INLINE_OPT, "y|"
+    y_or_
+    ret
+
+; ( n1 n2 -- n3 )
+; Logic
+; logical or with A register
+forthword_ OR_A, INLINE_OPT, "|a"
+    or_a_
+    ret
+
+; ( n1 A:n2 -- n1 A:n3 )
+; Logic
+; logical or W with A register, result in A
+forthword_ A_OR, INLINE_OPT, "a|"
+    a_or_
+    ret
+
+; ( n1 n2 -- n3 )
+; Logic
+; logical or with B register
+forthword_ OR_B, INLINE_OPT, "|b"
+    or_b_
+    ret
+
+; ( n1 B:n2 -- n1 B:n3 )
+; Logic
+; logical or W with B register, result in B
+forthword_ B_OR, INLINE_OPT, "b|"
+    b_or_
+    ret
+
+; ( n1 X:n2 -- n3)
+; Logic
+; exclusive or with X register
+forthword_ XOR_X, INLINE_OPT, "||x"
+    xor_x_
+    ret
+
+; ( n1 X:n2 -- n1 X:n3 )
+; Logic
+; logical xor W with X register, result in X
+forthword_ X_XOR, INLINE_OPT, "x||"
+    x_xor_
+    ret
+
+; ( n1 n2 -- n3)
+; Logic
+; exclusive or with Y register
+forthword_ XOR_Y, INLINE_OPT, "||y"
+    xor_y_
+    ret
+
+; ( n1 Y:n2 -- n1 Y:n3 )
+; Logic
+; logical xor W with Y register, result in Y
+forthword_ Y_XOR, INLINE_OPT, "y||"
+    y_xor_
+    ret
+
+; ( n1 n2 -- n3)
+; Logic
+; exclusive or with A register
+forthword_ XOR_A, INLINE_OPT, "||a"
+    xor_a_
+    ret
+
+; ( n1 A:n2 -- n1 A:n3 )
+; Logic
+; logical xor W with A register, result in A
+forthword_ A_XOR, INLINE_OPT, "a||"
+    a_xor_
+    ret
+
+; ( n1 n2 -- n3)
+; Logic
+; exclusive or with B register
+forthword_ XOR_B, INLINE_OPT, "||b"
+    xor_b_
+    ret
+
+; ( n1 B:n2 -- n1 B:n3 )
+; Logic
+; logical xor W with B register, result in B
+forthword_ B_XOR, INLINE_OPT, "b||"
+    b_xor_
     ret
 
 ; ( ddddkkkk -- kkkkdddd )
@@ -290,27 +486,41 @@ forthword_ SWAPNIB, INLINE_OPT, "swnib"
 ; ( n1 -- n2 ) 
 ; Arithmetics
 ; arithmetic shift right
-forthword_ TWOSLASH, INLINE_OPT, "2/"
+forthword_ TWOSLASH, INLINE_OPT, "/2"
     twoslash_
     ret
 
 ; ( n1 -- n2 ) 
 ; Arithmetics
 ; arithmetic shift left, filling with zero
-forthword_ TWOSTAR, INLINE_OPT, "2*"
+forthword_ TWOSTAR, INLINE_OPT, "*2"
     twostar_
+    ret
+
+; ( n1 A:n2 -- n3)
+; Arithmetics
+; add contents of A register to working register
+forthword_ PLUSA, INLINE_OPT, "+a"
+    plus_a_
+    ret
+
+; ( n1 Y:n2 -- n3)
+; Arithmetics
+; add contents of B register to working register
+forthword_ PLUSB, INLINE_OPT, "+b"
+    plus_b_
     ret
 
 ; ( n1 X:n2 -- n3)
 ; Arithmetics
-; add n1 and n2
+; add contents of X register to working register
 forthword_ PLUSX, INLINE_OPT, "+x"
     plus_x_
     ret
 
 ; ( n1 Y:n2 -- n3)
 ; Arithmetics
-; add n1 and n2
+; add contents of Y register to working register
 forthword_ PLUSY, INLINE_OPT, "+y"
     plus_y_
     ret
@@ -349,16 +559,23 @@ forthword_ ZERO, INLINE_OPT, "0"
 
 ; ( -- 1 ) 
 ; Arithmetics
-; place a value 1 on TOS
+; place a value 1 in working register
 forthword_ ONE, INLINE_OPT, "1"
     one_
     ret
 
 ; ( -- 2 ) 
 ; Arithmetics
-; place a value 2 on TOS
+; place a value 2 in working register
 forthword_ TWO, INLINE_OPT, "2"
     two_
+    ret
+
+; ( -- 4 ) 
+; Arithmetics
+; place a value 4 in working register
+forthword_ FOUR, INLINE_OPT, "4"
+    four_
     ret
 
 ; ( -- 10 ) 
@@ -460,9 +677,93 @@ forthword_ APLUS1, INLINE_OPT, "a+1"
     ret
 
 ; ( -- )
+; add 1 to register B 
+forthword_ BPLUS1, INLINE_OPT, "b+1"
+    bplus1_
+    ret
+
+; ( -- )
+; add 1 to register X 
+forthword_ XPLUS1, INLINE_OPT, "x+1"
+    xplus1_
+    ret
+
+; ( -- )
+; add 1 to register Y 
+forthword_ YPLUS1, INLINE_OPT, "y+1"
+    yplus1_
+    ret
+
+; ( -- )
 ; add 2 to register A
 forthword_ APLUS2, INLINE_OPT, "a+2"
     aplus2_
+    ret
+
+; ( -- )
+; add 2 to register B
+forthword_ BPLUS2, INLINE_OPT, "b+2"
+    bplus2_
+    ret
+
+; ( -- )
+; add 2 to register X
+forthword_ XPLUS2, INLINE_OPT, "x+2"
+    xplus2_
+    ret
+
+; ( -- )
+; add 2 to register Y
+forthword_ YPLUS2, INLINE_OPT, "y+2"
+    yplus2_
+    ret
+
+; ( -- )
+; register A minus 1 
+forthword_ AMINUS1, INLINE_OPT, "a-1"
+    aminus1_
+    ret
+
+; ( -- )
+; register B minus 1 
+forthword_ BMINUS1, INLINE_OPT, "b-1"
+    bminus1_
+    ret
+
+; ( -- )
+; register X minus 1
+forthword_ XMINUS1, INLINE_OPT, "x-1"
+    xminus1_
+    ret
+
+; ( -- )
+; register Y minus 1
+forthword_ YMINUS1, INLINE_OPT, "y-1"
+    yminus1_
+    ret
+
+; ( -- )
+; register A minus 2
+forthword_ AMINUS2, INLINE_OPT, "a-2"
+    aminus2_
+    ret
+
+; ( -- )
+; register B minus 2
+forthword_ BMINUS2, INLINE_OPT, "b-2"
+    bminus2_
+    ret
+
+; ( -- )
+; register X minus 2
+forthword_ XMINUS2, INLINE_OPT, "x-2"
+    xminus2_
+    ret
+
+; ( -- )
+; register Y minus 2
+forthword_ YMINUS2, INLINE_OPT, "y-2"
+    yminus2_
     ret
 
 ; ( -- icell )
