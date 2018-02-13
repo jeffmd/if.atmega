@@ -490,8 +490,10 @@ ZFETCH:
 ; Memory
 ; write value in Y to RAM memory at addr in WR, low byte first
 forthword_ YWSTORE, 0, "y.!"
-    movw ZL, wl
     movw temp4, yrl
+
+WSTORE:
+    movw ZL, wl
 
 ZSTORE:
     st Z, temp4
@@ -502,10 +504,22 @@ ZSTORE:
 ; Memory
 ; write value in Y to RAM memory at addr in WR, low byte first
 forthword_ XWSTORE, 0, "x.!"
-    movw ZL, wl
     movw temp4, xrl
-    rjmp ZSTORE
+    rjmp WSTORE
 
+; ( addr A:n -- )
+; Memory
+; write value in A to RAM memory at addr in WR, low byte first
+forthword_ AWSTORE, 0, "a.!"
+    movw temp4, al
+    rjmp WSTORE
+
+; ( addr B:n -- )
+; Memory
+; write value in B to RAM memory at addr in WR, low byte first
+forthword_ BWSTORE, 0, "b.!"
+    movw temp4, bl
+    rjmp WSTORE
 
 ; ( addr -- )
 ; write 0 to RAM memory at addr.
@@ -536,9 +550,9 @@ forthword_ HSTORE, 0, "h!"
 ; Memory
 ; store a single byte to RAM address
 forthword_ YWCSTORE, 0, "y.c!"
-    movw ZL, wl
     mov temp4, yrl
-
+WCSTORE:
+    movw ZL, wl
 ZCSTORE:
     st Z, temp4
     ret
@@ -547,9 +561,8 @@ ZCSTORE:
 ; Memory
 ; store a 0 to single byte RAM address
 forthword_ ZEROCSTORE, 0, "0c!"
-    movw ZL, wl
     clr temp4
-    rjmp ZCSTORE
+    rjmp WCSTORE
 
 ; ( a-addr - c1 )
 ; Memory

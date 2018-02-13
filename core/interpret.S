@@ -270,15 +270,41 @@ REC_WORD_CHECKSTATE:
 	    jmp TRUE
       
 REC_WORD_EXECUTE:
-    lit_ WR          ; ( xt WR )
-    rcall FETCH      ; ( xt w )
+    lit_y_ WR        ; ( xt ? Y:WR )
+    rcall YFETCH     ; ( xt w )
+    push_            ; ( xt w w )
+    yplus2_
+    rcall YFETCH     ; ( xt w a )
+    str_a_
+    yplus2_
+    rcall YFETCH     ; ( xt w b )
+    str_b_
+    yplus2_
+    rcall YFETCH     ; ( xt w x )
+    str_x_
+    yplus2_
+    rcall YFETCH     ; ( xt w y )
+    str_y_
+    pop_             ; ( xt w )
     rcall SWAP       ; ( w xt )
-    ; state is zero, EXEC xt
+
     rcall EXEC       ; ( w )
-    push_            ; ( w w )
-    lit_ WR          ; ( w WR )
-    pop_y_           ; ( WR Y:w )
-    rcall YWSTORE    ; ( WR )
+    
+    push_a_          ; ( a w )
+    push_            ; ( a w w )
+    lit_ WR          ; ( y w WR )
+    pop_a_           ; ( y WR A:w )
+    rcall AWSTORE    ; ( WR )
+    twoplus_
+    pop_a_           ; ( WR A:y )
+    rcall AWSTORE
+    twoplus_
+    rcall BWSTORE
+    twoplus_
+    rcall XWSTORE
+    twoplus_
+    rcall YWSTORE
+    
     jmp TRUE
 
 

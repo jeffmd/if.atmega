@@ -393,18 +393,40 @@ forthword_ STR_B, INLINE_OPT, "!b"
     str_b_
     ret
 
+; ( n -- ) X: n
+; copy WR to X register
+forthword_ STR_X, INLINE_OPT, "!x"
+    str_x_
+    ret
+
+; ( n -- ) Y: n
+; copy WR to Y register
+forthword_ STR_Y, INLINE_OPT, "!y"
+    str_y_
+    ret
+
 ; ( -- n ) 
-; Extended VM
 ; load A register into WR
 forthword_ A_, INLINE_OPT, "a"
     a_
     ret
 
 ; ( -- n ) 
-; Extended VM
 ; load B register into WR
 forthword_ B_, INLINE_OPT, "b"
     b_
+    ret
+
+; ( -- n ) 
+; load X register into WR
+forthword_ X_, INLINE_OPT, "x"
+    x_
+    ret
+
+; ( -- n ) 
+; load Y register into WR
+forthword_ Y_, INLINE_OPT, "y"
+    y_
     ret
 
 ; ( n1 n2 -- n2 ) A: n1
