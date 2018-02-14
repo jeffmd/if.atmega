@@ -113,6 +113,217 @@ forthword_ SP_STORE, INLINE_OPT, "!sp"
     str_sp_
     ret
 
+; ( n2 n1 -- n2 n2 )
+;   d0 WR
+; fetch datastack[0] and place in WR register
+Forthword_ D0, INLINE_OPT, "d0"
+  d0_
+  ret
+  
+; ( n3 n2 n1 -- n3 n2 n3 )
+;   d1 d0 WR
+; fetch datastack[1] and place in WR register
+Forthword_ D1, INLINE_OPT, "d1"
+  d1_
+  ret
+  
+; ( n4 n3 n2 n1 -- n4 n3 n2 n4 )
+;   d2 d1 d0 WR
+; fetch datastack[2] and place in WR register
+Forthword_ D2, INLINE_OPT, "d2"
+  d2_
+  ret
+
+; ( n2 n1 -- n1 n1 )
+;   d0 WR
+; fetch WR register and place in datastack[0] 
+Forthword_ STR_D0, INLINE_OPT, "!d0"
+  str_d0_
+  ret
+    
+; ( n3 n2 n1 -- n1 n2 n1 )
+;   d1 d0 WR
+; fetch WR register and place in datastack[1] 
+Forthword_ STR_D1, INLINE_OPT, "!d1"
+  str_d1_
+  ret
+    
+; ( n4 n3 n2 n1 -- n1 n3 n2 n1 )
+;   d2 d1 d0 WR
+; fetch WR register and place in datastack[2] 
+Forthword_ STR_D2, INLINE_OPT, "!d2"
+  str_d2_
+  ret
+    
+; ( n2 n1 -- n2 n1 ) A: n2
+;   d0 WR
+; fetch datastack[0] and store in A register
+Forthword_ D0_STR_A, INLINE_OPT, "d0!a"
+  d0_str_a_
+  ret
+  
+; ( n2 n1 -- n2 n1 ) B: n2
+;   d0 WR
+; fetch datastack[0] and store in B register
+Forthword_ D0_STR_B, INLINE_OPT, "d0!b"
+  d0_str_b_
+  ret
+  
+; ( n2 n1 -- n2 n1 ) X: n2
+;   d0 WR
+; fetch datastack[0] and store in X register
+Forthword_ D0_STR_X, INLINE_OPT, "d0!x"
+  d0_str_x_
+  ret
+  
+; ( n2 n1 -- n2 n1 ) Y: n2
+;   d0 WR
+; fetch datastack[0] and store in Y register
+Forthword_ D0_STR_Y, INLINE_OPT, "d0!y"
+  d0_str_y_
+  ret
+   
+; ( n3 n2 n1 -- n3 n2 n1 ) A: n3
+;   d1 d0 WR
+; fetch datastack[1] and store in A register
+Forthword_ D1_STR_A, INLINE_OPT, "d1!a"
+  d1_str_a_
+  ret
+  
+; ( n3 n2 n1 -- n3 n2 n1 ) B: n3
+;   d1 d0 WR
+; fetch datastack[1] and store in B register
+Forthword_ D1_STR_B, INLINE_OPT, "d1!b"
+  d1_str_b_
+  ret
+  
+; ( n3 n2 n1 -- n3 n2 n1 ) X: n3
+;   d1 d0 WR
+; fetch datastack[1] and store in X register
+Forthword_ D1_STR_X, INLINE_OPT, "d1!x"
+  d1_str_x_
+  ret
+  
+; ( n3 n2 n1 -- n3 n2 n1 ) Y: n3
+;   d1 d0 WR
+; fetch datastack[1] and store in Y register
+Forthword_ D1_STR_Y, INLINE_OPT, "d1!y"
+  d1_str_y_
+  ret
+  
+; ( n4 n3 n2 n1 -- n4 n3 n2 n1 ) A: n4
+;   d2 d1 d0 WR
+; fetch datastack[2] and store in A register
+Forthword_ D2_STR_A, INLINE_OPT, "d2!a"
+  d2_str_a_
+  ret
+  
+; ( n4 n3 n2 n1 -- n4 n3 n2 n1 ) B: n4
+;   d2 d1 d0 WR
+; fetch datastack[2] and store in B register
+Forthword_ D2_STR_B, INLINE_OPT, "d2!b"
+  d2_str_b_
+  ret
+  
+; ( n4 n3 n2 n1 -- n4 n3 n2 n1 ) X: n4
+;   d2 d1 d0 WR
+; fetch datastack[2] and store in X register
+Forthword_ D2_STR_X, INLINE_OPT, "d2!x"
+  d2_str_x_
+  ret
+  
+; ( n4 n3 n2 n1 -- n4 n3 n2 n1 ) Y: n4
+;   d2 d1 d0 WR
+; fetch datastack[2] and store in Y register
+Forthword_ D2_STR_Y, INLINE_OPT, "d2!y"
+  d2_str_y_
+  ret
+  
+; ( ?  n2 -- n1 n2 ) A: n1
+;   d0 WR
+; fetch A register and store in d0 stack position
+Forthword_ A_STR_D0, INLINE_OPT, "a!d0"
+  a_str_d0_
+  ret
+  
+; ( ?  n2 -- n1 n2 ) B: n1
+;   d0 WR
+; fetch B register and store in d0 stack position
+Forthword_ B_STR_D0, INLINE_OPT, "b!d0"
+  b_str_d0_
+  ret
+  
+; ( ?  n2 -- n1 n2 ) X: n1
+;   d0 WR
+; fetch X register and store in d0 stack position
+Forthword_ X_STR_D0, INLINE_OPT, "x!d0"
+  x_str_d0_
+  ret
+  
+; ( ?  n2 -- n1 n2 ) Y: n1
+;   d0 WR
+; fetch y register and store in d0 stack position
+Forthword_ Y_STR_D0, INLINE_OPT, "y!d0"
+  y_str_d0_
+  ret
+  
+; ( ?  ?  n1 -- n2 ? n1 ) A: n2
+;   d1 d0 WR
+; fetch A register and store in d1 stack position
+Forthword_ A_STR_D1, INLINE_OPT, "a!d1"
+  a_str_d1_
+  ret
+  
+; ( ?  ?  n1 -- n2 ?  n1 ) B: n2
+;   d1 d0 WR
+; fetch B register and store in d1 stack position
+Forthword_ B_STR_D1, INLINE_OPT, "b!d1"
+  b_str_d1_
+  ret
+  
+; ( ?  ?  n1 -- n2 ?  n1 ) X: n2
+;   d1 d0 WR
+; fetch X register and store in d1 stack position
+Forthword_ X_STR_D1, INLINE_OPT, "x!d1"
+  x_str_d1_
+  ret
+  
+; ( ?  ?  n1 -- n2 ?  n1 ) Y: n2
+;   d1 d0 WR
+; fetch y register and store in d1 stack position
+Forthword_ Y_STR_D1, INLINE_OPT, "y!d1"
+  y_str_d1_
+  ret
+  
+; ( ?  ?  ?  n1 -- n2 ?  ? n1 ) A: n2
+;   d2 d1 d0 WR
+; fetch A register and store in d2 stack position
+Forthword_ A_STR_D2, INLINE_OPT, "a!d2"
+  a_str_d2_
+  ret
+  
+; ( ?  ?  ?  n1 -- n2 ?  ? n1 ) B: n2
+;   d2 d1 d0 WR
+; fetch B register and store in d2 stack position
+Forthword_ B_STR_D2, INLINE_OPT, "b!d2"
+  b_str_d2_
+  ret
+  
+; ( ?  ?  ?  n1 -- n2 ?  ? n1 ) X: n2
+;   d2 d1 d0 WR
+; fetch X register and store in d2 stack position
+Forthword_ X_STR_D2, INLINE_OPT, "x!d2"
+  x_str_d2_
+  ret
+  
+; ( ?  ?  ?  n1 -- n2 ?  ? n1 ) Y: n2
+;   d2 d1 d0 WR
+; fetch y register and store in d2 stack position
+Forthword_ Y_STR_D2, INLINE_OPT, "y!d2"
+  y_str_d2_
+  ret
+
+
 ; (  -- n)
 ; Stack
 ; current return stack pointer address
@@ -304,35 +515,35 @@ forthword_ SREIGHT, INLINE_OPT, "~h"
 ; ( n1 -- n2) 
 ; Arithmetics
 ; 1-complement of W
-forthword_ NOT, INLINE_OPT, "'"
+forthword_ NOT, INLINE_OPT, "not"
     not_
     ret
 
 ; ( n1 -- n2) 
 ; Arithmetics
 ; 1-complement of A
-forthword_ A_NOT, INLINE_OPT, "a'"
+forthword_ A_NOT, INLINE_OPT, "a.not"
     a_not_
     ret
 
 ; ( n1 -- n2) 
 ; Arithmetics
 ; 1-complement of B
-forthword_ B_NOT, INLINE_OPT, "b'"
+forthword_ B_NOT, INLINE_OPT, "b.not"
     b_not_
     ret
 
 ; ( n1 -- n2) 
 ; Arithmetics
 ; 1-complement of X
-forthword_ X_NOT, INLINE_OPT, "x'"
+forthword_ X_NOT, INLINE_OPT, "x.not"
     x_not_
     ret
 
 ; ( n1 -- n2) 
 ; Arithmetics
 ; 1-complement of Y
-forthword_ Y_NOT, INLINE_OPT, "y'"
+forthword_ Y_NOT, INLINE_OPT, "y.not"
     y_not_
     ret
 
@@ -340,168 +551,168 @@ forthword_ Y_NOT, INLINE_OPT, "y'"
 ; ( n1 X:n2 -- n3 )
 ; Logic
 ; bitwise W with X register, result in W
-forthword_ AND_X, INLINE_OPT, "&x"
+forthword_ AND_X, INLINE_OPT, "and.x"
     and_x_
     ret
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
 ; bitwise W with X register, result in X
-forthword_ X_AND, INLINE_OPT, "x&"
+forthword_ X_AND, INLINE_OPT, "x.and"
     x_and_
     ret
 
 ; ( n1 Y:n2 -- n3 )
 ; Logic
 ; bitwise W with Y register, result in W
-forthword_ AND_Y, INLINE_OPT, "&y"
+forthword_ AND_Y, INLINE_OPT, "and.y"
     and_y_
     ret
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
 ; bitwise W with Y register, result in Y
-forthword_ Y_AND, INLINE_OPT, "y&"
+forthword_ Y_AND, INLINE_OPT, "y.and"
     x_and_
     ret
 
 ; ( n1 Y:n2 -- n3 )
 ; Logic
 ; bitwise and with A register
-forthword_ AND_A, INLINE_OPT, "&a"
+forthword_ AND_A, INLINE_OPT, "and.a"
     and_a_
     ret
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
 ; bitwise W with A register, result in A
-forthword_ A_AND, INLINE_OPT, "a&"
+forthword_ A_AND, INLINE_OPT, "a.and"
     a_and_
     ret
 
 ; ( n1 Y:n2 -- n3 )
 ; Logic
 ; bitwise and with B register
-forthword_ AND_B, INLINE_OPT, "&b"
+forthword_ AND_B, INLINE_OPT, "and.b"
     and_b_
     ret
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
 ; bitwise W with B register, result in B
-forthword_ B_AND, INLINE_OPT, "b&"
+forthword_ B_AND, INLINE_OPT, "b.and"
     b_and_
     ret
 
 ; ( n1 n2 -- n3 )
 ; Logic
 ; logical or with X register
-forthword_ OR_X, INLINE_OPT, "|x"
+forthword_ OR_X, INLINE_OPT, "or.x"
     or_x_
     ret
 
 ; ( n1 X:n2 -- n1 X:n3 )
 ; Logic
 ; logical or W with X register, result in X
-forthword_ X_OR, INLINE_OPT, "x|"
+forthword_ X_OR, INLINE_OPT, "x.or"
     x_or_
     ret
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
 ; logical or with Y register
-forthword_ OR_Y, INLINE_OPT, "|y"
+forthword_ OR_Y, INLINE_OPT, "or.y"
     or_y_
     ret
 
 ; ( n1 Y:n2 -- n1 Y:n3 )
 ; Logic
 ; logical or W with Y register, result in Y
-forthword_ Y_OR, INLINE_OPT, "y|"
+forthword_ Y_OR, INLINE_OPT, "y.or"
     y_or_
     ret
 
 ; ( n1 n2 -- n3 )
 ; Logic
 ; logical or with A register
-forthword_ OR_A, INLINE_OPT, "|a"
+forthword_ OR_A, INLINE_OPT, "or.a"
     or_a_
     ret
 
 ; ( n1 A:n2 -- n1 A:n3 )
 ; Logic
 ; logical or W with A register, result in A
-forthword_ A_OR, INLINE_OPT, "a|"
+forthword_ A_OR, INLINE_OPT, "a.or"
     a_or_
     ret
 
 ; ( n1 n2 -- n3 )
 ; Logic
 ; logical or with B register
-forthword_ OR_B, INLINE_OPT, "|b"
+forthword_ OR_B, INLINE_OPT, "or.b"
     or_b_
     ret
 
 ; ( n1 B:n2 -- n1 B:n3 )
 ; Logic
 ; logical or W with B register, result in B
-forthword_ B_OR, INLINE_OPT, "b|"
+forthword_ B_OR, INLINE_OPT, "b.or"
     b_or_
     ret
 
 ; ( n1 X:n2 -- n3)
 ; Logic
 ; exclusive or with X register
-forthword_ XOR_X, INLINE_OPT, "||x"
+forthword_ XOR_X, INLINE_OPT, "xor.x"
     xor_x_
     ret
 
 ; ( n1 X:n2 -- n1 X:n3 )
 ; Logic
 ; logical xor W with X register, result in X
-forthword_ X_XOR, INLINE_OPT, "x||"
+forthword_ X_XOR, INLINE_OPT, "x.xor"
     x_xor_
     ret
 
 ; ( n1 n2 -- n3)
 ; Logic
 ; exclusive or with Y register
-forthword_ XOR_Y, INLINE_OPT, "||y"
+forthword_ XOR_Y, INLINE_OPT, "xor.y"
     xor_y_
     ret
 
 ; ( n1 Y:n2 -- n1 Y:n3 )
 ; Logic
 ; logical xor W with Y register, result in Y
-forthword_ Y_XOR, INLINE_OPT, "y||"
+forthword_ Y_XOR, INLINE_OPT, "y.xor"
     y_xor_
     ret
 
 ; ( n1 n2 -- n3)
 ; Logic
 ; exclusive or with A register
-forthword_ XOR_A, INLINE_OPT, "||a"
+forthword_ XOR_A, INLINE_OPT, "xor.a"
     xor_a_
     ret
 
 ; ( n1 A:n2 -- n1 A:n3 )
 ; Logic
 ; logical xor W with A register, result in A
-forthword_ A_XOR, INLINE_OPT, "a||"
+forthword_ A_XOR, INLINE_OPT, "a.xor"
     a_xor_
     ret
 
 ; ( n1 n2 -- n3)
 ; Logic
 ; exclusive or with B register
-forthword_ XOR_B, INLINE_OPT, "||b"
+forthword_ XOR_B, INLINE_OPT, "xor.b"
     xor_b_
     ret
 
 ; ( n1 B:n2 -- n1 B:n3 )
 ; Logic
 ; logical xor W with B register, result in B
-forthword_ B_XOR, INLINE_OPT, "b||"
+forthword_ B_XOR, INLINE_OPT, "b.xor"
     b_xor_
     ret
 
@@ -673,30 +884,6 @@ forthword_ X_, INLINE_OPT, "x"
 ; load Y register into WR
 forthword_ Y_, INLINE_OPT, "y"
     y_
-    ret
-
-; ( n1 n2 -- n2 ) A: n1
-; Remove next on stack and write to A register
-forthword_ POPA, INLINE_OPT, "pop.a"
-    pop_a_
-    ret
-
-; ( n1 n2 -- n2 ) B: n1
-; Remove next on stack and write to B register
-forthword_ POPB, INLINE_OPT, "pop.b"
-    pop_b_
-    ret
-
-; ( n1 n2 -- n2 ) X: n1
-; Remove next on stack and write to X register
-forthword_ POPX, INLINE_OPT, "pop.x"
-    pop_x_
-    ret
-
-; ( n1 n2 -- n2 ) Y: n1
-; Remove next on stack and write to Y register
-forthword_ POPY, INLINE_OPT, "pop.y"
-    pop_y_
     ret
 
 ; ( -- )
