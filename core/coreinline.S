@@ -886,6 +886,30 @@ forthword_ Y_, INLINE_OPT, "y"
     y_
     ret
 
+; ( -- ) A: 0
+; set A to 0
+Forthword_ ZEROA, INLINE_OPT, "0!a"
+	zero_a_
+	ret
+
+; ( -- ) B: 0
+; set B to 0
+Forthword_ ZEROB, INLINE_OPT, "0!b"
+	zero_b_
+	ret
+
+; ( -- ) X: 0
+; set X to 0
+Forthword_ ZEROX, INLINE_OPT, "0!x"
+	zero_x_
+	ret
+
+; ( -- ) Y: 0
+; set Y to 0
+Forthword_ ZEROY, INLINE_OPT, "0!y"
+	zero_y_
+	ret
+
 ; ( -- )
 ; add 1 to register A 
 forthword_ APLUS1, INLINE_OPT, "a+1"

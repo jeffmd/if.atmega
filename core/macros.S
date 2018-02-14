@@ -803,22 +803,22 @@
     clr wh
 .endm
 
-.macro a_zero_
+.macro zero_a_
     clr al
     clr ah
 .endm
 
-.macro b_zero_
+.macro zero_b_
     clr bl
     clr bh
 .endm
 
-.macro x_zero_
+.macro zero_x_
     clr xrl
     clr xrh
 .endm
 
-.macro y_zero_
+.macro zero_y_
     clr yrl
     clr yrh
 .endm
