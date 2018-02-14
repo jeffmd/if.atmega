@@ -303,10 +303,39 @@ forthword_ SREIGHT, INLINE_OPT, "~h"
 
 ; ( n1 -- n2) 
 ; Arithmetics
-; 1-complement of TOS
-forthword_ NOT, INLINE_OPT, "not"
+; 1-complement of W
+forthword_ NOT, INLINE_OPT, "'"
     not_
     ret
+
+; ( n1 -- n2) 
+; Arithmetics
+; 1-complement of A
+forthword_ A_NOT, INLINE_OPT, "a'"
+    a_not_
+    ret
+
+; ( n1 -- n2) 
+; Arithmetics
+; 1-complement of B
+forthword_ B_NOT, INLINE_OPT, "b'"
+    b_not_
+    ret
+
+; ( n1 -- n2) 
+; Arithmetics
+; 1-complement of X
+forthword_ X_NOT, INLINE_OPT, "x'"
+    x_not_
+    ret
+
+; ( n1 -- n2) 
+; Arithmetics
+; 1-complement of Y
+forthword_ Y_NOT, INLINE_OPT, "y'"
+    y_not_
+    ret
+
 
 ; ( n1 X:n2 -- n3 )
 ; Logic
