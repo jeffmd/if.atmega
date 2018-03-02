@@ -115,7 +115,8 @@ forthword_ QUIT, 0, "quit"
     ; reset return stack pointers
     call RP0
     str_rp_
-    ;**rcall RESET    
+    ;**rcall RESET  
+    call WSET
     rjmp DOTASKS
 
 ; must be last word in highmem of kernel/core

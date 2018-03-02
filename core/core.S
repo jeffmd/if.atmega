@@ -94,8 +94,8 @@ forthword_ POPRET, DIS_CALL_OPT, "popret"
 
 ; ( -- n) (R: n -- n )
 ; Stack
-; put a copy of TOR on TOS
-forthword_ R_FETCH, DIS_CALL_OPT, "r"
+; put a copy of R0 on return stack in working register
+forthword_ R0, DIS_CALL_OPT, "r0"
     in ZL, SPL
     in ZH, SPH
     ldd wh, Z+3
@@ -783,7 +783,7 @@ forthword_ YSTORE, 0, "y!"
 
 ; ( n -- )
 ; Write char memory pointed to by register Y
-forthword_ YCSTORE, 0, "Yc!"
+forthword_ YCSTORE, 0, "yc!"
     movw ZL, yrl
     mov temp4, wl
     rjmp ZCSTORE

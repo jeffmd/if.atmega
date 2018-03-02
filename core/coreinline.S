@@ -446,6 +446,30 @@ forthword_ ISZERO, INLINE_OPT, "0?"
     iszero_
     ret
 
+; ( n -- n )
+; test if A is zero
+Forthword_ AISZERO, INLINE_OPT, "a0?"
+	a_iszero_
+	ret
+  
+; ( n -- n )
+; test if B is zero
+Forthword_ BISZERO, INLINE_OPT, "b0?"
+	b_iszero_
+	ret
+  
+; ( n -- n )
+; test if X is zero
+Forthword_ XISZERO, INLINE_OPT, "x0?"
+	x_iszero_
+	ret
+  
+; ( n -- n )
+; test if Y is zero
+Forthword_ YISZERO, INLINE_OPT, "y0?"
+	y_iszero_
+	ret
+
 ; ( n1|u1 -- n2|u2 ) 
 ; Arithmetics
 ; optimized increment

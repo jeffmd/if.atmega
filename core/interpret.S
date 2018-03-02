@@ -199,25 +199,146 @@ forthword_ PNAME, 0, "pname"
     rcall SKIPBL     ; ( ? )
     bl_              ; ( bl )
     rjmp PARSE       ; ( c-addr len )
+
+; ( xtc xti -- )
+; Select register for literal
+Forthword_ REGSET, IMMEDIATE_EN, "regset"
+  rpush_y_           ; ( xtc xti )(R:y)
+  str_y_             ; ( xtc xti Y:xti )
+  lit_ Lit_Interpret ; ( xtc Lit_Interpret )
+  rcall YWSTORE      ; ( xtc Lit_Interpret )
+  d0_str_y_          ; ( xtc Lit_Interpret Y:xtc )
+  lit_ Lit_Compile   ; ( xtc Lit_Compile Y:xtc )
+  rcall YWSTORE      ; ( xtc Lit_Compile )
+  rcall DPOP2        ; ( )
+  rpop_y_            ; ( Y:y )
+  ret
+
+; ( -- )
+; Select W register for literal
+Forthword_ WSET, IMMEDIATE_EN, "w="
+  push_
+  zero_ ;lit_ pm(WLIT_C)
+  push_
+  lit_ pm(WLIT_INTERP)
+  rjmp REGSET
+  
+; ( -- )
+; Select A register for literal
+Forthword_ ASET, IMMEDIATE_EN, "a="
+  push_
+  zero_ ;lit_ pm(ALIT_C)
+  push_
+  lit_ pm(ALIT_INTERP)
+  rjmp REGSET
+
+; ( -- )
+; Select B register for literal
+Forthword_ BSET, IMMEDIATE_EN, "b="
+  push_
+  zero_ ;lit_ pm(BLIT_C)
+  push_
+  lit_ pm(BLIT_INTERP)
+  rjmp REGSET
+
+; ( -- )
+; Select X register for literal
+Forthword_ XSET, IMMEDIATE_EN, "x="
+  push_
+  zero_ ;lit_ pm(XLIT_C)
+  push_
+  lit_ pm(XLIT_INTERP)
+  rjmp REGSET
+
+; ( -- )
+; Select Y register for literal
+Forthword_ YSET, IMMEDIATE_EN, "y="
+  push_
+  zero_ ;lit_ pm(YLIT_C)
+  push_
+  lit_ pm(YLIT_INTERP)
+  rjmp REGSET
+
             
+; ( n -- )
+; store n in WR
+Forthword_ WLIT_INTERP, IMMEDIATE_EN, "[w=]"
+  movw temp4, wl
+  lit_ WR            ; ( WR )
+  rcall WSTORE       ; ( WR )
+  ret
+
+; ( n -- )
+; store n in RY
+Forthword_ YLIT_INTERP, IMMEDIATE_EN, "[y=]"
+  movw temp4, wl
+  lit_ RY            ; ( RY )
+  rcall WSTORE       ; ( RY )
+  ret
+
+; ( n -- )
+; store n in RX
+Forthword_ XLIT_INTERP, IMMEDIATE_EN, "[x=]"
+  movw temp4, wl
+  lit_ RX            ; ( RX )
+  rcall WSTORE       ; ( RX )
+  ret
+
+; ( n -- )
+; store n in RA
+Forthword_ ALIT_INTERP, IMMEDIATE_EN, "[a=]"
+  movw temp4, wl
+  lit_ RA            ; ( RA )
+  rcall WSTORE       ; ( RA )
+  ret
+
+; ( n -- )
+; store n in RB
+Forthword_ BLIT_INTERP, IMMEDIATE_EN, "[b=]"
+  movw temp4, wl
+  lit_ RB            ; ( RB )
+  rcall WSTORE       ; ( RB )
+  ret
+
+; ( c -- )
+; fetch the lit vector and EXEC it. Will interpret a litteral for one of the registers
+Forthword_ LIT_INTERP, 0, "lit.interp"
+  push_
+  lit_  Lit_Interpret
+  rcall FETCH
+  jmp EXEC
+
+; ( c -- )
+; fetch the lit vector and EXEC it. Will compile a litteral for one of the registers
+Forthword_ LIT_COMP, 0, "lit.comp"
+  push_
+  lit_  Lit_Compile
+  rcall FETCH
+  jmp EXEC
+
             
 ; ( addr len -- [n] f )
 ; Interpreter
 ; recognizer for integer numbers
 forthword_ REC_NUM, 0, "rec#"
     ; try converting to a number
-    nip_ ;**call NUMBER              ; ( [n] f )
-    zero_
+    call NUMBER              ; ( [n] f )
     iszero_
     breq PFA_REC_NONUMBER
 
     rcall STATEFETCH         ; ( n state )
     iszero_
-    pop_
+    pop_                     ; ( n )
     breq PFA_REC_NUMBER_OK
-    ;**call LIT
+      ;**call LIT
+      rjmp REC_NUMBER_DONE
+      
 PFA_REC_NUMBER_OK:
-    jmp TRUE                ; ( n true )
+    rcall LIT_INTERP
+
+REC_NUMBER_DONE:
+    rcall WSET
+    true_                   ; ( true )
 
 PFA_REC_NONUMBER:
     ret                     ; ( 0 )
@@ -290,11 +411,11 @@ REC_WORD_EXECUTE:
     
     push_a_          ; ( a w )
     push_            ; ( a w w )
-    lit_ WR          ; ( y w WR )
-    pop_a_           ; ( y WR A:w )
-    rcall AWSTORE    ; ( WR )
+    lit_ WR          ; ( a w WR )
+    pop_a_           ; ( a WR A:w )
+    rcall AWSTORE    ; ( a WR )
     twoplus_
-    pop_a_           ; ( WR A:y )
+    pop_a_           ; ( WR A:a )
     rcall AWSTORE
     twoplus_
     rcall BWSTORE

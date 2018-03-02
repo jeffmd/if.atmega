@@ -8,10 +8,11 @@
 
 .include "interrupt.S"
 .include "coreinline.S"
+.include "core_lowmem.S"
 ;.include "minimum.S"
 .include "math.S"
-;.include "mathadv.S"
-;.include "number.S"
+.include "mathadv.S"
+.include "number.S"
 .include "kernel_lowmem.S"
 ;.include "asm.S"
 
