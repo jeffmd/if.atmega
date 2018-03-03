@@ -821,34 +821,6 @@ forthword_ ZERO, INLINE_OPT, "0"
     zero_
     ret
 
-; ( -- 1 ) 
-; Arithmetics
-; place a value 1 in working register
-forthword_ ONE, INLINE_OPT, "1"
-    one_
-    ret
-
-; ( -- 2 ) 
-; Arithmetics
-; place a value 2 in working register
-forthword_ TWO, INLINE_OPT, "2"
-    two_
-    ret
-
-; ( -- 4 ) 
-; Arithmetics
-; place a value 4 in working register
-forthword_ FOUR, INLINE_OPT, "4"
-    four_
-    ret
-
-; ( -- 10 ) 
-; Arithmetics
-; place a value 10 on TOS
-forthword_ TEN, INLINE_OPT, "10"
-    ten_
-    ret
-
 ; ( -- 32 )
 ; put ascii code of the blank/space character to the stack
 forthword_ BL, INLINE_OPT, "bl"

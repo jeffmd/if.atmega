@@ -113,7 +113,8 @@ forthword_ THROW, 0, "throw"
     rpop_              ; ( hxt Y:hxt ) (R: callerret SP )
     call XSTORE        ; ( hxt )
     rpop_sp_           ; ( SP ) (R: callerret )
-    jmp ONE
+    one_
+    ret
 
 ; allocate space for User Area
 .pushsection .noinit
