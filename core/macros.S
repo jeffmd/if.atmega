@@ -823,22 +823,6 @@
     clr yrh
 .endm
 
-.macro one_
-  lit_ 1
-.endm
-
-.macro two_
-  lit_ 2
-.endm
-
-.macro four_
-  lit_ 4
-.endm
-
-.macro ten_
-  lit_ 10
-.endm
-
 .macro bl_
   lit_ 32
 .endm

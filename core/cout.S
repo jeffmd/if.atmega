@@ -13,7 +13,7 @@ forthword_ EMIT, 0, "emit"
 forthword_ CR, 0, "cr"
     lit_ 13
     rcall EMIT
-    ten_
+    lit_ 10
     rjmp EMIT
     
 ; ( addr n --  )

@@ -31,13 +31,18 @@ forthword_ DPUSH2, 0, "push2"
     push_
     ret
 
+; ( n n -- )
+; Stack
+; drop TOS twice
+forthword_ DPOP2, 0, "pop2"
+    nip_
+    pop_
+    ret
+
 ; ( n1 n2 -- n2 n1)
 ; Stack
 ; swaps the two top level stack cells
 forthword_ SWAP, 0, "swap"
-    ;movw xrl, wl
-    ;pop_
-    ;pushx_
     ld temp4, Y
     ldd temp5, Y+1
     str_d0_
@@ -58,26 +63,6 @@ forthword_ OVER, 0, "over"
 forthword_ TWOOVER, 0, "2over"
     rcall OVER
     rjmp OVER
-
-# ( x1 x2 x3 -- x1 x2 x3 x1 x2 x3 )
-# Place a copy of x1, x2, x3 on top of the stack
-Forthword_ THREEOVER, 0, "3over"
-    push_
-    d2_
-    push_
-    d2_
-    push_
-    d2_
-    ret
-
-; ( n n -- )
-; Stack
-; drop TOS twice
-forthword_ DPOP2, 0, "pop2"
-    nip_
-    pop_
-    ret
-
 
 ;;;;;;;;;;;; Return Stack ;;;;;;;;;;;;;
 
@@ -225,54 +210,6 @@ forthword_ WALIGN, 0, "w_"
   	;andi wl, 0xfe
     twoslash_
     ret
-
-
-; ( n1 n2 -- n3)
-; Arithmetics
-; logically shift n1 left n2 times
-forthword_ LSHIFT, 0, "<<"
-    movw ZL, wl
-    pop_
-PFA_LSHIFT1:
-    sbiw ZL, 1
-    brmi PFA_LSHIFT2
-    lsl wl
-    rol wh
-    rjmp PFA_LSHIFT1
-PFA_LSHIFT2:
-    ret
-
-; ( n1 n2 -- n3 )
-; Arithmetics
-; shift n1 n2-times logically right
-forthword_ RSHIFT, 0, ">>"
-    movw ZL, wl
-    pop_
-PFA_RSHIFT1:
-    sbiw ZL, 1
-    brmi PFA_RSHIFT2
-    lsr wh
-    ror wl
-    rjmp PFA_RSHIFT1
-PFA_RSHIFT2:
-    ret
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; ( addr  -- ) (R: -- x*y)
-; Stack
-; set return stack pointer
-; must be called
-forthword_ RP_STORE, DIS_CALL_OPT, "!rp"
-    in yrl, SREG
-    cli
-    ; keep the return address
-    pop ZH
-    pop ZL
-    str_rp_
-    out SREG, yrl
-    pop_
-    ijmp
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -645,15 +582,6 @@ forthword_ AFETCHI, 0, "a@i"
     rjmp ZFETCHI
 
 
-; ( n1 -- n2 )
-; Read memory pointed to by register A plus offset
-;forthword_ NAFETCH, 0, "na@"
-;    movw ZL, al
-;    add ZL, wl
-;    adc ZH, wh
-;    rjmp ZFETCH
-
-
 ; ( -- n )
 ; Read a byte from ram pointed to by register A
 forthword_ ACFETCH, 0, "ac@"
@@ -676,15 +604,6 @@ forthword_ ACSTORE, 0, "ac!"
     mov temp4, wl
     rjmp ZCSTORE
 
-
-; ( n offs -- )
-; Write TOS to memory pointed to by register A plus offset
-forthword_ NASTORE, 0, "na!"
-    movw ZL, al
-    add ZL, wl
-    adc ZH, wh
-    pop_
-    rjmp ZSTORE
 
 ; ( -- n2 )
 ; Read memory pointed to by register B

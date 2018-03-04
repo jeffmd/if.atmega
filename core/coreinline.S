@@ -741,54 +741,118 @@ forthword_ B_XOR, INLINE_OPT, "b.xor"
     ret
 
 ; ( ddddkkkk -- kkkkdddd )
-; Arithmetics
 ; swap nibbles in lower half of TOS
 forthword_ SWAPNIB, INLINE_OPT, "swnib"
     swapnib_
     ret
 
-; ( n1 -- n2 ) 
-; Arithmetics
+; ( n1 -- n1/2 ) 
 ; arithmetic shift right
 forthword_ TWOSLASH, INLINE_OPT, "/2"
     twoslash_
     ret
 
-; ( n1 -- n2 ) 
-; Arithmetics
-; arithmetic shift left, filling with zero
+; ( A:n1 -- A:n1/2 ) 
+; arithmetic shift right of A register
+forthword_ ASLASH2, INLINE_OPT, "a/2"
+    a_slash_2_
+    ret
+
+; ( B:n1 -- B:n1/2 ) 
+; arithmetic shift right of B register
+forthword_ BSLASH2, INLINE_OPT, "b/2"
+    b_slash_2_
+    ret
+
+; ( X:n1 -- X:n1/2 ) 
+; arithmetic shift right of X register
+forthword_ XSLASH2, INLINE_OPT, "x/2"
+    x_slash_2_
+    ret
+
+; ( Y:n1 -- Y:n1/2 ) 
+; arithmetic shift right of Y register
+forthword_ YSLASH2, INLINE_OPT, "y/2"
+    y_slash_2_
+    ret
+
+; ( n1 -- n1*2 ) 
+; arithmetic shift left, multiply by 2
 forthword_ TWOSTAR, INLINE_OPT, "*2"
     twostar_
     ret
 
+; ( A:n1 -- A:n1*2 ) 
+; arithmetic shift left of A register, multiply by 2
+forthword_ ASTAR2, INLINE_OPT, "a*2"
+    a_star_2_
+    ret
+
+; ( B:n1 -- B:n1*2 ) 
+; arithmetic shift left of B register, multiply by 2
+forthword_ BSTAR2, INLINE_OPT, "b*2"
+    b_star_2_
+    ret
+
+; ( X:n1 -- X:n1*2 ) 
+; arithmetic shift left of X register, multiply by 2
+forthword_ XSTAR2, INLINE_OPT, "x*2"
+    x_star_2_
+    ret
+
+; ( Y:n1 -- Y:n1*2 ) 
+; arithmetic shift left of Y register, multiply by 2
+forthword_ YSTAR2, INLINE_OPT, "y*2"
+    y_star_2_
+    ret
+
 ; ( n1 A:n2 -- n3)
-; Arithmetics
 ; add contents of A register to working register
 forthword_ PLUSA, INLINE_OPT, "+a"
     plus_a_
     ret
 
+; ( n1 A:n2 -- A:n3)
+; add contents of working register to A register
+forthword_ APLUS, INLINE_OPT, "a+"
+    a_plus_
+    ret
+
 ; ( n1 Y:n2 -- n3)
-; Arithmetics
 ; add contents of B register to working register
 forthword_ PLUSB, INLINE_OPT, "+b"
     plus_b_
     ret
 
+; ( n1 B:n2 -- B:n3)
+; add contents of working register to B register
+forthword_ BPLUS, INLINE_OPT, "b+"
+    b_plus_
+    ret
+
 ; ( n1 X:n2 -- n3)
-; Arithmetics
 ; add contents of X register to working register
 forthword_ PLUSX, INLINE_OPT, "+x"
     plus_x_
     ret
 
+; ( n1 X:n2 -- X:n3)
+; add contents of working register to X register
+forthword_ XPLUS, INLINE_OPT, "x+"
+    x_plus_
+    ret
+
 ; ( n1 Y:n2 -- n3)
-; Arithmetics
 ; add contents of Y register to working register
 forthword_ PLUSY, INLINE_OPT, "+y"
     plus_y_
     ret
 
+; ( n1 Y:n2 -- Y:n3)
+; add contents of working register to Y register
+forthword_ YPLUS, INLINE_OPT, "y+"
+    y_plus_
+    ret
 
 ; ( n1|u1 -- n1-y|u1-y )
 ; subtract y from n1
@@ -796,11 +860,23 @@ Forthword_ MINUSY, INLINE_OPT, "-y"
   minus_y_
   ret
 
+; ( n1 Y:n2 -- Y:n2-n1)
+; subtract contents of working register from Y register
+forthword_ YMINUS, INLINE_OPT, "y-"
+    y_minus_
+    ret
+
 ; ( n1|u1 -- n1-x|u1-x )
 ; subtract x from n1
 Forthword_ MINUSX, INLINE_OPT, "-x"
   minus_x_
   ret
+
+; ( n1 X:n2 -- X:n2-n1)
+; subtract contents of working register from X register
+forthword_ XMINUS, INLINE_OPT, "x-"
+    x_minus_
+    ret
 
 ; ( n1|u1 -- n1-a|u1-a )
 ; subtract a from n1
@@ -808,11 +884,23 @@ Forthword_ MINUSA, INLINE_OPT, "-a"
   minus_a_
   ret
 
+; ( n1 A:n2 -- A:n2-n1)
+; subtract contents of working register from A register
+forthword_ AMINUS, INLINE_OPT, "a-"
+    a_minus_
+    ret
+
 ; ( n1|u1 -- n1-b|u1-b )
 ; subtract b from n1
 Forthword_ MINUSB, INLINE_OPT, "-b"
   minus_b_
   ret
+
+; ( n1 B:n2 -- B:n2-n1)
+; subtract contents of working register from B register
+forthword_ BMINUS, INLINE_OPT, "b-"
+    b_minus_
+    ret
 
 ; ( -- 0 ) 
 ; Arithmetics
@@ -1005,7 +1093,7 @@ forthword_ YMINUS2, INLINE_OPT, "y-2"
 ; ( -- icell )
 ; push instruction cell size 
 forthword_ ICELL, INLINE_OPT, "icell"
-    one_
+    lit_ 1
     ret
   
 ; ( n -- n-icell )
@@ -1023,7 +1111,7 @@ forthword_ ICELLP, INLINE_OPT, "icell+"
 ; ( -- dcell )
 ; push data cell size 
 forthword_ DCELL, INLINE_OPT, "dcell"
-    two_
+    lit_ 2
     ret
   
 ; ( n -- n-dcell )

@@ -14,7 +14,7 @@
 .include "mathadv.S"
 .include "number.S"
 .include "kernel_lowmem.S"
-;.include "asm.S"
+.include "asm.S"
 
 ;**********
 DPSTART:
@@ -27,7 +27,7 @@ DPSTART:
 .include "dictionary.S"
 .include "core.S"
 .include "string.S"
-;.include "compiler.S"
+.include "compiler.S"
 .include "defer.S"
 .include "kernel_highmem.S"
 

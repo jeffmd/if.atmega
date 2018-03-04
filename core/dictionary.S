@@ -137,7 +137,7 @@ FINDW_BEGIN:
     iszero_
     brmi FINDLAST       ; ( addr len idx idx )
       pop_              ; ( addr len idx )
-      rcall THREEOVER   ; ( addr len idx addr len idx )
+      call THREEOVER    ; ( addr len idx addr len idx )
       rcall FINDWI      ; ( addr len idx nfa )
       iszero_
       ; end loop if word found

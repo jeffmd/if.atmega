@@ -1,5 +1,32 @@
 ; core_lowmem.S
 
+# ( x1 x2 x3 -- x1 x2 x3 x1 x2 x3 )
+# Place a copy of x1, x2, x3 on top of the stack
+Forthword_ THREEOVER, 0, "3over"
+    push_
+    d2_
+    push_
+    d2_
+    push_
+    d2_
+    ret
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ( addr  -- ) (R: -- x*y)
+; Stack
+; set return stack pointer
+; must be called
+forthword_ RP_STORE, DIS_CALL_OPT, "!rp"
+    in yrl, SREG
+    cli
+    ; keep the return address
+    pop ZH
+    pop ZL
+    str_rp_
+    out SREG, yrl
+    pop_
+    ijmp
+
 ; ( -- n ) (R: n n1 -- n n1 )
 ;             r1 r0
 ; Stack
@@ -291,3 +318,20 @@ Forthword_ Y_STR_R2, DIS_CALL_OPT, "y!r2"
     std Z+7, yrl
     std Z+8, yrh
 	  ret
+
+; ( n offs -- )
+; Write TOS to memory pointed to by register A plus offset
+forthword_ NASTORE, 0, "na!"
+    movw ZL, al
+    add ZL, wl
+    adc ZH, wh
+    pop_
+    jmp ZSTORE
+
+; ( n1 -- n2 )
+; Read memory pointed to by register A plus offset
+;forthword_ NAFETCH, 0, "na@"
+;    movw ZL, al
+;    add ZL, wl
+;    adc ZH, wh
+;    rjmp ZFETCH

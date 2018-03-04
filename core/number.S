@@ -28,14 +28,14 @@ forthword_ BASEFETCH, 0, "base@"
 ; set base for number conversion to 2
 
 forthword_ BIN, 0, "bin"
-    two_
+    lit_ 2
     rjmp BASESTORE
 
 ; ( -- )
 ; Numeric IO
 ; set base for numeric conversion to 10
 forthword_ DECIMAL, 0, "decimal"
-    ten_
+    lit_ 10
     rjmp BASESTORE
 
 ; ( -- )
@@ -113,7 +113,7 @@ PRAEFIX:        ; ( adr1 len1 -- adr2 len2 )
 
 SET_PRAEFIX:
     rcall SETBASE     ;( adr1 len1 ? )
-    one_              ;( adr1 len1 1 )
+    lit_ 1            ;( adr1 len1 1 )
     jmp SLASHSTRING
 
 ; (addr len -- addr len flag) Numeric IO
@@ -128,7 +128,7 @@ NUMBERSIGN:        ; ( addr len -- )
       ret
 NUMBERSIGN_HASSIGN:
       rpush_       ; ( addr len flag ) (R: flag )
-      one_         ; ( addr len 1 )
+      lit_ 1       ; ( addr len 1 )
       call SLASHSTRING ; ( addr' len' )
       push_        ; ( addr' len' len' )
       rpop_        ; ( addr' len' char )
@@ -157,7 +157,7 @@ TO_NUMBER_CONV:
       pop_x_               ; ( u adr len u' X:digit )
       plus_x_              ; ( u adr len u'+x )
       str_d2_              ; ( u'' adr len u'' )
-      one_                 ; ( u'' adr len 1 )
+      lit_ 1               ; ( u'' adr len 1 )
       call SLASHSTRING     ; ( u'' adr' len' )
       rjmp TO_NUMBER
 

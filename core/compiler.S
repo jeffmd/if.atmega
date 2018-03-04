@@ -67,7 +67,7 @@ forthword_ DPPLUS, 0, "dp+"
 ; Dictionary
 ; increment 16 bit (dictionary pointer) DP by one
 forthword_ DPPLUSONE, 0, "dp+1"
-    one_
+    lit_ 1
     rjmp DPPLUS
 
 
@@ -216,28 +216,31 @@ SCOMMA_END:
 ; count is number of words to get to match value in flash
 ; or get word index of match
 forthword_ FINDI, 0, "findi"
+    rpush_a_         ; ( start match )(R: A )
+    rpush_b_         ; ( start match )(R: A B )
     ; fetch from flash and check if equal to match word
-    rcall TO_B       ; ( start ) B: match
-    push_             ; ( start start )
-    twostar_         ; ( start start*2 )
-    rcall TO_A       ; ( start ) A: start*2
+    str_b_           ; ( start match ) B: match
+    d0_str_a_        ; ( start match ) A: start
+    a_star_2_        ; ( start match ) A: A*2
     ; begin
 FINDI_BEGIN:
-      rcall AFETCHI  ; ( start val )
-      aplus2_
-      push_
-      movw wl, bl  ; ( start val match )
-      rcall EQUAL    ; ( start flag )
+    rcall AFETCHI    ; ( start val )
+    aplus2_
+    push_
+    movw wl, bl      ; ( start val match )
+    rcall EQUAL      ; ( start flag )
     ; until
-    iszero_          ; ( start )
-    pop_
+    iszero_          ; ( start flag )
     breq FINDI_BEGIN
 
-    rcall A_         ; ( start end )
+    a_               ; ( start end )
     twoslash_        ; ( start end/2 )
     oneminus_        ; ( start end/2-1 )
-    rcall OVER       ; ( start end/2-1 start )
-    rjmp MINUS       ; ( start count )
+    d0_str_y_        ; ( start end/2-1 Y:start )
+    minus_y_         ; ( start count )
+    rpop_b_          ; ( start count B:b )(R: A )
+    rpop_a_          ; ( start count A:a )(R:  )
+    ret
 
 
 ; ( start -- )

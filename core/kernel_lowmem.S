@@ -113,7 +113,7 @@ forthword_ THROW, 0, "throw"
     rpop_              ; ( hxt Y:hxt ) (R: callerret SP )
     call XSTORE        ; ( hxt )
     rpop_sp_           ; ( SP ) (R: callerret )
-    one_
+    lit_ 1
     ret
 
 ; allocate space for User Area
@@ -167,8 +167,8 @@ forthword_ WARM, 0, "warm"
     ;**call RESET
     rcall DECIMAL
     call ONLY
-    rcall USART
-    rcall INTON
+    call USART
+    call INTON
     call DOSLIT
     ascii_ "if.atmega 0.1"
     call ITYPE
