@@ -67,7 +67,7 @@ forthword_ DPPLUS, 0, "dp+"
 ; Dictionary
 ; increment 16 bit (dictionary pointer) DP by one
 forthword_ DPPLUSONE, 0, "dp+1"
-    rcall ONE
+    one_
     rjmp DPPLUS
 
 
@@ -98,13 +98,13 @@ TAILOPT_OPT:
     ; fetch contents at DP-1
     rcall DP       ; ( DP )
     oneminus_      ; ( DP-1 )
-    push_           ; ( DP-1 DP-1 )
+    push_          ; ( DP-1 DP-1 )
     rcall FETCHI   ; ( DP-1 inst )
     ; bit 4 of high byte must be cleared.
-    cbr wh, 1<<4    ; ( DP-1 inst' )
+    cbr wh, 1<<4   ; ( DP-1 inst' )
     ; store result at DP-1
     rcall SWAP     ; ( inst' DP-1 )
-    rjmp STOREI     ; (  )
+    rjmp STOREI    ; ( ? )
     
 TAILOPT_CALL:
     
@@ -117,27 +117,28 @@ TAILOPT_CALL:
     ; assume <64k address space so can directly replace first part of instruction, don't need to read it in
     ; bit 1 of high word low byte must be cleared.
     ; write in 0x940C at DP-2
-    lit_ 0x940C  ; ( 0x940c )
-    rcall DP            ; ( 0x940c DP )
+    lit_ 0x940C        ; ( 0x940c )
+    push_              ; ( 0x940c 0x940c )
+    rcall DP           ; ( 0x940c DP )
     twominus_          ; ( 0x940c DP-2 )
-    rjmp STOREI        ; (  )
+    rjmp STOREI        ; ( ? )
 
 ; ( -- )
 ; Compiler
 ; update wid from smudge if valid 
 forthword_ UWID, 0, "uwid"
-    rcall SMUDGE
-    rcall FETCH
-    rcall QDPUSH
+    rcall SMUDGE        ;( smudgeaddr )
+    rcall FETCH         ;( smudge )
     iszero_
-    pop_
     breq UWID_end
+       push_
        rcall CURRENT
        rcall FETCH
        rcall STOREE
        rcall SMUDGE
        rcall ZEROSTORE
        rjmp DPSTOREE
+       
 UWID_end:
     ret
 
@@ -165,43 +166,47 @@ forthword_ LBRACKET, IMMEDIATE_EN, "["
 forthword_ COMMA, 0, ","
     push_           ;( n n )
     rcall DP        ;( n DP )
-    rcall STOREI    ;( n  )
+    rcall STOREI    ;( ? )
     rjmp DPPLUSONE
 
 ; ( addr len len' -- )
 ; Compiler
 ; compiles a string from RAM to Flash
 forthword_ DOSCOMMA, 0, "(s,)"
-    rcall COMMA        ; ( addr len )
+    rpush_a_           ; ( addr len len' ) (R: A )
+    rcall COMMA        ; ( addr len ? )
+    pop_               ; ( addr len )
     rcall BTOW         ; ( addr len/2 rem )
-    rcall TO_R         ; ( addr len/2 ) (R: rem )
-    pop_a_             ; ( len/2 ) A: addr
+    rpush_
+    pop_               ; ( addr len/2 ) (R: rem )
+    d0_str_a_          ; ( addr len/2 ) A: addr
 
     ; begin
-PFA_SCOMMA1:
+SCOMMA_LOOP:
     ; ?while
-    iszero_      ; ( len )
-    breq PFA_SCOMMA2
+    iszero_            ; ( len len' )
+    breq SCOMMA_LAST
+    str_d0_            ; ( len' len' )
     rcall AFETCH       ; ( len c1c2 )
     aplus2_
-    rcall COMMA        ; ( len )
-    oneminus_          ; ( len-1 )
+    rcall COMMA        ; ( len ? )
+    d0_                ; ( len len )
+    oneminus_          ; ( len len-1 )
     ; repeat
-    rjmp PFA_SCOMMA1
+    rjmp SCOMMA_LOOP
 
-PFA_SCOMMA2:
-    pop_              ; (  )
-    push_
+SCOMMA_LAST:
+    pop_              ; ( len len )
     rpop_             ; ( rem ) (R: )
     ; if
-    iszero_           ; ( )
-    pop_
-    breq PFA_SCOMMA3
+    iszero_           ; ( rem )
+    breq SCOMMA_END
       rcall ACFETCH    ; ( c1 )
-      rjmp COMMA       ; ( )
+      rcall COMMA      ; ( ? )
 
     ; then
-PFA_SCOMMA3:
+SCOMMA_END:
+    rpop_a_            ; ( A:a ) (R: )
     ret
    
 ; ( start match -- start count )
@@ -252,7 +257,8 @@ forthword_ INLINE, 0, "inline"
     rcall DP                 ; ( start count dp )
     rcall SWAP               ; ( start dp count )
     push_                    ; ( start dp count count )
-    rcall DPPLUS             ; ( start dp count )
+    rcall DPPLUS             ; ( start dp count ? )
+    pop_                     ; ( start dp count )
     rjmp ITOI
 
 ; ( -- )
