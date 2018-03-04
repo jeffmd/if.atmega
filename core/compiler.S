@@ -163,8 +163,9 @@ forthword_ LBRACKET, IMMEDIATE_EN, "["
 ; Dictionary
 ; compile 16 bit into flash at (dictionary pointer) DP
 forthword_ COMMA, 0, ","
-    rcall DP
-    rcall STOREI
+    push_           ;( n n )
+    rcall DP        ;( n DP )
+    rcall STOREI    ;( n  )
     rjmp DPPLUSONE
 
 ; ( addr len len' -- )
@@ -242,13 +243,15 @@ forthword_ INLINE, 0, "inline"
     sbr fflags, 1<<DIS_CALL_OPT_FB
     ; find the ret word, want count to ret
     ; count will be number of words to inline
-    lit_ 0x9508        ; ( start 0x9508 )
+    push_
+    lit_ 0x9508              ; ( start 0x9508 )
     rcall FINDI              ; ( start count )
 
     ; dp swap dup dp+ itoi
+    push_
     rcall DP                 ; ( start count dp )
     rcall SWAP               ; ( start dp count )
-    push_                     ; ( start dp count count )
+    push_                    ; ( start dp count count )
     rcall DPPLUS             ; ( start dp count )
     rjmp ITOI
 

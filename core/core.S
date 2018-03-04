@@ -353,8 +353,6 @@ forthword_ STOREI, 0, "!i"
   ; restore parameter stack
   pop YH
   pop YL
-  ; finally clear the stack
-  pop_
   pop xrh
   ; restore status register (and interrupt enable flag)
   out SREG,xrh
