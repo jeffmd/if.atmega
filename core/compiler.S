@@ -131,12 +131,12 @@ forthword_ UWID, 0, "uwid"
     rcall FETCH         ;( smudge )
     iszero_
     breq UWID_end
-       push_
-       rcall CURRENT
-       rcall FETCH
-       rcall STOREE
-       rcall SMUDGE
-       rcall ZEROSTORE
+       push_            ;( smudge smudge )
+       rcall CURRENT    ;( smudge current )
+       rcall FETCH      ;( smudge wid )
+       rcall STOREE     ;( ? )
+       rcall SMUDGE     ;( smudgeaddr )
+       rcall ZEROSTORE  ;( smudgeaddr )
        rjmp DPSTOREE
        
 UWID_end:
@@ -196,7 +196,7 @@ SCOMMA_LOOP:
     rjmp SCOMMA_LOOP
 
 SCOMMA_LAST:
-    pop_              ; ( len len )
+    pop_              ; ( len )
     rpop_             ; ( rem ) (R: )
     ; if
     iszero_           ; ( rem )

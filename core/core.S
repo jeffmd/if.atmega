@@ -221,22 +221,22 @@ forthword_ STOREE, 0, "!e"
     pop_
     in_ yrl, SREG
     cli
-    rcall PFA_STOREE1
+    rcall STOREE_WRITE
     adiw ZL,1
 
     mov wl, wh
-    rcall PFA_STOREE1
+    rcall STOREE_WRITE
     out_ SREG, yrl
     ret
 
-PFA_STOREE1:
+STOREE_WRITE:
     sbic EECR, EEPE
-    rjmp PFA_STOREE1
+    rjmp STOREE_WRITE
 
-PFA_STOREE2: ; estore_wait_low_spm:
+STOREE_WAIT: ; estore_wait_low_spm:
     in_ xrl, SPMCSR
     sbrc xrl,SPMEN
-    rjmp PFA_STOREE2
+    rjmp STOREE_WAIT
 
     out_ EEARH,ZH
     out_ EEARL,ZL

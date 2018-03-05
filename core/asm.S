@@ -49,7 +49,7 @@ forthword_ LDI, 0, "ldi,"
     lit_ 0xE000     ;( reg n 0xe000 )
     push_
     lit_ 0xF000     ;( reg n 0xe000 0xf000 )
-    rjmp  RD_K            ;( )
+    rjmp  RD_K      ;( ? )
 
 ; Operands P-port,bit
 ; Assembler

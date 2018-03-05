@@ -53,25 +53,25 @@ forthword_ HEX, 0, "hex"
 forthword_ DIGITQ, 0, "digit?"
     sbiw wl, 0x30            ; ( c )
     cpi wl, 10
-    brlo PFA_DIGITQ0
+    brlo DIGITQ_VALID
     sbiw wl, 7
     cpi wl, 10
-    brge PFA_DIGITQ0
+    brge DIGITQ_VALID
     zero_                    ; ( 0 )
     ret
 
-PFA_DIGITQ0:
-    call DPUSH2              ; ( c c c )
-    rcall BASEFETCH          ; ( c c base )
-    call UGREATEREQUAL       ; ( c f )
+DIGITQ_VALID:
+    call DPUSH2              ; ( n n n )
+    rcall BASEFETCH          ; ( n n base )
+    call UGREATEREQUAL       ; ( n f )
     iszero_
-    breq PFA_DIGITQ_DONE
+    breq DIGITQ_DONE
     nip_                     ; ( f )
     zero_                    ; ( 0 )
     ret
 
-PFA_DIGITQ_DONE:
-    jmp TRUE                 ; ( true )
+DIGITQ_DONE:
+    jmp TRUE                 ; ( n true )
 
 ; (c -- ) Numeric IO
 ; R( -- )
@@ -108,7 +108,7 @@ PRAEFIX:        ; ( adr1 len1 -- adr2 len2 )
     cpi wl, 0x30       
     brlo SET_PRAEFIX
     ; no praefix
-    pop_              ;( adr1 len1 )
+    pop_               ;( adr1 len1 )
     ret
 
 SET_PRAEFIX:

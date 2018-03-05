@@ -37,17 +37,17 @@ forthword_ CSKIP, 0, "cskip"
   pop_x_               ; ( addr1 c X:n1 )
   x_str_d0_            ; ( n1 c )
   
-PFA_CSKIP1:
+CSKIP_LOOP:
   x_iszero_            ; ( n1 n')
-  breq PFA_CSKIP_DONE
+  breq CSKIP_DONE
   rcall ACFETCH        ; ( n1 c' )
   aplus1_
-  cp wl, yrl            ; ( n1 c' )
-  brne PFA_CSKIP_DONE
+  cp wl, yrl           ; ( n1 c' )
+  brne CSKIP_DONE
   xminus1_             ; ( n1 c X:n'-1 )
-  rjmp PFA_CSKIP1
+  rjmp CSKIP_LOOP
 
-PFA_CSKIP_DONE:
+CSKIP_DONE:
   rpop_a_
   pop_                 ; ( n1 )
   minus_x_             ; ( n1-n' )
@@ -64,17 +64,17 @@ forthword_ CSCAN, 0, "cscan"
   d1_str_a_            ; ( addr1 n1 c A:addr1 )
   d0_str_x_            ; ( addr1 n1 c X:n1 )
   
-PFA_CSCAN1:
+CSCAN_LOOP:
   x_iszero_            ; ( addr1 n1 c )
-  breq PFA_CSCAN_DONE
+  breq CSCAN_DONE
   rcall ACFETCH        ; ( addr1 n1 c' )
   aplus1_
   cp wl, yrl            ; ( addr1 n1 c' )
-  breq PFA_CSCAN_DONE
+  breq CSCAN_DONE
   xminus1_             ; ( addr1 n1 c' X:n'-1 )
-  rjmp PFA_CSCAN1
+  rjmp CSCAN_LOOP
 
-PFA_CSCAN_DONE:
+CSCAN_DONE:
   rpop_a_
   pop_                 ; ( addr1 n1 )
   minus_x_             ; ( addr1 n1-n' )
@@ -90,7 +90,7 @@ forthword_ ISTRCOMPARE, 0, "icmp"
   rcall NOTEQUAL           ; ( r-addr r-len f-addr flag )
   ; if
   iszero_                  ; ( r-addr r-len f-addr flag )
-  breq PFA_ICOMPARE_SAMELEN
+  breq ICOMPARE_SAMELEN
 
   ; strings are not the same length
   nip3_                    ; ( flag )
@@ -98,7 +98,7 @@ forthword_ ISTRCOMPARE, 0, "icmp"
   ret
 
     ; then
-PFA_ICOMPARE_SAMELEN:
+ICOMPARE_SAMELEN:
   rpush_a_
   rpush_b_
   pop_a_                   ; ( r-addr r-len flag A:f-addr )
@@ -109,17 +109,17 @@ PFA_ICOMPARE_SAMELEN:
   x_slash_2_               ; ( flag X:(len+1)/2 )
 
   ; begin
-PFA_ICOMPARE_LOOP:
+ICOMPARE_LOOP:
   ; while
   x_iszero_                ; ( ? )
-  breq PFA_ICOMPARE_FOUND
+  breq ICOMPARE_FOUND
   rcall BFETCH             ; ( r-cc )
   push_                    ; ( r-cc r-cc )
   rcall AFETCHI            ; ( r-cc f-cc )
   xminus1_
   
   ; if not last check then compare words
-  brne PFA_ICOMPARE_COMPCELL
+  brne ICOMPARE_COMPCELL
   ; flash strings are zero-padded at the last cell
   ; that means: if the flash cell is less $0100, than mask the
   ; high byte in the ram cell
@@ -130,31 +130,31 @@ PFA_ICOMPARE_LOOP:
   ; if
   iszero_
   pop_                     ; ( r-cc f-cc )
-  breq PFA_ICOMPARE_COMPCELL
+  breq ICOMPARE_COMPCELL
   rcall SWAP               ; ( f-cc r-cc )
   zerohigh_                ; ( f-cc 0:r-cc)
   ; then
-PFA_ICOMPARE_COMPCELL:
+ICOMPARE_COMPCELL:
   rcall NOTEQUAL           ; ( flag )
   ; if
   iszero_                  ; ( flag )
-  breq PFA_ICOMPARE_NEXTLOOP
+  breq ICOMPARE_NEXTLOOP
     ; not equal
     zero_                  ; ( 0 )
-    rjmp PFA_ICOMPARE_DONE
+    rjmp ICOMPARE_DONE
 
   ; then
-PFA_ICOMPARE_NEXTLOOP:
+ICOMPARE_NEXTLOOP:
   aplus2_
   bplus2_
   ; repeat
-  rjmp PFA_ICOMPARE_LOOP
+  rjmp ICOMPARE_LOOP
 
-PFA_ICOMPARE_FOUND:
+ICOMPARE_FOUND:
   ; strings are the same
   true_
   
-PFA_ICOMPARE_DONE:
+ICOMPARE_DONE:
   rpop_b_
   rpop_a_
   ret
@@ -324,23 +324,23 @@ forthword_ REC_NUM, 0, "rec#"
     ; try converting to a number
     call NUMBER              ; ( [n] f )
     iszero_
-    breq PFA_REC_NONUMBER
+    breq REC_NONUMBER
 
     rcall STATEFETCH         ; ( n state )
     iszero_
     pop_                     ; ( n )
-    breq PFA_REC_NUMBER_OK
+    breq REC_NUMBER_OK
       ;**call LIT
       rjmp REC_NUMBER_DONE
       
-PFA_REC_NUMBER_OK:
+REC_NUMBER_OK:
     rcall LIT_INTERP
 
 REC_NUMBER_DONE:
     rcall WSET
     true_                   ; ( true )
 
-PFA_REC_NONUMBER:
+REC_NONUMBER:
     ret                     ; ( 0 )
 
 ; save registers W, A, B, X, Y
@@ -423,8 +423,8 @@ REC_WORD_CHECKSTATE:
   pop_
   breq REC_WORD_EXECUTE
     ; in compile mode so compile xt
-  ;**call COMPILEXT
-  jmp TRUE
+    call COMPILEXT
+    jmp TRUE
       
 REC_WORD_EXECUTE:
   rcall REGL
@@ -500,9 +500,9 @@ INTERPRET_END:
 forthword_ DOINTERPRET, 0, "(interp)"
   ; input buffer has something so try to interpret it
   ; setup exception handling in case of error
-  push_
-  lit_ pm(INTERPRET)
-  call CATCH
+  push_                     ; ( ? ? )
+  lit_ pm(INTERPRET)        ; ( ? INTERPRETxt )
+  call CATCH                ; ( ? [???] flag )
   ; check to make sure no throws
   ; <if>
   iszero_
@@ -513,6 +513,6 @@ forthword_ DOINTERPRET, 0, "(interp)"
   ; <then>
 DOINTERPRET_ok:
   ; make sure in buf pointer is not at zero
-  rcall G_IN               ; ( 1 >inaddr )
-  rcall ONEPLUSSTORE       ; ( )
+  rcall G_IN               ; ( ? [???] >inaddr )
+  rcall ONEPLUSSTORE       ; ( ? [???] ? )
   rjmp PROMPTOK

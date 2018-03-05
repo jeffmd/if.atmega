@@ -210,10 +210,10 @@ forthword_ QSTACK, 0, "?sp"
     rcall DEPTH
     call LESSZERO
     iszero_
-    brne PFA_QSTACKERROR
+    brne QSTACK_ERROR
     ret
-PFA_QSTACKERROR:
 
+QSTACK_ERROR:
       call DOSLIT
       ascii_ " Stack Underflow!"
       rjmp THROW
@@ -235,11 +235,11 @@ forthword_ EE2RAM, 0, "ee>r"
     pop_a_             ; ( e-addr len A:r-addr )
     d0_str_b_          ; ( e-addr len B:e-addr )
     
-PFA_EE2RAM_1:
+EE2RAM_LOOP:
     ; <begin>
     ; <while>
     iszero_
-    breq PFA_EE2RAM_2
+    breq EE2RAM_DONE
     str_d0_              ; ( len len )
     b_                   ; ( len e-addr)
     call FETCHE          ; ( len n )
@@ -249,9 +249,9 @@ PFA_EE2RAM_1:
     d0_                  ; ( len len )
     oneminus_            ; ( len len-1 )
     ; <repeat>
-    rjmp PFA_EE2RAM_1
+    rjmp EE2RAM_LOOP
 
-PFA_EE2RAM_2:
+EE2RAM_DONE:
     rpop_b_
     rpop_a_
     jmp DPOP
