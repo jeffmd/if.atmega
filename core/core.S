@@ -458,7 +458,7 @@ forthword_ BWSTORE, 0, "b.!"
 
 ; ( addr -- )
 ; write 0 to RAM memory at addr.
-forthword_ ZEROSTORE, 0, "0!"
+forthword_ ZERO_STR, 0, "0!"
     movw ZL, wl
 
 ZEROZSTORE:
@@ -495,7 +495,7 @@ ZCSTORE:
 ; ( a-addr -- )
 ; Memory
 ; store a 0 to single byte RAM address
-forthword_ ZEROCSTORE, 0, "0c!"
+forthword_ ZERO_CSTR, 0, "0c!"
     clr temp4
     rjmp WCSTORE
 
@@ -551,22 +551,12 @@ forthword_ ONEPLUSCSTORE, 0, "1+c!"
     inc temp4
     rjmp ZCSTORE
 
-
-; ( index -- n )
-; Memory
-; read 1 cell from user RAM address + index
-forthword_ UPFETCH, 0, "up@"
-    plus_up_
-    rjmp FETCH
-
 ; ( n index -- )
 ; Memory
 ; write n to user RAM memory at addr, low byte first
 forthword_ UPSTORE, 0, "up!"
-    plus_up_
     pop_y_
     rjmp YWSTORE
-
 
 ; ( -- n2 )
 ; Read memory pointed to by register A

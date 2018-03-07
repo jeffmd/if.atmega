@@ -29,8 +29,8 @@ forthword_ TURNKEY, 0, "turnkey"
 
 ; USER variable used by catch/throw
 forthword_ HANDLER, 0, "handle"
-    call DOUSER
-    .word USER_HANDLER
+    lit_ ram_user1 + USER_HANDLER
+    ret
 
 ; ( val -- char )
 ; convert low byte of val to a printable hex character    
@@ -137,9 +137,6 @@ forthword_ COLD, 0, "cold"
     clr yrh
     clr zerol
     out_ MCUSR, zerol
-    ; init first user data area
-    lit_ ram_user1
-    movw upl, wl
     ; init return stack pointer
 	  ; using the MCU SP registers
     lit_ rstackstart
@@ -164,7 +161,7 @@ forthword_ WARM, 0, "warm"
     lit_ pm(PAUSE)
     call DEFERSTORE
     ; init DP in ram from eeprom
-    ;**call RESET
+    call RESET
     rcall DECIMAL
     call ONLY
     call USART
@@ -262,7 +259,8 @@ EE2RAM_DONE:
 forthword_ INITUSER, 0, "i-u"
     rcall EEUSER
     push_
-    push_up_
+    lit_ ram_user1
+    push_
     lit_ SYSUSERSIZE/2
     ;twoslash_
     rjmp EE2RAM

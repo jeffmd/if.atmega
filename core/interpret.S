@@ -218,7 +218,7 @@ Forthword_ REGSET, IMMEDIATE_EN, "regset"
 ; Select W register for literal
 Forthword_ WSET, IMMEDIATE_EN, "w="
   push_
-  zero_ ;lit_ pm(WLIT_C)
+  lit_ pm(WLIT_C)
   push_
   lit_ pm(WLIT_INTERP)
   rjmp REGSET
@@ -227,7 +227,7 @@ Forthword_ WSET, IMMEDIATE_EN, "w="
 ; Select A register for literal
 Forthword_ ASET, IMMEDIATE_EN, "a="
   push_
-  zero_ ;lit_ pm(ALIT_C)
+  lit_ pm(ALIT_C)
   push_
   lit_ pm(ALIT_INTERP)
   rjmp REGSET
@@ -236,7 +236,7 @@ Forthword_ ASET, IMMEDIATE_EN, "a="
 ; Select B register for literal
 Forthword_ BSET, IMMEDIATE_EN, "b="
   push_
-  zero_ ;lit_ pm(BLIT_C)
+  lit_ pm(BLIT_C)
   push_
   lit_ pm(BLIT_INTERP)
   rjmp REGSET
@@ -245,7 +245,7 @@ Forthword_ BSET, IMMEDIATE_EN, "b="
 ; Select X register for literal
 Forthword_ XSET, IMMEDIATE_EN, "x="
   push_
-  zero_ ;lit_ pm(XLIT_C)
+  lit_ pm(XLIT_C)
   push_
   lit_ pm(XLIT_INTERP)
   rjmp REGSET
@@ -254,7 +254,7 @@ Forthword_ XSET, IMMEDIATE_EN, "x="
 ; Select Y register for literal
 Forthword_ YSET, IMMEDIATE_EN, "y="
   push_
-  zero_ ;lit_ pm(YLIT_C)
+  lit_ pm(YLIT_C)
   push_
   lit_ pm(YLIT_INTERP)
   rjmp REGSET
@@ -326,11 +326,11 @@ forthword_ REC_NUM, 0, "rec#"
     iszero_
     breq REC_NONUMBER
 
-    rcall STATEFETCH         ; ( n state )
+    rcall STATE              ; ( n state )
     iszero_
     pop_                     ; ( n )
     breq REC_NUMBER_OK
-      ;**call LIT
+      call LIT_COMP
       rjmp REC_NUMBER_DONE
       
 REC_NUMBER_OK:
@@ -398,7 +398,7 @@ REC_WORD_FOUND:
       
 CHECK_COMPILE_ONLY:
   push_
-  rcall STATEFETCH
+  rcall STATE
   iszero_
   pop_
   brne CHECK_IMMEDIATE
@@ -418,7 +418,7 @@ CHECK_IMMEDIATE:
 REC_WORD_CHECKSTATE:
   ; check state
   push_
-  rcall STATEFETCH
+  rcall STATE
   iszero_
   pop_
   breq REC_WORD_EXECUTE

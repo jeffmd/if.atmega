@@ -171,4 +171,4 @@ forthword_ ONLY, IMMEDIATE_EN, "only"
     ; make second slot have no vocab
     oneplus_
     twoplus_
-    rjmp ZEROSTORE
+    rjmp ZERO_STR

@@ -3,13 +3,12 @@
 ; ( -- addr )
 ; System Variable
 ; system state variable. 0 is interpret mode. Not 0 is compile mode
-forthword_ STATE, 0, "state"
-    call DOUSER
-    .word USER_STATE
+forthword_ STATE_ADDR, 0, "state#"
+    lit_ ram_user1 + USER_STATE
     ret
 
-forthword_ STATEFETCH, 0, "state@"
-    rcall STATE
+forthword_ STATE, 0, "state"
+    rcall STATE_ADDR
     rjmp FETCH
 
 ; ( -- )
@@ -50,7 +49,7 @@ forthword_ PROMPTERROR, 0, ".??"
 ; System
 ; check if a ready prompt is required
 forthword_ QP_RD, 0, "?prd"
-    rcall STATEFETCH
+    rcall STATE
     ; output ready prompt if in interpret mode
     ; <-if>
     iszero_
@@ -83,8 +82,8 @@ DOREFILL_do:
 ; Fetch pause vector and EXEC it. may make a context/task switch
 forthword_ PAUSE, 0, "pause"
     call DODEFER
-    .word USER_PAUSE
-    addr_ UPFETCH
+    .word ram_user1 + USER_PAUSE
+    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- )
@@ -115,7 +114,7 @@ forthword_ QUIT, 0, "quit"
     ; reset return stack pointers
     call RP0
     str_rp_
-    ;**rcall RESET  
+    rcall RESET  
     call WSET
     rjmp DOTASKS
 

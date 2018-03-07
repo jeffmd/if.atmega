@@ -10,6 +10,7 @@
 .include "coreinline.S"
 .include "core_lowmem.S"
 ;.include "minimum.S"
+.include "defer.S"
 .include "math.S"
 .include "mathadv.S"
 .include "number.S"
@@ -28,7 +29,6 @@ DPSTART:
 .include "core.S"
 .include "string.S"
 .include "compiler.S"
-.include "defer.S"
 .include "kernel_highmem.S"
 
 FLASHLAST:

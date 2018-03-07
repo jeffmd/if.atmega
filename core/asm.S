@@ -115,22 +115,52 @@ forthword_ SBIS_C, 0, "sbis,"
 
 
 ; Compiler
-; compile load top of stack with immediate value
-; ( n -- )
-forthword_ LIT, 0, "lit"
-    push_           ;( n n )
-    ; compile push tos
-    lit_ 0x939a     ;( n 0x939a )
-    call COMMA      ;( n ? )
-    lit_ 0x938a     ;( n 0x938a )
-    call COMMA      ;( n ? )
-    lit_ wl         ;( n wl )
-    call OVER       ;( n wl n )
-    rcall LDI       ;( n ? )
-    lit_ wh         ;( n wh )
-    call SWAP       ;( wh n' )
-    call BYTESWAP   ;( wh n' )
+; compile inlinned immediate value
+; ( n rl -- )
+forthword_ DOLIT, 0, "(lit,)"
+    call DPUSH2     ;( n rl rl rl )
+    d2_             ;( n rl rl n )
+    rcall LDI       ;( n rl ? )
+    pop_            ;( n rl )
+    oneplus_        ;( n rl+1 )
+    call SWAP       ;( rl+1 n )
+    call BYTESWAP   ;( rl+1 n' )
     rjmp LDI        ;( ? )
+
+; compile W register load inlinned immediate 16 bit constant
+; ( n -- )
+forthword_ WLIT_C, 0, "w=,"
+    push_           ;( n n )
+    lit_ wl         ;( n wl )
+    rjmp DOLIT
+    
+; compile Y register load inlinned immediate 16 bit constant
+; ( n -- )
+Forthword_ YLIT_C, 0, "y=,"
+  push_
+  lit_ yrl
+  rjmp DOLIT
+
+; compile X register load inlinned immediate 16 bit constant
+; ( n -- )
+Forthword_ XLIT_C, 0, "x=,"
+  push_
+  lit_ xrl
+  rjmp DOLIT
+
+; compile A register load inlinned immediate 16 bit constant
+; ( n -- )
+Forthword_ ALIT_C, 0, "a=,"
+  push_
+  lit_ al
+  rjmp DOLIT
+
+; compile B register load inlinned immediate 16 bit constant
+; ( n -- )
+Forthword_ BLIT_C, 0, "b=,"
+  push_
+  lit_ bl
+  rjmp DOLIT
 
 ; Assembler
 ; compile assembler ret 

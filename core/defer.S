@@ -2,26 +2,14 @@
 ; words that support defer
 
     
-; ( -- addr )
-; System
-; runtime part of user
-; get the address of the user var which is located at the return address of the caller
-forthword_ DOUSER, DIS_CALL_OPT, "(user)"
-    pop ZH
-    pop ZL
-    rcall ZDFETCHI
-    ; calculate user address
-    plus_up_
-    ret
-
 ; ( defaddr -- deferval defaddr )
 ; System
 ; get defer contents
 forthword_ DEFGET, 0, "defg"
     push_                ; ( addr addr )
     ; get address of defer
-    rcall FETCHI        ; ( addr valaddr )
-    rjmp SWAP           ; ( valaddr addr )
+    call FETCHI        ; ( addr valaddr )
+    jmp SWAP           ; ( valaddr addr )
  
 ; ( addr -- n )
 ; System
@@ -30,9 +18,9 @@ forthword_ DEFX, 0, "defx"
     rcall DEFGET
     ; get the fetch Xt pointer which is one word after the data
     oneplus_
-    rcall FETCHI        ; ( valaddr xtfetch )
+    call FETCHI        ; ( valaddr xtfetch )
     ; EXEC the fetch
-    rjmp EXEC        ; ( n )
+    jmp EXEC        ; ( n )
 
 ; ( -- n )
 ; System
@@ -57,7 +45,7 @@ forthword_ DODEFER, DIS_CALL_OPT, "(def)"
     rpop_                ; ( raddr ) (R: raddr -- )
     rcall DEFX           ; ( n )
     ; EXEC the defer
-    rjmp EXEC
+    jmp EXEC
 
 ; ( xt1 -- xt2 )
 ; System
@@ -78,15 +66,15 @@ forthword_ DEFERSTORE, 0, "def!"
     ; to deferstore section
     twoplus_                 ; ( xt1 defaddr xt2+4 )
     ; get defered store xt address
-    rcall FETCHI              ; ( xt1 defaddr xtstore )
-    rjmp EXEC
+    call FETCHI              ; ( xt1 defaddr xtstore )
+    jmp EXEC
 
 ; ( n -- ) (R: IP -- IP+2)
 ; Tools
 ; runtime portion of to
 ; must be called
 forthword_ DOTO, DIS_CALL_OPT, "(to)"
-    rcall R_FETCHPLUS    ; ( n -- n raddr ) (R: raddr -- raddr+1 )
+    call R_FETCHPLUS    ; ( n -- n raddr ) (R: raddr -- raddr+1 )
     ; next cell contains address of deferred word
-    rcall FETCHI         ; ( n defxt )
+    call FETCHI         ; ( n defxt )
     rjmp DEFERSTORE

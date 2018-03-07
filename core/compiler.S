@@ -9,8 +9,20 @@ COLON_SMUDGE: .space 2
 ; system SMUDGE. Get flash name address of current word being compiled. 
 forthword_ SMUDGE, 0, "smudge"
     lit_ COLON_SMUDGE
-    ret
+    rjmp FETCH
 
+; ( addr -- )
+; set system SMUDGE to addr of latest word being compiled.
+Forthword_ SMUDGE_STR, 0, "smudge!"
+  str_y_
+  lit_ COLON_SMUDGE
+  rjmp YWSTORE
+
+; ( -- )
+; clear system SMUDGE
+Forthword_ SMUDGE_ZERO_STR, 0, "smudge0!"
+  lit_ COLON_SMUDGE
+  rjmp ZERO_STR
 
 .pushsection .noinit
 ram_dp: .space 2
@@ -77,7 +89,6 @@ forthword_ DPPLUSONE, 0, "dp+1"
 forthword_ TAILOPT, 0, ";opt"
     ; optimize only if smudge is not zero
     rcall SMUDGE
-    rcall FETCH
     iszero_
     brne TAILOPT_OPT
     ret
@@ -127,16 +138,14 @@ TAILOPT_CALL:
 ; Compiler
 ; update wid from smudge if valid 
 forthword_ UWID, 0, "uwid"
-    rcall SMUDGE        ;( smudgeaddr )
-    rcall FETCH         ;( smudge )
+    rcall SMUDGE        ;( smudge )
     iszero_
     breq UWID_end
        push_            ;( smudge smudge )
        rcall CURRENT    ;( smudge current )
        rcall FETCH      ;( smudge wid )
        rcall STOREE     ;( ? )
-       rcall SMUDGE     ;( smudgeaddr )
-       rcall ZEROSTORE  ;( smudgeaddr )
+       rcall SMUDGE_ZERO_STR ;( smudgeaddr )
        rjmp DPSTOREE
        
 UWID_end:
@@ -156,9 +165,15 @@ forthword_ FFRST, 0, "ffrst"
 ; Compiler
 ; enter interpreter mode
 forthword_ LBRACKET, IMMEDIATE_EN, "["
-    rcall STATE
-    rjmp ZEROSTORE
+    rcall STATE_ADDR
+    rjmp ZERO_STR
 
+; ( -- )
+; enter compile mode
+Forthword_ RBRACKET, 0, "]"
+  lit_y_ 1
+  rcall STATE_ADDR
+  rjmp YWSTORE
 
 ; ( n -- )
 ; Dictionary
@@ -267,8 +282,7 @@ forthword_ INLINE, 0, "inline"
 ; ( -- )
 ; reset compiler state
 forthword_ RESET, 0, "rst"
-    rcall SMUDGE
-    rcall ZEROSTORE
+    rcall SMUDGE_ZERO_STR
     ; restore dp from eeprom
     rcall DPFETCHE
     ; switch to interpret mode

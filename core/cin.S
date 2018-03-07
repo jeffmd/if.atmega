@@ -24,8 +24,8 @@ forthword_ SHARPTIB, 0, "#tib"
 ; ( -- a-addr )
 ; pointer to current read position in input buffer
 forthword_ G_IN, 0, ">in"
-    call DOUSER
-    .word USER_G_IN
+    lit_ ram_user1 + USER_G_IN
+    ret
 
 ; ( -- addr len )
 ; System
@@ -40,18 +40,18 @@ forthword_ STIB, 0, "stib"
 ; fetch key vector and EXEC it, should leave a single character on TOS
 forthword_ KEY, 0, "key"
     call DODEFER
-    .word USER_KEY
-    addr_ UPFETCH
+    .word ram_user1 + USER_KEY
+    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- )
 ; Reset the input buffer
 forthword_ INRESET, 0, "in_"
     rcall G_IN             ; ( >inaddr )
-    rcall ZEROSTORE        ; ( ? )
+    rcall ZERO_STR         ; ( ? )
     ; reset input buffer cursor position
     rcall SHARPTIB         ; ( #tibaddr )
-    rjmp ZEROSTORE         ; ( )
+    rjmp ZERO_STR          ; ( )
 
 ; ( -- srcaddr len  )
 ; String
@@ -67,8 +67,8 @@ forthword_ SRCIN, 0, "srcin"
 ; refills the input buffer
 forthword_ REFILL, 0, "refill"
     call DODEFER
-    .word USER_REFILL
-    addr_ UPFETCH
+    .word ram_user1 + USER_REFILL
+    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- flag )

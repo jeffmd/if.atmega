@@ -416,20 +416,6 @@ forthword_ RPOPSP, INLINE_OPT, "rpop.sp"
     rpop_sp_
     ret
 
-; ( -- addr )
-; System Variable
-; get user area pointer
-forthword_ UP_, INLINE_OPT, "up"
-    movw wl, upl
-    ret
-
-; ( addr -- )
-; System Variable
-; set user area pointer
-forthword_ STOREUP, INLINE_OPT, "!up"
-    movw upl, wl
-    ret
-
 ; ( n1 -- n2 )
 ; Arithmetics
 ; exchange the bytes of the TOS

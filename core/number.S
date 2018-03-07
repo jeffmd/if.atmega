@@ -5,8 +5,8 @@
 ; location of the cell containing the number conversion radix
 
 forthword_ BASE, 0, "base"
-    call DOUSER
-    .word USER_BASE
+    lit_ ram_user1 + USER_BASE
+    ret
 
 ; ( n -- )
 ; Numeric IO

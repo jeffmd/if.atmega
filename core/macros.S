@@ -7,8 +7,8 @@
   isrXL = 2 
   isrXH = 3
   
-  upl = 4 ; ram user area 
-  uph = 5
+  ;upl = 4 ; ram user area 
+  ;uph = 5
 
 
   ; registers 10, 11, 12, 13 not used except in interrupt service routines
@@ -379,11 +379,6 @@
     st -Y, yrl
 .endm
 
-.macro push_up_
-    st -Y, uph
-    st -Y, upl
-.endm
-
 .macro pop_ 
     ld wl, Y+
     ld wh, Y+
@@ -589,11 +584,6 @@
 .macro sp_plus_
     add YL, wl
     adc YH, wh
-.endm
-
-.macro plus_up_
-    add wl, upl
-    adc wh, uph
 .endm
 
 .macro minus_a_
