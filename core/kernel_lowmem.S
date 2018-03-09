@@ -22,9 +22,8 @@ forthword_ HERE, 0, "here"
 ; System Value
 ; Deferred action during startup/reset
 forthword_ TURNKEY, 0, "turnkey"
-    call DODEFER
+    call DODEFE
     .word EE_TURNKEY
-    addr_ FETCHE
     addr_ STOREE
 
 ; USER variable used by catch/throw
@@ -171,7 +170,7 @@ forthword_ WARM, 0, "warm"
     call ITYPE
     call CR
     
-    rcall TURNKEY
+    ;rcall TURNKEY
     jmp QUIT
 
 

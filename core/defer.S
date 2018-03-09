@@ -37,13 +37,28 @@ forthword_ DOVALUE, DIS_CALL_OPT, "(val)"
 ; ( i*x -- j*x )
 ; System
 ; runtime of defer
-forthword_ DODEFER, DIS_CALL_OPT, "(def)"
+forthword_ DODEFR, DIS_CALL_OPT, "(defr)"
     ; top of return stack has return address of caller
     ; return address is data for defer so pop it onto data stack
     ; will not be returning to the caller
-    push_
-    rpop_                ; ( raddr ) (R: raddr -- )
-    rcall DEFX           ; ( n )
+    push_                ; ( ? ? )
+    rpop_                ; ( ? raddr ) (R: raddr -- )
+    call FETCHI          ; ( ? ramaddr )
+    call FETCH           ; ( ? xt )
+    ; EXEC the defer
+    jmp EXEC
+
+; ( i*x -- j*x )
+; System
+; runtime of defer
+forthword_ DODEFE, DIS_CALL_OPT, "(defe)"
+    ; top of return stack has return address of caller
+    ; return address is data for defer so pop it onto data stack
+    ; will not be returning to the caller
+    push_                ; ( ? ? )
+    rpop_                ; ( ? raddr ) (R: raddr -- )
+    call FETCHI          ; ( ? ramaddr )
+    call FETCHE           ; ( ? xt )
     ; EXEC the defer
     jmp EXEC
 
@@ -64,7 +79,7 @@ forthword_ DEFERSTORE, 0, "def!"
     rcall DEFGET             ; ( st1 defaddr xt2+2 )
     ; skip past data address and deferfetch section to get
     ; to deferstore section
-    twoplus_                 ; ( xt1 defaddr xt2+4 )
+    oneplus_                 ; ( xt1 defaddr xt2+4 )
     ; get defered store xt address
     call FETCHI              ; ( xt1 defaddr xtstore )
     jmp EXEC

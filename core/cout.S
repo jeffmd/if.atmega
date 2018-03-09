@@ -3,9 +3,8 @@
 ; ( c -- )
 ; fetch the emit vector and EXEC it. should emit a character from TOS
 forthword_ EMIT, 0, "emit"
-    call DODEFER
+    call DODEFR
     .word ram_user1 + USER_EMIT
-    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- )

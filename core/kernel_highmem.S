@@ -81,9 +81,8 @@ DOREFILL_do:
 ; Multitasking
 ; Fetch pause vector and EXEC it. may make a context/task switch
 forthword_ PAUSE, 0, "pause"
-    call DODEFER
+    call DODEFR
     .word ram_user1 + USER_PAUSE
-    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- )

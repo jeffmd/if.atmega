@@ -39,9 +39,8 @@ forthword_ STIB, 0, "stib"
 ; ( -- c )
 ; fetch key vector and EXEC it, should leave a single character on TOS
 forthword_ KEY, 0, "key"
-    call DODEFER
+    call DODEFR
     .word ram_user1 + USER_KEY
-    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- )
@@ -66,9 +65,8 @@ forthword_ SRCIN, 0, "srcin"
 ; ( -- f )
 ; refills the input buffer
 forthword_ REFILL, 0, "refill"
-    call DODEFER
+    call DODEFR
     .word ram_user1 + USER_REFILL
-    addr_ FETCH
     addr_ UPSTORE
 
 ; ( -- flag )
