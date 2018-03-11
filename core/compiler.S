@@ -150,31 +150,7 @@ forthword_ UWID, 0, "uwid"
        
 UWID_end:
     ret
-
-; ( --  ) 
-; Compiler
-; reset forth flags
-forthword_ FFRST, 0, "ffrst"
-    ; clear rcall/call flags
-    cbr fflags, (1<<LAST_RCALL_FB)|(1<<LAST_CALL_FB)
-    ; set disable tail optimize flag
-    sbr fflags, 1<<DIS_CALL_OPT_FB
-    ret
     
-; ( --  ) 
-; Compiler
-; enter interpreter mode
-forthword_ LBRACKET, IMMEDIATE_EN, "["
-    rcall STATE_ADDR
-    rjmp ZERO_STR
-
-; ( -- )
-; enter compile mode
-Forthword_ RBRACKET, 0, "]"
-  lit_y_ 1
-  rcall STATE_ADDR
-  rjmp YWSTORE
-
 ; ( n -- )
 ; Dictionary
 ; compile 16 bit into flash at (dictionary pointer) DP

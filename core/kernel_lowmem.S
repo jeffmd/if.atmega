@@ -15,7 +15,6 @@ forthword_ EDP, 0, "edp"
 forthword_ HERE, 0, "here"
     call DOVALUE
     .word EE_HERE
-    addr_ FETCHE
     addr_ STOREE    
 
 ; ( -- n*y )
@@ -28,7 +27,7 @@ forthword_ TURNKEY, 0, "turnkey"
 
 ; USER variable used by catch/throw
 forthword_ HANDLER, 0, "handle"
-    lit_ ram_user1 + USER_HANDLER
+    user_ USER_HANDLER
     ret
 
 ; ( val -- char )

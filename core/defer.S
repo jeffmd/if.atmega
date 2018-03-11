@@ -32,7 +32,8 @@ forthword_ DOVALUE, DIS_CALL_OPT, "(val)"
     ; return address is actually the address of the value
     ; won't be returning to this address
     rpop_               ; ( raddr ) (R: raddr -- )
-    rjmp DEFX           ; ( n )
+    call FETCHI         ; ( valaddr )
+    jmp FETCHE
 
 ; ( i*x -- j*x )
 ; System

@@ -1,65 +1,67 @@
-dp
-pname header push $FF00 or (s,)
-  current @ @e , 
-  smudge !
-  ffrst 1 state !
-    dp >r >r push $FF00 or (s,) r> @e , r>
-  [
-  ;opt uwid
+\ boot.fs - bootstrap the forth compiler
+\ header are (create) are created manually
+\ use (create) to make : then define the rest manually
 
-pname (create) current @ header
-  smudge !
-  ffrst 1 state !
-    pname current @ header
-  [
-  ;opt uwid
-
-(create) ] 
-  smudge !
-  ffrst 1 state !
-    ffrst 1 state !
-  [
-  ;opt uwid
-
-(create) :
-  smudge !
+\ header ( addr len wid -- nfa )
+\ 
+dp push                               \ ( nfa nfa )
+pname header push y= $FF00 or.y (s,)  \ ( nfa ? )
+  current @ @e ,                      \ ( nfa ? )
+  pop smudge!                         \ ( ? )
   ]
-    (create) smudge ! ]
+    push dp                   \ ( addr len wid nfa )
+    rpush pop rpush           \ ( addr len wid )(R: nfa wid )  
+    d0 y= $FF00 or.y          \ ( addr len len' )
+    (s,)                      \ ( ? )
+    rpop @e ,                 \ ( ? )(R: nfa )
+    rpop                      \ ( nfa )
   [
   ;opt uwid
 
+\ (create) ( <input> -- nfa )
+pname (create) push current @ header
+  smudge!
+  ]
+    pname push current @ header
+  [
+  ;opt uwid
 
+\ : ( <input> -- )
+\ used to define a new word
+(create) :
+  smudge!
+  ]
+    (create) smudge! ]
+  [
+  ;opt uwid
+\ : can now be used to define a new word but must manually 
+\ terminate the definition of a new word
+
+
+\ ( -- wid )
+\ get the current wid
 : cur@
   current @
 [ ;opt uwid
 
+\ ( n -- )
+\ set wid flags of current word
 : widf 
-    cur@
-    @e
-    push
-    @i
-    rot and
-    swap
-    !i
+  rpush         \ ( n )(R: n )
+  cur@ @e push  \ ( nfa nfa )
+  @i            \ ( nfa flags )
+  rpop.y        \ ( nfa flags Y:n )(R: )
+  and.y         \ ( nfa n&flags )
+  swap          \ ( n&flags nfa )
+  !i            \ ( ? )
 [ ;opt uwid
 
+\ ( -- )
 : immediate
     $7FFF widf
 [ ;opt uwid immediate
 
-: \
-    stib
-    nip
-    >in
-    !
-[ ;opt uwid immediate
-
-\ boot.fs - bootstrap the forth compiler
-\ header, (create), and ] are created manually
-\ use (create) to make : then define the rest manually
-\ : can now be used to define a new word but must manually 
-\ terminate the definition of a new word
-
+\ ( -- )
 \ define ; which is used when finishing the compiling of a word
 : ;
   \ change to interpret mode and override to compile [

@@ -853,6 +853,10 @@
     ldi yrh, hi8(\val) 
 .endm
 
+.macro user_ val
+  lit_ ram_user1 + \val
+.endm
+
 .macro zerohigh_
     clr wh
 .endm

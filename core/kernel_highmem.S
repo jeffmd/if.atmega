@@ -1,15 +1,32 @@
 ; kernel_highmem.S
 
-; ( -- addr )
-; System Variable
-; system state variable. 0 is interpret mode. Not 0 is compile mode
-forthword_ STATE_ADDR, 0, "state#"
-    lit_ ram_user1 + USER_STATE
+; ( --  ) 
+; reset forth flags
+forthword_ FFRST, 0, "ffrst"
+    ; clear rcall/call flags
+    cbr fflags, (1<<LAST_RCALL_FB)|(1<<LAST_CALL_FB)
+    ; set disable tail optimize flag
+    sbr fflags, 1<<DIS_CALL_OPT_FB
     ret
 
 forthword_ STATE, 0, "state"
-    rcall STATE_ADDR
+    user_ USER_STATE
     rjmp FETCH
+
+; ( --  ) 
+; Compiler
+; enter interpreter mode
+forthword_ LBRACKET, IMMEDIATE_EN, "["
+    user_ USER_STATE
+    rjmp ZERO_STR
+
+; ( -- )
+; enter compile mode
+Forthword_ RBRACKET, 0, "]"
+  rcall FFRST
+  lit_y_ 1
+  user_ USER_STATE
+  rjmp YWSTORE
 
 ; ( -- )
 ; System

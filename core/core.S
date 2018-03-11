@@ -715,7 +715,8 @@ forthword_ BTOW, 0, "btow"
 forthword_ ITOI, 0, "itoi"
     rpush_a_
     rpush_b_
-    pop_a_           ; ( start count ) A: dest
+    pop_a_          ; ( start count ) A: dest
+    
 ITOI_B:
     iszero_         ; ( start count )
     breq ITOI_END
@@ -725,7 +726,7 @@ ITOI_B:
     push_
     a_              ; ( start val dest )
     rcall STOREI    ; ( start ? )
-    aplus2_
+    aplus1_
     d0_             ; ( start start )
     oneplus_        ; ( start start+1 )
     str_d0_         ; ( start+1 start+1 )

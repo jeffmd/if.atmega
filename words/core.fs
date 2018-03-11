@@ -4,7 +4,7 @@
 \ Compiler
 \ skip everything up to the closing bracket on the same line
 : (
-    $29 parse
+    push $29 parse
     pop2
 ; immediate
 
@@ -36,8 +36,8 @@
 \ create a dictionary entry and register in word list
 : rword
     (create)      ( voc-link )
-    cur@          ( voc-link wid )
-    !e            ( )
+    push cur@     ( voc-link wid )
+    !e            ( ? )
 ;
 
 \ search dictionary for name, returns XT or 0
@@ -54,8 +54,8 @@
 : ['f]
     'f
     swap
-    lit
-    lit
+    w=, pop
+    w=,
 ; :ic
 
 \ search dictionary for name, returns XT
@@ -70,7 +70,7 @@
 \ compiles xt as literal
 : [']
     '
-    lit
+    w=,
 ; :ic
 
 
