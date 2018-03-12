@@ -6,7 +6,6 @@
 forthword_ EDP, 0, "edp"
     call DOVALUE
     .word EE_EDP
-    addr_ FETCHE
     addr_ STOREE
 
 ; ( -- addr )
@@ -169,7 +168,7 @@ forthword_ WARM, 0, "warm"
     call ITYPE
     call CR
     
-    ;rcall TURNKEY
+    rcall TURNKEY
     jmp QUIT
 
 

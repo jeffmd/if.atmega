@@ -78,9 +78,9 @@ forthword_ DEFERSTORE, 0, "def!"
     ; skip past call to get to data
     twoplus_                 ; ( xt1 xt2+2 )
     rcall DEFGET             ; ( st1 defaddr xt2+2 )
-    ; skip past data address and deferfetch section to get
-    ; to deferstore section
-    oneplus_                 ; ( xt1 defaddr xt2+4 )
+    ; skip past data address field to get
+    ; to deferstore field
+    oneplus_                 ; ( xt1 defaddr xt2+3 )
     ; get defered store xt address
     call FETCHI              ; ( xt1 defaddr xtstore )
     jmp EXEC
@@ -90,7 +90,8 @@ forthword_ DEFERSTORE, 0, "def!"
 ; runtime portion of to
 ; must be called
 forthword_ DOTO, DIS_CALL_OPT, "(to)"
-    call R_FETCHPLUS    ; ( n -- n raddr ) (R: raddr -- raddr+1 )
+    push_               ; ( n n )
+    call R0PLUS         ; ( n raddr )(R: raddr -- raddr+1 )
     ; next cell contains address of deferred word
     call FETCHI         ; ( n defxt )
     rjmp DEFERSTORE

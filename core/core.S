@@ -91,10 +91,9 @@ forthword_ R0, DIS_CALL_OPT, "r0"
 ; Stack
 ; fetch content of TOR and then increment TOR by 1
 ; call only
-forthword_ R_FETCHPLUS, DIS_CALL_OPT, "r>r+"
+forthword_ R0PLUS, DIS_CALL_OPT, "r0+"
     pop ZH
     pop ZL
-    push_
     pop wh
     pop wl
     adiw wl, 0x01
@@ -249,7 +248,7 @@ STOREE_WAIT: ; estore_wait_low_spm:
 ; Memory
 ; read 1 cell from eeprom
 forthword_ FETCHE, 0, "@e"
-    in_ yrl, SREG
+    in_ temp4, SREG
     cli
     movw ZL, wl
     rcall FETCHE_READ
@@ -258,7 +257,7 @@ forthword_ FETCHE, 0, "@e"
     adiw ZL, 1
     rcall FETCHE_READ
     in_  wh, EEDR
-    out_ SREG, yrl
+    out_ SREG, temp4
     ret
 
 FETCHE_READ:

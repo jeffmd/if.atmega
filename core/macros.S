@@ -11,7 +11,7 @@
   ;uph = 5
 
 
-  ; registers 10, 11, 12, 13 not used except in interrupt service routines
+  ; registers 8 to 11 not used except in interrupt service routines
   isrt0 = 8
   isrt1 = 9
   isrt2 = 10
