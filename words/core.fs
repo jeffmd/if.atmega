@@ -40,10 +40,16 @@
     !e            ( ? )
 ;
 
+( C:"<spaces>name" -- 0 | nfa )
+\ Dictionary
+\ search dictionary for name, returns nfa if found or 0 if not found
+: find
+    pname findw
+;
+
 \ search dictionary for name, returns XT or 0
 : 'f  ( "<spaces>name" -- XT XTflags )
-    pname 
-    findw
+    find
     nfa>xtf
 ;
 
@@ -54,8 +60,13 @@
 : ['f]
     'f
     swap
-    w=, pop
     w=,
+    \ compile literal of 'f push
+    [ 'f push swap w=, ]
+    push
+    [ pop w=, ]
+    cxt
+    pop w=,
 ; :ic
 
 \ search dictionary for name, returns XT
@@ -72,11 +83,3 @@
     '
     w=,
 ; :ic
-
-
-( C:"<spaces>name" -- 0 | nfa )
-\ Dictionary
-\ search dictionary for name, returns nfa if found or 0 if not found
-: find
-    pname findw
-;
