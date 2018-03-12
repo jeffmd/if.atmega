@@ -10,16 +10,16 @@
 \ to the current dictionary position.
 \ must use call/rcall
 
-: (compile)  ( -- )
-    r>r+     ( raddr ) ( R: raddr+1 )
+: (program)  ( -- )
+    r0+      ( raddr ) ( R: raddr+1 )
     @i       ( nfa )
     nfa>xtf  ( xt xtflags )
     cxt
 ; call
 
 \ compile into pending new word
-: compile ( C: x "<spaces>name" -- )
-  ['f] (compile) cxt
+: program: ( C: x "<spaces>name" -- )
+  ['f] (program) cxt
   find ,
 ; :ic
 
@@ -32,7 +32,7 @@
 : create
     rword
     \ leave address after call on tos
-    compile popret
+    program: popret
 ;
 
 
@@ -48,7 +48,7 @@
 \ of the word on the stack
 : [char]
     char
-    lit
+    w=,
 ; immediate
 
 ( -- )
@@ -61,7 +61,7 @@
     \ get current word and then get its XT being compiled
     \ code at XT is 'call POPRET'
     \ want to change POPRET address to return address
-    r>
+    rpop push
     cur@ @e
     nfa>lfa
     2+         \ lfa>xt+1
@@ -75,8 +75,8 @@
 \ ie: : name create .... does> .... ;
 : does>
     \ compile pop return to tos which is used as 'THIS' pointer
-    compile (does>)
-    compile r>
+    program: (does>)
+    program: rpop
 ; :ic
 
 ( -- xt )
@@ -86,20 +86,20 @@
     dp ]
 ;
 
-( -- start ) 
+( -- start ? ) 
 \ Compiler
 \ places current dictionary position for forward
 \ branch resolve on TOS and advances DP
 : >mark
-    dp
+    dp push        \ ( start start )
     dp+1           \ advance DP
 ;
 
-( start -- ) 
+( start ? -- ) 
 \ Compiler
 \ do forward jump
 : >jmp
-    ?sp              ( start ) \ check stack integrety
+    ?sp              ( start ? ) \ check stack integrety
     dp               ( start dest )
     rjmpc            ( )
 ;
@@ -108,10 +108,10 @@
 \ Compiler
 \ place destination for backward branch
 : <mark
-    dp            ( dest )
+    dp push           ( dest dest )
 ;
 
-( dest -- ) 
+( dest ? -- ) 
 \ Compiler
 \ do backward jump
 : <jmp
@@ -128,8 +128,8 @@
 \ compile zerosense and conditional branch forward
 : ?brc
     
-    compile 0?       \ inline 0? pop
-    compile pop
+    program: 0?       \ inline 0? pop
+    program: pop
     brnz1,
 ;
 
@@ -165,7 +165,7 @@
 \ part of: if...else...then
 : else
     >mark         \ mark forward rjmp at end of true code
-    swap          \ swap new mark with previouse mark
+    pop swap push \ swap new mark with previouse mark
     >jmp          \ rjmp from previous mark to false code starting here
 ; :ic
 
@@ -202,7 +202,7 @@
 \ part of: begin...while...repeat
 : while
     [compile] if
-    swap
+    pop swap push
 ; :ic
 
 ( f -- f) ( C: dest -- orig dest ) 
@@ -211,7 +211,7 @@
 \ part of: begin...?while...repeat
 : ?while
     [compile] ?if
-    swap
+    pop swap push
 ; :ic
 
 ( --  ) ( C: orig dest -- )
@@ -249,7 +249,7 @@
 \ compile the XT of the word currently
 \ being defined into the dictionary
 : recurse
-    smudge @ nfa>xtf cxt
+    smudge nfa>xtf cxt
 ; :ic
 
 ( n cchar -- ) 
@@ -263,11 +263,11 @@
 
 \ store the TOS to the named defer
 : to ( n <name> -- )
-    '  \ get address of next word from input stream
-    state@
+    push '  \ get address of next word from input stream
+    push state
     if 
-      compile (to)
-      ,
+      push program: (to)
+      pop ,
     else
       def! \ not in compile state, so do runtime operation
     then
@@ -276,14 +276,14 @@
 
 \ allocate or release n bytes of memory in RAM
 : allot ( n -- )
-    here + to here
+    !y here +y to here
 ;
 
 ( x -- ) ( C: x "<spaces>name" -- )
 \ create a constant in the dictionary
 : con
-    rword
-    lit  
+    push rword pop
+    w=,
     ret,
 ;
 
@@ -311,16 +311,16 @@
 \ Compiler
 \ create a dictionary entry for a value and allocate 1 cell in EEPROM.
 : val
-    rword
-    compile (val)
+    push rword
+    program: (val)
     edp                ( n edp )
     push               ( n edp edp )
-    ,                  ( n edp )
-    push               ( n edp edp )
+    ,                  ( n edp ? )
+    d0                 ( n edp edp )
     dcell+             ( n edp edp+dcell)
-    to edp             ( n edp )
-    !e                 ( )
-    ['] @e ,
+    to edp             ( n edp ? )
+    pop                ( n edp )
+    !e                 ( ? )
     ['] !e ,
 ;
 
@@ -335,7 +335,7 @@
 \ String
 \ compiles a string to flash
 : slit
-    compile (slit)     ( -- addr n)
+    push program: (slit) pop    ( -- addr n)
     s,
 ; immediate
 
@@ -346,8 +346,8 @@
 \ at runtime leaves ( -- flash-addr count) on stack
 : s"
     $22
-    parse        ( -- addr n)
-    state@
+    parse        ( addr n )
+    push state
     if  \ skip if not in compile mode
       [compile] slit
     then 
@@ -358,9 +358,9 @@
 \ compiles string into dictionary to be printed at runtime
 : ."
      [compile] s"             \ "
-     state@
+     push state
      if
-       compile itype
+       program: itype
      else
        type
      then
