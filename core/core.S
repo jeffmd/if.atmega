@@ -212,20 +212,22 @@ forthword_ WALIGN, 0, "w_"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; ( n e-addr -- )
+; ( n e-addr -- e-addr+2 )
 ; Memory
 ; write n (2bytes) to eeprom address
 forthword_ STOREE, 0, "!e"
     movw ZL, wl
     pop_
-    in_ yrl, SREG
+    in_ temp4, SREG
     cli
     rcall STOREE_WRITE
     adiw ZL,1
 
     mov wl, wh
     rcall STOREE_WRITE
-    out_ SREG, yrl
+    out_ SREG, temp4
+    movw wl, ZL
+    adiw wl, 1
     ret
 
 STOREE_WRITE:
@@ -233,8 +235,8 @@ STOREE_WRITE:
     rjmp STOREE_WRITE
 
 STOREE_WAIT: ; estore_wait_low_spm:
-    in_ xrl, SPMCSR
-    sbrc xrl,SPMEN
+    in_ temp5, SPMCSR
+    sbrc temp5, SPMEN
     rjmp STOREE_WAIT
 
     out_ EEARH,ZH
