@@ -17,13 +17,13 @@ Forthword_ THREEOVER, 0, "3over"
 ; set return stack pointer
 ; must be called
 forthword_ RP_STORE, DIS_CALL_OPT, "!rp"
-    in yrl, SREG
+    in temp4, SREG
     cli
     ; keep the return address
     pop ZH
     pop ZL
     str_rp_
-    out SREG, yrl
+    out SREG, temp4
     pop_
     ijmp
 
@@ -327,6 +327,61 @@ forthword_ NASTORE, 0, "na!"
     adc ZH, wh
     pop_
     jmp ZSTORE
+
+; ( a-addr -- )
+; Memory
+; subtract 1 from content of word RAM address a-addr
+forthword_ ONEMINUSSTORE, 0, "1-!"
+    movw ZL, wl
+    ld XL, Z
+    ldd XH, Z+1
+    sbiw XL, 1
+    movw temp4, XL
+    jmp ZSTORE
+
+; ( a-addr -- )
+; Memory
+; subtract 1 from content of byte RAM address a-addr
+forthword_ ONEMINUSCSTORE, 0, "1-c!"
+    movw ZL, wl
+    ld temp4, Z
+    dec temp4
+    st Z, temp4
+    ret
+
+; ( a-addr Y:n -- )
+; Memory
+; add X to content of RAM address a-addr
+forthword_ XPLUSSTORE, 0, "x+!"
+    movw ZL, wl
+    ld temp4, Z
+    ldd temp5, Z+1
+    add temp4, xrl
+    adc temp5, xrh
+    jmp ZSTORE
+
+; ( a-addr Y:n -- )
+; Memory
+; add A to content of RAM address a-addr
+forthword_ APLUSSTORE, 0, "a+!"
+    movw ZL, wl
+    ld temp4, Z
+    ldd temp5, Z+1
+    add temp4, al
+    adc temp5, ah
+    jmp ZSTORE
+
+; ( a-addr Y:n -- )
+; Memory
+; add B to content of RAM address a-addr
+forthword_ BPLUSSTORE, 0, "b+!"
+    movw ZL, wl
+    ld temp4, Z
+    ldd temp5, Z+1
+    add temp4, bl
+    adc temp5, bh
+    jmp ZSTORE
+
 
 ; ( n1 -- n2 )
 ; Read memory pointed to by register A plus offset
