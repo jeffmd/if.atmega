@@ -7,7 +7,7 @@
 
 \ get context array address using context index
 : context# ( -- addr )
-  context contidx c@ dcell* +
+  context !y contidx c@ dcell* +y
 ;
 
 \ get a wordlist id from context array
@@ -17,7 +17,7 @@
 
 \ save wordlist id in context array at context index
 : context! ( wid -- )
-  context# !
+  push context# pop.y y.!
 ;
 
 \ get a valid wid from the context
@@ -25,7 +25,7 @@
 \ if no valid entries then defaults to Forth wid
 : wid@ ( -- wid )
   context@
-  ?if else drop context @ then
+  ?if else context @ then
 ;
 
 \ wordlist record fields:
@@ -39,55 +39,67 @@
 \ add link field offset
 : wid:link ( wid -- wid:link) dcell+ dcell+ ;
 \ add child field offset
-: wid:child ( wid -- wid:child ) 3 dcell* + ;
+: wid:child ( wid -- wid:child ) !y 3 dcell* +y ;
 
 \ initialize wid fields of definitions vocabulary
 : widinit ( wid -- wid )
+  !x           ( wid X:wid )
   \ wid.word = 0
-  0 over !e ( wid )
+  0!y push.y   ( 0 wid ) 
+  !e           ( wid+2 )
 
   \ parent wid child field is in cur@->child
-  dup cur@ wid:child  ( wid wid parentwid.child )
-  2over ( wid wid parentwid.child wid parentwid.child )
-  @e   ( wid wid parentwid.child wid childLink )
-  swap wid:link ( wid wid parentwid.child childLink wid.link )
+  cur@         ( parentwid )
+  wid:child push ( parentwid.child parentwid.child )
+  @e           ( parentwid.child childLink )
+  push x wid:link ( parentwid.child childLink wid.link )
+
+  \ wid.link = childLink
+  !e           ( parentwid.child wid.child )
 
   \ wid.child = 0
-  0 over dcell+ !e ( wid wid parentwid.child childLink wid.link )
-  \ wid.link = childLink
-  !e ( wid wid parentwid.child )
+  0!y push.y   ( parentwid.child 0 wid.child )
+  !e           ( parentwid.child wid.child+2 )
   \ parentwid.child = wid
-  !e ( wid )
+  d0 x!d0      ( wid parentwid.child )
+  !e           ( parentwid.child+2 )
+  x            ( wid )
 ;
 
 : wordlist ( -- wid )
   \ get head address in eeprom for wid
-  edp      ( wid )
+  edp          ( wid )
   \ allocate  4 16bit words in eeprom
-  dup 4 dcell* + ( wid edp+8 )
-  to edp       ( wid )
-  widinit  ( wid )
+  push !y 4    ( wid 4 Y:wid )
+  dcell* +y    ( wid edp+8 )
+  to edp       ( wid ? )
+  pop
+  widinit      ( wid )
 ;
 
 : also ( -- )
-  context@
+  context@ push    ( wid wid )
   \ increment index
-  contidx 1+c!
-  context!
-  
+  contidx 1+c!     ( wid ? )
+  pop              ( wid )
+  context!  
 ; immediate
 
 
 : previous ( -- )
   \ get current index and decrement by 1
-  contidx dup c@ 1- dup
+  contidx push ( contidx contidx ) 
+  c@ 1- push   ( contidx idx-1 idx-1 )
   \ index must be >= 1
-  0>
-  if
-    0 context! swap c!
+  0>           ( contidx idx-1 flag )
+  ?if
+    0 context! ( contidx idx-1 ? )
+    d0!y d1    ( contidx idx-1 contidx Y:idx-1 )
+    y.c!       ( contidx idx-1 contidx )
   else
-    2drop [compile] only
+    [compile] only
   then
+  nip2
 ; immediate
 
 \ Used in the form:
@@ -99,7 +111,7 @@
 
 : definitions
     context@
-    ?if current ! then
+    ?if !y current y.! then
 ; immediate
 
 \ A defining word used in the form:
@@ -115,9 +127,12 @@
   create
   [compile] immediate
   \ allocate space in eeprom for head and tail of vocab word list
-  wordlist dup , ( wid )
+  wordlist push  ( wid wid )
+  ,              ( wid ? )
   \ get nfa and store in second field of wordlist record in eeprom
-  cur@ @e swap dcell+ !e
+  cur@ @e        ( wid nfa )
+  swap dcell+    ( nfa wid.name ) 
+  !e             ( wid.name+2 )
   does>
    @i \ get eeprom header address
    context!
@@ -133,38 +148,35 @@
 cur@ @e ( nfa )
 \ get the forth wid, initialize it and set name field
 \ forthwid.word is already initialized
-context @ dcell+ ( nfa forthwid.name )
+push context @ dcell+ ( nfa forthwid.name )
 \ write forth nfa to name field
 \ forthwid.name = nfa
-tuck !e ( forthwid.name )
+!e ( forthwid.link )
 \ forthwid.link = 0
-dcell+ 0 over !e ( forthwid.link )
+0!y push.y push.y !e ( 0 forthwid.child )
 \ forthwid.child = 0
-dcell+ 0 swap !e ( )
+!e ( forthwid.child+2 )
 
 
 \ print name field
 : .nf ( nfa -- )
-      $l $FF and             ( cnt addr addr n ) \ mask immediate bit
-      itype space            ( cnt addr )
+      $l y= $FF and.y        ( addr cnt ) \ mask immediate bit
+      itype space            ( ? )
 ;
  
 \ list words starting at a name field address
 : lwords ( nfa -- )
-    0 swap
+    push 0 push              ( nfa 0 0 )
+    d1                       ( nfa cnt nfa )
     begin
-      ?dup                   ( cnt addr addr )
-    while                    ( cnt addr ) \ is nfa = counted string
-      dup                    ( cnt addr addr )
-      .nf                    ( cnt addr )
-      nfa>lfa                ( cnt lfa )
-      @i                     ( cnt addr )
-      swap                   ( addr cnt )
-      1+                     ( addr cnt+1 )
-      swap                   ( cnt+1 addr )
+    ?while                   ( nfa cnt nfa ) \ is nfa = counted string
+      .nf                    ( nfa cnt ? )
+      d0 1+ !d0              ( nfa cnt+1 cnt+1 )
+      d1 nfa>lfa             ( nfa cnt lfa )
+      @i !d1                 ( nfa' cnt addr )
     repeat 
-
-    cr ." count: " .
+    cr ." count: " d0 .
+    nip2
 ;
 
 \ List the names of the definitions in the context vocabulary.
@@ -178,31 +190,31 @@ dcell+ 0 swap !e ( )
 
 \ list the root words
 : rwords ( -- )
-  [ find WIPE lit ]
+  [ find WIPE w=, ]
   lwords
 ;
 
-\ list active vocabularies
+\ print out search list of active vocabularies
 : order ( -- )
   ." Search: "
   \ get context index and use as counter
-  contidx c@
+  contidx c@  push            ( idx idx )
   begin
   \ iterate through vocab array and print out vocab names
   ?while
-    dup dcell* context +
+    dcell* !y context +y      ( idx context' )
     \ get context wid
     @
     \ if not zero then print vocab name 
-    ?dup if
+    ?if
       \ next cell in eeprom has name field address 
       dcell+ @e
       .nf
     then
     \ decrement index
-    1-
+    d0 1- !d1                 ( idx-1 idx-1 )
   repeat
-  drop
+  pop
   ." Forth Root" cr
   ." definitions: "
   cur@ dcell+ @e .nf cr
@@ -214,34 +226,36 @@ dcell+ 0 swap !e ( )
   \ while link is not zero
   ?while  ( spaces linkwid )
     \ print indent
-    over spaces ." |- "
+    over spaces ." |- " ( spaces linkwid ? )
     \ get name from name field
-    dcell+ dup @e ( spaces linkwid.name name )
+    d0 dcell+ !d0 @e ( spaces linkwid.name name )
     \ print name and line feed
-    .nf cr ( spaces link.name )
-    \ get link field
-    dcell+ ( spaces linkwid.link )
+    .nf cr          ( spaces link.name ? )
     \ increase spaces for indenting child vocabularies
-    over 4+ over ( spaces linkwid.link spaces+4 linkwid.link )
+    d1 4+ push      ( spaces linkwid.name spaces+4 spaces+4 )
+    \ get link field
+    d1 dcell+ !d1   ( spaces linkwid.link spaces+4 linkwid.link )
     \ get child link and recurse: print child vocabularies
-    dcell+ @e recurse ( spaces linkwid.link )
+    dcell+ @e       ( spaces linkwid.link spaces+4 childwid )
+    recurse         ( spaces linkwid.link )
     \ get link for next sibling
     @e
   repeat
-  2drop
+  pop2
 ;
 
 \ list context vocabulary and all child vocabularies
 \ order is newest to oldest
 : vocs ( -- )
   \ start spaces at 2
-  2
+  push 2        ( ? 2 )
   \ get top search vocabulary address
   \ it is the head of the vocabulary linked list
-  wid@  ( wid )
+  push wid@     ( ? 2 wid )
   \ print context vocabulary
-  dup dcell+ @e .nf cr
+  push dcell+   ( ? 2 wid wid.name )
+  @e .nf cr pop ( ? 2 wid )
   \ get child link of linked list
-  wid:child @e ( linkwid )
+  wid:child @e  ( ? 2 linkwid )
   .childvocs cr
 ;
