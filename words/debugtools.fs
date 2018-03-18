@@ -1,10 +1,10 @@
-
+only
 
 ( -- n )
 \ Tools
 \ Amount of available RAM (incl. PAD)
 : unused
-    sp0 here -
+    here !y sp0 -y
 ;
     
 
@@ -14,15 +14,15 @@
 
 : dbg- 
   [
-    4 5 sbi,
-    5 5 cbi,
+    4 push 5 sbi,
+    5 push 5 cbi,
   ]
 ; 
 
 : dbg+
   [
-    4 5  sbi,
-    5 5  sbi,
+    4 push 5 sbi,
+    5 push 5 sbi,
   ]
 ;
 
@@ -31,9 +31,9 @@
 : dmp
  over .$ [char] : emit space
  begin
-   ?while icell- swap dup @i .$ icell+ swap
+   d0 ?while icell- !d0 d1 @i .$ d1 icell+ !d1
  repeat
- drop
+ pop2
 ;
 
 
@@ -48,24 +48,23 @@
 ( bbb reg -- )
 \ tools
 \ set the bits of reg defined by bit pattern in bbb
-: rbs :a c@ or ac! ;
+: rbs pop.y !x c@ or.y xc! ;
 
 ( bbb reg -- )
 \ tools
 \ clear the bits of reg defined by bit pattern in bbb
-: rbc >a not ac@ and ac! ;
+: rbc !x pop.y y.not xc@ and.y xc! ;
 
 \ modify bits of reg defined by mask
 : rbm ( val mask reg -- )
-    >a ac@ and or
-    ac!
+    !x pop.y xc@ and.y pop.y or.y xc!
 ;
 
 
 ( reg -- )
 \ tools
 \ read register/ram byte contents and print in binary form
-: rb? c@ bin <# # # # # # # # # #> type space decimal ;
+: rb? c@ !x bin x <# # # # # # # # # #> type space decimal ;
 
 ( reg -- )
 \ tools
@@ -77,28 +76,26 @@ find r? val fence
 
 ( c: name -- )
 : forget
-  pname
-  cur@
-  findnfa            ( nfa )
-  ?dup
-  if
+  pname            ( addr cnt )
+  push cur@        ( addr cnt wid )
+  findnfa          ( nfa )
+  ?if
     \ nfa must be greater than fence
-    dup           ( nfa nfa)
-    fence         ( nfa nfa fence )
-    $3800
-    within             ( nfa nfa>fence )
+    push          ( nfa nfa )
+    push fence    ( nfa nfa fence )
+    push $3800    ( nfa nfa fence $3800 )
+    within        ( nfa nfa>fence )
     if
       \ nfa is valid
       \ set dp to nfa
-      dup           ( nfa nfa )
-      dp! dp!e      ( nfa )
+      push        ( nfa nfa )
+      dp! dp!e    ( nfa ? )
+      pop
       \ set context wid to lfa
       nfa>lfa       ( lfa )
       @i            ( nfa )
-      cur@     ( nfa wid )
-      !e            (  )
-    else
-      drop  
+      push cur@     ( nfa wid )
+      !e            ( ? )
     then
   then
 ;
@@ -110,18 +107,27 @@ find forget to fence
 \ back to when marker was created
 : marker  ( c: name -- )
   \ copy current word list, current wid, dp, here
-  cur@ dup @e dp here
-  create
+  cur@ push        ( wid wid )
+  @e push          ( wid nfa nfa )
+  dp push          ( wid nfa dp dp )
+  here push        ( wid nfa dp here here )
+  create           ( wid nfa dp here ? )
   \ save here, dp, current wid, current word list
-  , , , ,
+  pop ,            ( wid nfa dp ? )
+  pop ,            ( wid nfa ? )
+  pop ,            ( wid ? )
+  pop ,            ( ? )
   does> ( addr )
     \ restore here
-    dup @i to here
+     push @i to here  ( addr ? )
     \ restore dp
-    icell+ dup @i dp! dp!e 
+    d0 icell+ !d0 @i  ( addr+icell dp )
+    dp! dp!e          ( addr+icell ? ) 
     \ restore current wid
-    icell+ dup @i 
-    swap icell+ @i !e
+    d0 icell+ !d0 @i  ( addr nfa )
+    swap              ( nfa addr )
+    icell+ @i         ( nfa wid )
+    !e                ( wid+2 )
     \ only Forth and Root are safe vocabs
     [compile] only
 ;
