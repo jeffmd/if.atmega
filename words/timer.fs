@@ -22,16 +22,19 @@ var us
 \ each tick is 1.024 ms
 \ 42 ticks of 24 us is 1.008 ms
 :isr T0ms
-  ms 1+! us @ 253 +
+  ms 1+! 
+  us !x          ( us# X:us# )
+  @ y= 253 +y    ( us+253 )
   \ check if microsecond accumulator is > 1000
-  dup 9999 >
-  if
+  push push 9999 ( us+253 us+253 9999 ) 
+  >              ( us+253 flag )
+  if             ( us+253 )
     \ add extra millisecond
-    ms 1+!
+    push ms 1+! pop
     \ remove 1000 microseconds from accumulator
-    10000 -
+    y= 10000 -y
   then
-  us !
+  x!
 ;isr
 
 \ Timer 0 clock select
@@ -59,11 +62,11 @@ OVF0 isr T0ms
   ms 0! us 0!
 \ use prescaler of 64
 \ timer 0 will generate an overflow event 976.5625 times/sec
-  %011 TCCR0B c!
+  y= %011 TCCR0B y.c!
 \ setup timer in normal count mode and normal port mode
   TCCR0A 0c!
 \ clear overflow flag by setting the flag
-  1 TIFR0 c!
+  y= 1 TIFR0 y.c!
 \ enable timer overflow interupt
-  1 TIMSK0 c!
+  y= 1 TIMSK0 y.c!
 ;

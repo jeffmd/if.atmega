@@ -141,6 +141,6 @@ $3F con EECR	\ EEPROM Control Register
 &50  con SPM  \ Store Program Memory Read
 
 \ turn port into direct i/o address
-: DIO ( port -- )
-  $20 - 
+: DIO ( port -- port-$20 )
+  y= $20 -y 
 ;
