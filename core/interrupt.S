@@ -31,6 +31,7 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
     movw isrXL, XL
     movw isrt0, xrl
     movw isrt2, yrl
+    movw isrTemp4, temp4
     
     ; pop return address
     pop ZH
@@ -39,6 +40,7 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
     ; save status register
     in xrl, SREG
     push xrl
+    push_
     ijmp
 
 ; ( -- )
@@ -49,7 +51,9 @@ forthword_ IEND, 0, "(i;)"
     movw XL, isrXL
     movw xrl, isrt0
     movw yrl, isrt2
+    movw temp4, isrTemp4
     
     pop isrt0
+    pop_
     out SREG, isrt0    
     reti

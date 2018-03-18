@@ -7,8 +7,9 @@
   isrXL = 2 
   isrXH = 3
   
-  ;upl = 4 ; ram user area 
-  ;uph = 5
+  ; register 4, 5 not used except in interrupt service routines
+  isrTemp4 = 4 
+  isrTemp5 = 5
 
 
   ; registers 8 to 11 not used except in interrupt service routines
