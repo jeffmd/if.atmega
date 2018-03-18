@@ -267,7 +267,7 @@
     push state
     if 
       push program: (to)
-      pop ,
+      pop , pop
     else
       def! \ not in compile state, so do runtime operation
     then
