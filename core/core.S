@@ -484,7 +484,7 @@ forthword_ HSTORE, 0, "h!"
 
 ; ( a-addr Y:c -- )
 ; Memory
-; store a single byte to RAM address
+; store a single byte from Y register to RAM address
 forthword_ YWCSTORE, 0, "y.c!"
     mov temp4, yrl
 WCSTORE:
@@ -492,6 +492,27 @@ WCSTORE:
 ZCSTORE:
     st Z, temp4
     ret
+
+; ( a-addr X:c -- )
+; Memory
+; store a single byte from X register to RAM address
+forthword_ XWCSTORE, 0, "x.c!"
+    mov temp4, xrl
+    rjmp WCSTORE
+
+; ( a-addr X:c -- )
+; Memory
+; store a single byte from A register to RAM address
+forthword_ AWCSTORE, 0, "a.c!"
+    mov temp4, al
+    rjmp WCSTORE
+
+; ( a-addr X:c -- )
+; Memory
+; store a single byte from B register to RAM address
+forthword_ BWCSTORE, 0, "b.c!"
+    mov temp4, bl
+    rjmp WCSTORE
 
 ; ( a-addr -- )
 ; Memory
