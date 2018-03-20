@@ -20,17 +20,17 @@ cvar secs
 
 \ increment number of hours by one
 : hrs+ ( -- )
-  23 hrs 1+c!mx if days+ then
+  23 push hrs 1+c!mx ?if days+ then
 ;
 
 \ increment number of minutes by one
 : mins+ ( -- )
-  59 mins 1+c!mx if hrs+ then
+  59 push mins 1+c!mx ?if hrs+ then
 ;
 
 \ increment number of seconds by one
 : secs+ ( -- )
-  59 secs 1+c!mx if mins+ then
+  59 push secs 1+c!mx ?if mins+ then
 ;
 
 \ clear the clock
@@ -43,7 +43,7 @@ cvar secs
 
 \ run the clock
 : run ( -- )
-  ['] secs+ 14 task!
+  14 push ['] secs+ task!
 ;
 
 : stop ( -- )
