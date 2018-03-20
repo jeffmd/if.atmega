@@ -16,7 +16,7 @@ also Adc definitions
 : conv
 \ start conversion, auto conversion is on
   \ start conversion
-  %01000000 ADCSRA rbs
+  %01000000 push ADCSRA rbs
   \ wait ~200 usec
   200 usec
 \ read adcl and adch by doing 16 bit read from adcl
@@ -33,8 +33,8 @@ also Adc definitions
 \ channel 14 - 1.1v band gap
 \ channel 15 - 0V ground
 : amux
-  $0F and
-  $F0 ADMUX rbm
+  y= $0F and.y
+  push $F0 push ADMUX rbm
 ;
 
 ( ref -- )
@@ -46,40 +46,44 @@ also Adc definitions
 \      3 - internal 1.1V with external cap at AREF pin
 
 : aref
-  %11 and
-  2* 2* swnib
-  $0F ADMUX rbm
+  y= %11 and.y
+  *2 *2 swnib
+  push $0F push ADMUX rbm
 ;
 
 ( -- )
 \ initialize the ADC to default values
 : init
 \ disable digital inputs on first 6 analog inputs
-%00111111 DIDR0 rbs
+  %00111111 push DIDR0 rbs
 \ set voltage ref to AVcc
-%01000000 ADMUX rbs
+  %01000000 push ADMUX rbs
 \ enable adc
 \ set analog conversion to non free running mode
 \ set prescaler to 128 to give 125K sample cycle
-%10000111 ADCSRA rbs
+  %10000111 push ADCSRA rbs
 ;
 
 ( -- temperature )
 \ get the temperature of the microcontroller in deg celcius
 : temp
   \ get copy of AMUX
-  ADMUX c@
+  ADMUX c@        ( ADMUX.val )
   \ use internal 1.1V voltage ref
   \ 3 aref
   \ 8 amux \ set adc mux to channel 8
-  %11001000 ADMUX c!
+  push             ( ADMUX.val ADMUX.val )
+  y= %11001000     ( ADMUX.val Y:%11001000 )
+  ADMUX y.c!       ( ADMUX.val ADMUX )
   \ give time for cap to change value when changing reference voltage
-  10 msec
-  conv
+  10 msec          ( ADMUX.val ? )
+  conv             ( ADMUX.val aval )
   \ formula to convert sensor val to celcius = (adc - Tos)/ k
-  14 /
+  push 14 /        ( ADMUX.val aval/14 )
   \ restore AMUX
-  swap ADMUX c!
+  swap             ( aval/14 ADMUX.val )
+  !y ADMUX y.c!    ( aval/14 ADMUX Y:ADMUX.val )
+  pop
 ;
 
 ( -- vcc )
@@ -88,5 +92,5 @@ also Adc definitions
 : vcc
   \ Vcc * 10 = 1.1/5.0*1023*50 / (1.1 sample)
   \ sample 1.1 band gap
-  11253 14 amux 1 msec conv /
+  11253 push 14 amux 1 msec conv /
 ;
