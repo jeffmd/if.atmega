@@ -212,7 +212,7 @@ push context @ dcell+ ( nfa forthwid.name )
       .nf
     then
     \ decrement index
-    d0 1- !d1                 ( idx-1 idx-1 )
+    d0 1- !d0                 ( idx-1 idx-1 )
   repeat
   pop
   ." Forth Root" cr
