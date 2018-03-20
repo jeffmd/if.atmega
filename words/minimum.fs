@@ -7,9 +7,16 @@
     pop.y -y !x d0 -y !d0 x u<
 ;
 
-\ increment a cvar by one.  If val > max then set flag to true.
+\ increment a cvar by one.  If val > max then set flag to true and cvar val to 0.
 : 1+c!mx ( maxval cvar -- flag )
-  nip>b >a ac@ 1+ push b > if 0: then push ac! 0= 
+  pop.y     ( cvar Y:maxval ) 
+  !x c@     ( val X:cvar ) 
+  1+ push2 y ( val+1 val+1 y )
+  >         ( val+1 flag )
+  if        ( val+1 )
+    0       ( 0 )
+  then
+  xc! 0= 
 ;
 
 ( c<name> -- ) 
