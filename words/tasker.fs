@@ -18,19 +18,23 @@ cvar tcnt
 : tidx@
   tidx c@ 
   \ verify index is below 31
-  dup 30 >
+  push2 30 >
   if
     \ greater than 30 so 0
-    0:
     tidx 0c!
+    0
   then
+;
+
+: cnt& ( idx -- cntaddr )
+  !y tcnt +y
 ;
 
 ( idx -- cnt )
 \ get count for a slot
 \ idx: index of slot
 : cnt@
-  tcnt + c@
+  cnt& c@
 ;
 
 \ get the count for current task executing
@@ -42,13 +46,13 @@ cvar tcnt
 \ increment tcnt array element using idx as index
 ( idx -- )
 : cnt+
-  tcnt + 1+c!
+  cnt& 1+c!
 ;
 
 ( n idx -- )
 \ set tcnt array element using idx as index
 : cnt!
-  tcnt + c!
+  pop.x cnt& x.c!
 ;
 
 \ array of task slots in ram : max 31 tasks 62 bytes
@@ -65,36 +69,45 @@ var tasks
 \ increment task index to next task idx
 \ assume array flat layout and next idx = idx*2 + 1
 : tidx+
-  tidx@ 2* 1+ 
+  tidx@ *2 1+ 
   \ if slot count is odd then 1+
-  count
-  1 and +
-  tidx c!
+  !x count
+  y= 1 and.y x+ 
+  tidx x.c!
+;
+
+( idx -- taskaddr )
+\ get task address based on idx
+: task&
+  dcell* !y tasks +y
 ;
 
 ( idx -- task )
 \ get a task at idx slot
 : task@
-  dcell* tasks + @ 
+  task& @ 
 ;
 
-( addr idx -- ) 
+( idx addr -- ) 
 \ store a task in a slot
 \ idx is the slot index range: 0 to 30
+\ addr is xt of word to be executed
 : task!
-  dcell* tasks + !
+  !x pop task& x.!
 ;
 
 \ store a task in a slot
+\ example: 12 task mytask
+\ places xt of mytask in slot 12
 : task ( idx C: name -- )
-  ' swap task!
+  push ' task!
 ;
 
 ( idx -- )
 \ clear task at idx slot
 \ replaces task with noop
 : taskclr 
-  ['] noop swap task!
+  push ['] noop task!
 ;
 
 
@@ -102,8 +115,10 @@ var tasks
 \ execute active task and step to next task
 : taskex
   \ increment count for task slot
-  tidx@ cnt+
-  tidx@ task@ exec
+  tidx@ push ( tidx tidx )
+  cnt+       ( tidx ? )
+  d0 task@   ( tidx taskxt )
+  exec       ( ? )
   tidx+
 ;
 
@@ -113,26 +128,37 @@ var lastms
 \ default to 25 ms 
 cvar exms
 
+: upms
+  ms @ !y lastms y.!
+;
 
 ( -- )
 \ execute tasks.ex if tick time expired
 : tick
-  ms @ lastms @ - exms c@ u> if ms @ lastms ! taskex then 
+  lastms @ !y    ( lastms Y:lastms )
+  ms @ -y        ( ms-lastms )
+  push exms c@   ( timediff exms )
+  u>             ( flag )
+  ?if
+    upms
+    taskex
+  then 
 ;
 
 ( -- )
 \ clear all tasks
 : allclr
   \ iterate 0 to 30 and clear tcnt[] and set tasks[] to noop
-  0
   tidx 0c!
+  0 push           ( idx 0 )
   begin
-    0 over cnt!
-    dup taskclr 
-    1+ 
-    dup 30 >  
-  until
-  drop
+    0 over         ( idx 0 idx )
+    cnt!           ( idx ? )
+    d0 taskclr     ( idx ? )
+    d0 1+ !d0 
+    push 30 >  
+  ?until
+  nip
 ;
 
 ( -- )
@@ -140,8 +166,8 @@ cvar exms
 : run
   \ set taskms to ms
   T0init
-  24 exms c!
-  ms @ lastms !
+  y= 24 exms y.c!
+  upms
   ['] tick to pause
 ;
 
