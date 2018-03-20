@@ -13,10 +13,10 @@
 
 
   ; registers 8 to 11 not used except in interrupt service routines
-  isrt0 = 8
-  isrt1 = 9
-  isrt2 = 10
-  isrt3 = 11
+  isrtxrl = 8
+  isrtxrh = 9
+  isrtyrl = 10
+  isrtyrh = 11
   
   ; not to be used in ISR
   temp4 = 12

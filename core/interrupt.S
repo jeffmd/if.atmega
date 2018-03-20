@@ -29,8 +29,8 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
     ; save important registers
     movw isrZL, ZL
     movw isrXL, XL
-    movw isrt0, xrl
-    movw isrt2, yrl
+    movw isrtxrl, xrl
+    movw isrtyrl, yrl
     movw isrTemp4, temp4
     
     ; pop return address
@@ -49,11 +49,11 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
 forthword_ IEND, 0, "(i;)"
     movw ZL, isrZL
     movw XL, isrXL
-    movw xrl, isrt0
-    movw yrl, isrt2
+    movw xrl, isrtxrl
+    movw yrl, isrtyrl
     movw temp4, isrTemp4
     
-    pop isrt0
+    pop isrtxrl
     pop_
-    out SREG, isrt0    
+    out SREG, isrtxrl    
     reti
