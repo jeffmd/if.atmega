@@ -86,7 +86,7 @@
 ; immediate
 
 
-: previous ( -- )
+: prev ( -- )
   \ get current index and decrement by 1
   contidx push ( contidx contidx ) 
   c@ 1- push   ( contidx idx-1 idx-1 )
@@ -170,10 +170,11 @@ push context @ dcell+ ( nfa forthwid.name )
     d1                       ( nfa cnt nfa )
     begin
     ?while                   ( nfa cnt nfa ) \ is nfa = counted string
+      !d1                    ( nfa cnt nfa )
       .nf                    ( nfa cnt ? )
       d0 1+ !d0              ( nfa cnt+1 cnt+1 )
       d1 nfa>lfa             ( nfa cnt lfa )
-      @i !d1                 ( nfa' cnt addr )
+      @i                     ( nfa cnt addr )
     repeat 
     cr ." count: " d0 .
     nip2
@@ -202,6 +203,7 @@ push context @ dcell+ ( nfa forthwid.name )
   begin
   \ iterate through vocab array and print out vocab names
   ?while
+    !d0                       ( idx idx )
     dcell* !y context +y      ( idx context' )
     \ get context wid
     @
@@ -212,9 +214,9 @@ push context @ dcell+ ( nfa forthwid.name )
       .nf
     then
     \ decrement index
-    d0 1- !d0                 ( idx-1 idx-1 )
+    d0 1-                    ( idx idx-1 )
   repeat
-  pop
+  nip
   ." Forth Root" cr
   ." definitions: "
   cur@ dcell+ @e .nf cr

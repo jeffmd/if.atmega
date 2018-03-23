@@ -110,8 +110,9 @@
     push         ( n' n' )
     begin
     ?while
+      !d0
       space
-      d0 1- !d0
+      d0 1- 
     repeat
     nip
 ;
@@ -150,8 +151,8 @@ var hld
 : #s ( u -- 0 )
     #
     begin
-    ?while
-      #
+      ?while
+        #
     repeat
 ;
 

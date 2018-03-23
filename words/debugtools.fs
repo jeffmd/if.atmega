@@ -31,8 +31,9 @@ only
 : dmp
  over .$ [char] : emit space
  begin
-   d0 ?while icell- !d0 d1 @i .$ d1 icell+ !d1
- repeat
+   d0 ?while
+     icell- !d0 d1 @i .$ d1 icell+ !d1
+   repeat
  pop2
 ;
 
