@@ -77,14 +77,14 @@ cvar line
 \ setup port pins for I/O
 : sio
   \ setup pins 4,5,6,7 on Port D DDR for output
-  $F0 DDRD rbs
+  $F0 push DDRD rbs
   \ setup pins 0,1,2 on Port B DDR for output
-  %00000111 DDRB rbs
+  %00000111 push DDRB rbs
   \ setup Timer1 for fast PWM using ICR1 as TOP
   \ use inverting output on OC1B (D10 port B 2) so brightness goes
   \ all the way off
-  $1B32 TCCR1A !
-  1000 ICR1H h!
+  y= $1B32 TCCR1A y.!
+  1000 push ICR1H h!
   1000 dim
 ;
 
@@ -92,44 +92,44 @@ cvar line
 \ pulse enable line of lcd
 : pen
     \ lcd-en toggle low high low
-    [ PORTB DIO 1 cbi, ]
+    [ PORTB DIO push 1 cbi, ]
     1 usec
-    [ PORTB DIO 1 sbi, ]
+    [ PORTB DIO push 1 sbi, ]
     1 usec \ enable pulse must be >450ns
-    [ PORTB DIO 1 cbi, ]
+    [ PORTB DIO push 1 cbi, ]
     40 usec \ commands need > 37us to settle
 ;
 
 \ send high 4 bits of byte to lcd
 : 4bs ( c -- )
-    $F0 and
-    $0F PORTD rbm
+    y= $F0 and.y
+    push $0F push PORTD rbm
     pen
 ;
 
 \ send a byte to lcd
 : send ( c -- )
-    dup 4bs
-    swnib 4bs
+    push 4bs
+    pop swnib 4bs
 ;
 
 \ send a command to lcd
 : cmd ( c -- )
     \ lcd-rs low
-    [ PORTB DIO 0 cbi, ]
+    [ PORTB DIO push 0 cbi, ]
     send
 ;
 
 \ send data to lcd
 : data ( c -- )
     \ lcd-rs high
-    [ PORTB DIO 0 sbi, ]
+    [ PORTB DIO push 0 sbi, ]
     send
 ;
 
 : reset
   \ lcd-rs low start off in command mode
-  [ PORTB DIO 0 cbi, ]
+  [ PORTB DIO push 0 cbi, ]
 
   \ SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
   \ according to datasheet, we need at least 40ms
@@ -170,17 +170,17 @@ cvar line
 
 \ execute lcd display control command
 : ctrlx
-  ctrl c@ 8 or cmd
+  ctrl c@ y= 8 or.y cmd
 ;
 
 \ turn on flags in ctrl and send to lcd
 : ctrl+ ( n -- )
-  ctrl rbs ctrlx
+  push ctrl rbs ctrlx
 ;
 
 \ turn off flags in ctrl and send to lcd
 : ctrl- ( n -- )
-  ctrl rbc ctrlx
+  push ctrl rbc ctrlx
 ;
 
 \ turn display on
@@ -236,24 +236,24 @@ cvar line
 
 \ move cursor to col, row position
 : pos ( col row -- )
-  ?if drop $40 then +
-  $80 or cmd
+  ?if $40 then pop.y +y
+  y= $80 or.y cmd
 ;
 
 \ turn backlight all the way on
 : light
-  [ PORTB DIO 2 sbi, ]
+  [ PORTB DIO push 2 sbi, ]
 ;
 
 \ turn backlight off
 : light-
-  [ PORTB DIO 2 cbi, ]
+  [ PORTB DIO push 2 cbi, ]
 ;
 
 \ sends character to lcd
 \ used when defering system emit
 : emit ( c -- )
-  a swap data >a ;
+  data 
 ;
 
 : {.
