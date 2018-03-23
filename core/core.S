@@ -422,7 +422,7 @@ ZFETCH:
     ldd wh, Z+1
     ret
 
-; ( addr Y:n -- )
+; ( addr Y:n -- addr Y:n )
 ; Memory
 ; write value in Y to RAM memory at addr in WR, low byte first
 forthword_ YWSTORE, 0, "y.!"
@@ -436,28 +436,28 @@ ZSTORE:
     std Z+1, temp5
     ret
 
-; ( addr Y:n -- )
+; ( addr Y:n -- addr Y:n )
 ; Memory
 ; write value in Y to RAM memory at addr in WR, low byte first
 forthword_ XWSTORE, 0, "x.!"
     movw temp4, xrl
     rjmp WSTORE
 
-; ( addr A:n -- )
+; ( addr A:n -- addr A:n )
 ; Memory
 ; write value in A to RAM memory at addr in WR, low byte first
 forthword_ AWSTORE, 0, "a.!"
     movw temp4, al
     rjmp WSTORE
 
-; ( addr B:n -- )
+; ( addr B:n -- addr B:n )
 ; Memory
 ; write value in B to RAM memory at addr in WR, low byte first
 forthword_ BWSTORE, 0, "b.!"
     movw temp4, bl
     rjmp WSTORE
 
-; ( addr -- )
+; ( addr -- addr )
 ; write 0 to RAM memory at addr.
 forthword_ ZERO_STR, 0, "0!"
     movw ZL, wl
@@ -467,7 +467,7 @@ ZEROZSTORE:
     clr temp5
     rjmp ZSTORE
 
-; ( n addr -- )
+; ( n addr -- n )
 ; addr is high address
 ; Memory
 ; write n to RAM memory at addr, high byte first
@@ -514,7 +514,7 @@ forthword_ BWCSTORE, 0, "b.c!"
     mov temp4, bl
     rjmp WCSTORE
 
-; ( a-addr -- )
+; ( a-addr -- a-addr )
 ; Memory
 ; store a 0 to single byte RAM address
 forthword_ ZERO_CSTR, 0, "0c!"
@@ -532,7 +532,7 @@ ZCFETCH:
     ld wl, Z
     ret
 
-; ( a-addr Y:n -- )
+; ( a-addr Y:n -- a-addr Y:n )
 ; Memory
 ; add n to content of RAM address a-addr
 forthword_ YPLUSSTORE, 0, "y+!"
@@ -543,7 +543,7 @@ forthword_ YPLUSSTORE, 0, "y+!"
     adc temp5, yrh
     rjmp ZSTORE
 
-; ( a-addr -- )
+; ( a-addr -- a-addr )
 ; Memory
 ; add 1 to content of word RAM address a-addr
 forthword_ ONEPLUSSTORE, 0, "1+!"
@@ -554,7 +554,7 @@ forthword_ ONEPLUSSTORE, 0, "1+!"
     movw temp4, XL
     rjmp ZSTORE
 
-; ( a-addr Y:n -- )
+; ( a-addr Y:n -- a-addr Y:n )
 ; Memory
 ; add n to content of byte RAM address a-addr
 forthword_ PLUSCSTORE, 0, "y+c!"
@@ -564,7 +564,7 @@ forthword_ PLUSCSTORE, 0, "y+c!"
     rjmp ZCSTORE
 
 
-; ( a-addr -- )
+; ( a-addr -- a-addr )
 ; Memory
 ; add 1 to content of byte RAM address a-addr
 forthword_ ONEPLUSCSTORE, 0, "1+c!"
@@ -580,13 +580,13 @@ forthword_ UPSTORE, 0, "up!"
     pop_y_
     rjmp YWSTORE
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read memory pointed to by register A
 forthword_ AFETCH, 0, "a@"
     movw ZL, al
     rjmp ZFETCH
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read program memory pointed to by register A
 ; note: address must be setup as byte address
 forthword_ AFETCHI, 0, "a@i"
@@ -594,14 +594,14 @@ forthword_ AFETCHI, 0, "a@i"
     rjmp ZFETCHI
 
 
-; ( -- n )
+; ( ? -- n )
 ; Read a byte from ram pointed to by register A
 forthword_ ACFETCH, 0, "ac@"
     movw ZL, al
     rjmp ZCFETCH
 
 
-; ( n -- )
+; ( n -- n )
 ; Extended VM
 ; Write memory pointed to by register A (Extended VM)
 forthword_ ASTORE, 0, "a!"
@@ -609,7 +609,7 @@ forthword_ ASTORE, 0, "a!"
     movw temp4, wl
     rjmp ZSTORE
 
-; ( n -- )
+; ( n -- n )
 ; Write char memory pointed to by register A
 forthword_ ACSTORE, 0, "ac!"
     movw ZL, al
@@ -617,60 +617,60 @@ forthword_ ACSTORE, 0, "ac!"
     rjmp ZCSTORE
 
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read memory pointed to by register B
 forthword_ BFETCH, 0, "b@"
     movw ZL, bl
     rjmp ZFETCH
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read program memory pointed to by register B
 ; note: address must be setup as byte address
 forthword_ BFETCHI, 0, "b@i"
     movw ZL, bl
     rjmp ZFETCHI
 
-; ( -- n )
+; ( ? -- n )
 ; Read a byte from ram pointed to by register B
 forthword_ BCFETCH, 0, "bc@"
     movw ZL, bl
     rjmp ZCFETCH
 
 
-; ( n -- )
+; ( n -- n )
 ; Write memory pointed to by register B
 forthword_ BSTORE, 0, "b!"
     movw ZL, bl
     movw temp4, wl
     rjmp ZSTORE
 
-; ( n -- )
+; ( n -- n )
 ; Write char memory pointed to by register B
 forthword_ BCSTORE, 0, "bc!"
     movw ZL, bl
     mov temp4, wl
     rjmp ZCSTORE
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read memory pointed to by register X
 forthword_ XFETCH, 0, "x@"
     movw ZL, xrl
     rjmp ZFETCH
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read program memory pointed to by register X
 ; note: address must be setup as byte address
 forthword_ XFETCHI, 0, "x@i"
     movw ZL, xrl
     rjmp ZFETCHI
 
-; ( -- n )
+; ( ? -- n )
 ; Read a byte from ram pointed to by register X
 forthword_ XCFETCH, 0, "xc@"
     movw ZL, xrl
     rjmp ZCFETCH
 
-; ( n -- )
+; ( n -- n )
 ; Write memory pointed to by register X
 forthword_ XSTORE, 0, "x!"
     movw ZL, xrl
@@ -684,13 +684,13 @@ forthword_ XCSTORE, 0, "xc!"
     mov temp4, wl
     rjmp ZCSTORE
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read memory pointed to by register Y
 forthword_ YFETCH, 0, "y@"
     movw ZL, yrl
     rjmp ZFETCH
 
-; ( -- n2 )
+; ( ? -- n2 )
 ; Read program memory pointed to by register Y
 ; note: address must be setup as byte address
 forthword_ YFETCHI, 0, "y@i"
@@ -703,14 +703,14 @@ forthword_ YCFETCH, 0, "yc@"
     movw ZL, yrl
     rjmp ZCFETCH
 
-; ( n -- )
+; ( n -- n )
 ; Write memory pointed to by register Y
 forthword_ YSTORE, 0, "y!"
     movw ZL, yrl
     movw temp4, wl
     rjmp ZSTORE
 
-; ( n -- )
+; ( n -- n )
 ; Write char memory pointed to by register Y
 forthword_ YCSTORE, 0, "yc!"
     movw ZL, yrl

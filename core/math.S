@@ -70,7 +70,7 @@ PFA_RSHIFT2:
     ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; ( n1 -- n2 )
+; ( n1 -- -n1 )
 ; Logic
 ; 2-complement
 forthword_ NEGATE, INLINE_OPT, "neg"
