@@ -327,9 +327,36 @@ Forthword_ Y_STR_D2, INLINE_OPT, "y!d2"
 ; (  -- n)
 ; Stack
 ; current return stack pointer address
-; must be called, don't use jmp to optimize
 forthword_ RP_FETCH, INLINE_OPT, "rp"
     rp_
+    ret
+
+; (  -- X:n)
+; Stack
+; current return stack pointer address stored in X register
+forthword_ RP_STR_X, INLINE_OPT, "rp!x"
+    rp_str_x_
+    ret
+
+; (  -- Y:n)
+; Stack
+; current return stack pointer address stored in Y register
+forthword_ RP_STR_Y, INLINE_OPT, "rp!y"
+    rp_str_y_
+    ret
+
+; (  -- A:n)
+; Stack
+; current return stack pointer address stored in A register
+forthword_ RP_STR_A, INLINE_OPT, "rp!a"
+    rp_str_a_
+    ret
+
+; (  -- B:n)
+; Stack
+; current return stack pointer address stored in B register
+forthword_ RP_STR_B, INLINE_OPT, "rp!b"
+    rp_str_b_
     ret
 
 ; ( n -- n ) (R: -- n )

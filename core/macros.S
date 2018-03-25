@@ -13,10 +13,10 @@
 
 
   ; registers 8 to 11 not used except in interrupt service routines
-  isrtxrl = 8
-  isrtxrh = 9
-  isrtyrl = 10
-  isrtyrh = 11
+  isrxrl = 8
+  isrxrh = 9
+  isryrl = 10
+  isryrh = 11
   
   ; not to be used in ISR
   temp4 = 12
@@ -104,6 +104,16 @@
     in yrh, SPH
 .endm
 
+.macro rp_str_a_
+    in al, SPL
+    in ah, SPH
+.endm
+
+.macro rp_str_b_
+    in bl, SPL
+    in bh, SPH
+.endm
+
 .macro str_rp_
     out SPL, wl
     out SPH, wh
@@ -117,6 +127,16 @@
 .macro y_str_rp_
     out SPL, yrl
     out SPH, yrh
+.endm
+
+.macro a_str_rp_
+    out SPL, al
+    out SPH, ah
+.endm
+
+.macro b_str_rp_
+    out SPL, bl
+    out SPH, bh
 .endm
 
 
