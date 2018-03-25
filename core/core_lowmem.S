@@ -24,7 +24,6 @@ forthword_ RP_STORE, DIS_CALL_OPT, "!rp"
     pop ZL
     str_rp_
     out SREG, temp4
-    pop_
     ijmp
 
 ; ( -- n ) (R: n n1 -- n n1 )
