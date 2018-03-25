@@ -16,7 +16,7 @@ Forthword_ THREEOVER, 0, "3over"
 ; Stack
 ; set return stack pointer
 ; must be called
-forthword_ RP_STORE, DIS_CALL_OPT, "!rp"
+forthword_ STR_RP, DIS_CALL_OPT, "!rp"
     in temp4, SREG
     cli
     ; keep the return address
