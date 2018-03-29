@@ -325,7 +325,9 @@ forthword_ NASTORE, 0, "na!"
     add ZL, wl
     adc ZH, wh
     pop_
-    jmp ZSTORE
+    st Z, wl
+    std Z+1, wh
+    ret
 
 ; ( a-addr -- )
 ; Memory
@@ -335,8 +337,9 @@ forthword_ ONEMINUSSTORE, 0, "1-!"
     ld XL, Z
     ldd XH, Z+1
     sbiw XL, 1
-    movw temp4, XL
-    jmp ZSTORE
+    st Z, XL
+    std Z+1, XH
+    ret
 
 ; ( a-addr -- )
 ; Memory
@@ -357,7 +360,9 @@ forthword_ XPLUSSTORE, 0, "x+!"
     ldd temp5, Z+1
     add temp4, xrl
     adc temp5, xrh
-    jmp ZSTORE
+    st Z, temp4
+    std Z+1, temp5
+    ret
 
 ; ( a-addr Y:n -- )
 ; Memory
@@ -368,7 +373,9 @@ forthword_ APLUSSTORE, 0, "a+!"
     ldd temp5, Z+1
     add temp4, al
     adc temp5, ah
-    jmp ZSTORE
+    st Z, temp4
+    std Z+1, temp5
+    ret
 
 ; ( a-addr Y:n -- )
 ; Memory
@@ -379,7 +386,9 @@ forthword_ BPLUSSTORE, 0, "b+!"
     ldd temp5, Z+1
     add temp4, bl
     adc temp5, bh
-    jmp ZSTORE
+    st Z, temp4
+    std Z+1, temp5
+    ret
 
 
 ; ( n1 -- n2 )

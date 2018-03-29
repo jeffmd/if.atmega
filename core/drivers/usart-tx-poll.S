@@ -10,7 +10,8 @@ TX_POLL_TRY:
   breq TX_POLL_TRY
   ; send to usart
   lit_ USART_DATA
-  jmp YWCSTORE
+  y_wc_str_
+  ret
 
 ; ( -- f) MCU
 ; MCU

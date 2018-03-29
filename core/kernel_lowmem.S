@@ -156,7 +156,7 @@ forthword_ WARM, 0, "warm"
     lit_ pm(NOOP)
     push_
     lit_ pm(PAUSE)
-    call DEFERSTORE
+    rcall DEFERSTORE
     ; init DP in ram from eeprom
     call RESET
     rcall DECIMAL

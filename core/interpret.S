@@ -263,41 +263,41 @@ Forthword_ YSET, IMMEDIATE_EN, "y="
 ; ( n -- )
 ; store n in WR
 Forthword_ WLIT_INTERP, IMMEDIATE_EN, "[w=]"
-  movw temp4, wl
-  lit_ WR            ; ( WR )
-  rcall WSTORE       ; ( WR )
+  lit_z_ WR            ; ( WR )
+  st Z, wl
+  std Z+1, wh
   ret
 
 ; ( n -- )
 ; store n in RY
 Forthword_ YLIT_INTERP, IMMEDIATE_EN, "[y=]"
-  movw temp4, wl
-  lit_ RY            ; ( RY )
-  rcall WSTORE       ; ( RY )
+  lit_z_ RY            ; ( RY )
+  st Z, wl
+  std Z+1, wh
   ret
 
 ; ( n -- )
 ; store n in RX
 Forthword_ XLIT_INTERP, IMMEDIATE_EN, "[x=]"
-  movw temp4, wl
-  lit_ RX            ; ( RX )
-  rcall WSTORE       ; ( RX )
+  lit_z_ RX            ; ( RX )
+  st Z, wl
+  std Z+1, wh
   ret
 
 ; ( n -- )
 ; store n in RA
 Forthword_ ALIT_INTERP, IMMEDIATE_EN, "[a=]"
-  movw temp4, wl
-  lit_ RA            ; ( RA )
-  rcall WSTORE       ; ( RA )
+  lit_z_ RA            ; ( RA )
+  st Z, wl
+  std Z+1, wh
   ret
 
 ; ( n -- )
 ; store n in RB
 Forthword_ BLIT_INTERP, IMMEDIATE_EN, "[b=]"
-  movw temp4, wl
-  lit_ RB            ; ( RB )
-  rcall WSTORE       ; ( RB )
+  lit_z_ RB            ; ( RB )
+  st Z, wl
+  std Z+1, wh
   ret
 
 ; ( c -- )

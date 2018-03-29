@@ -874,6 +874,11 @@
     ldi yrh, hi8(\val) 
 .endm
 
+.macro lit_z_ val
+    ldi ZL, lo8(\val) 
+    ldi ZH, hi8(\val) 
+.endm
+
 .macro user_ val
   lit_ ram_user1 + \val
 .endm
@@ -1005,6 +1010,47 @@
 .macro y_
   movw wl, yrl
 .endm
+
+.macro y_wc_str_
+  movw ZL, wl
+  st Z, yrl
+.endm
+
+.macro x_wc_str_
+  movw ZL, wl
+  st Z, xrl
+.endm
+
+.macro a_wc_str_
+  movw ZL, wl
+  st Z, al
+.endm
+
+.macro b_wc_str_
+  movw ZL, wl
+  st Z, bl
+.endm
+
+.macro a_cstr_
+  movw ZL, al
+  st Z, wl
+.endm
+
+.macro b_cstr_
+  movw ZL, bl
+  st Z, wl
+.endm
+
+.macro x_cstr_
+  movw ZL, xrl
+  st Z, wl
+.endm
+
+.macro y_cstr_
+  movw ZL, yrl
+  st Z, wl
+.endm
+
 
 .macro in_ val, prt
 .if (\prt < 0x40)

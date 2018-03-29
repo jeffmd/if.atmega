@@ -15,11 +15,11 @@ forthword_ USART, 0, "+usart"
 
   lit_y_ USART_B_VALUE
   lit_ USART_B
-  call YWCSTORE
+  y_wc_str_
 
   lit_y_ USART_C_VALUE
   lit_ USART_C | bm_USARTC_en
-  call YWCSTORE
+  y_wc_str_
 
   lit_ UBRR_VAL
   PUSH_

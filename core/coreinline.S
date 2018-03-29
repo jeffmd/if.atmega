@@ -369,35 +369,35 @@ forthword_ RPUSH, INLINE_OPT, "rpush"
 ; ( n -- n ) (R: -- n )
 ; Stack
 ; push X onto return stack
-forthword_ RPUSHX, INLINE_OPT, "rpush.x"
+forthword_ RPUSH_X, INLINE_OPT, "rpush.x"
     rpush_x_
     ret
 
 ; ( n -- n ) (R: -- n )
 ; Stack
 ; push Y onto return stack
-forthword_ RPUSHY, INLINE_OPT, "rpush.y"
+forthword_ RPUSH_Y, INLINE_OPT, "rpush.y"
     rpush_y_
     ret
 
 ; ( n -- n ) (R: -- n )
 ; Stack
 ; push A onto return stack
-forthword_ RPUSHA, INLINE_OPT, "rpush.a"
+forthword_ RPUSH_A, INLINE_OPT, "rpush.a"
     rpush_a_
     ret
 
 ; ( n -- n ) (R: -- n )
 ; Stack
 ; push B onto return stack
-forthword_ RPUSHB, INLINE_OPT, "rpush.b"
+forthword_ RPUSH_B, INLINE_OPT, "rpush.b"
     rpush_b_
     ret
 
 ; ( n -- n ) (R: -- n )
 ; Stack
 ; push SP onto return stack
-forthword_ RPUSHSP, INLINE_OPT, "rpush.sp"
+forthword_ RPUSH_SP, INLINE_OPT, "rpush.sp"
     rpush_sp_
     ret
 
@@ -411,35 +411,35 @@ forthword_ RPOP, INLINE_OPT, "rpop"
 ; ( -- ) (R: n -- )
 ; Stack
 ; pop TOR into X
-forthword_ RPOPX, INLINE_OPT, "rpop.x"
+forthword_ RPOP_X, INLINE_OPT, "rpop.x"
     rpop_x_
     ret
 
 ; ( -- ) (R: n -- )
 ; Stack
 ; pop TOR into Y
-forthword_ RPOPY, INLINE_OPT, "rpop.y"
+forthword_ RPOP_Y, INLINE_OPT, "rpop.y"
     rpop_y_
     ret
 
 ; ( -- ) (R: n -- )
 ; Stack
 ; pop TOR into A
-forthword_ RPOPA, INLINE_OPT, "rpop.a"
+forthword_ RPOP_A, INLINE_OPT, "rpop.a"
     rpop_a_
     ret
 
 ; ( -- ) (R: n -- )
 ; Stack
 ; pop TOR into B
-forthword_ RPOPB, INLINE_OPT, "rpop.b"
+forthword_ RPOP_B, INLINE_OPT, "rpop.b"
     rpop_b_
     ret
 
 ; ( -- ) (R: n -- )
 ; Stack
 ; pop TOR into SP
-forthword_ RPOPSP, INLINE_OPT, "rpop.sp"
+forthword_ RPOP_SP, INLINE_OPT, "rpop.sp"
     rpop_sp_
     ret
 
@@ -461,25 +461,25 @@ forthword_ ISZERO, INLINE_OPT, "0?"
 
 ; ( n -- n )
 ; test if A is zero
-Forthword_ AISZERO, INLINE_OPT, "a0?"
+Forthword_ A_ISZERO, INLINE_OPT, "a0?"
 	a_iszero_
 	ret
   
 ; ( n -- n )
 ; test if B is zero
-Forthword_ BISZERO, INLINE_OPT, "b0?"
+Forthword_ B_ISZERO, INLINE_OPT, "b0?"
 	b_iszero_
 	ret
   
 ; ( n -- n )
 ; test if X is zero
-Forthword_ XISZERO, INLINE_OPT, "x0?"
+Forthword_ X_ISZERO, INLINE_OPT, "x0?"
 	x_iszero_
 	ret
   
 ; ( n -- n )
 ; test if Y is zero
-Forthword_ YISZERO, INLINE_OPT, "y0?"
+Forthword_ Y_ISZERO, INLINE_OPT, "y0?"
 	y_iszero_
 	ret
 
@@ -767,25 +767,25 @@ forthword_ TWOSLASH, INLINE_OPT, "/2"
 
 ; ( A:n1 -- A:n1/2 ) 
 ; arithmetic shift right of A register
-forthword_ ASLASH2, INLINE_OPT, "a/2"
+forthword_ A_SLASH2, INLINE_OPT, "a/2"
     a_slash_2_
     ret
 
 ; ( B:n1 -- B:n1/2 ) 
 ; arithmetic shift right of B register
-forthword_ BSLASH2, INLINE_OPT, "b/2"
+forthword_ B_SLASH2, INLINE_OPT, "b/2"
     b_slash_2_
     ret
 
 ; ( X:n1 -- X:n1/2 ) 
 ; arithmetic shift right of X register
-forthword_ XSLASH2, INLINE_OPT, "x/2"
+forthword_ X_SLASH2, INLINE_OPT, "x/2"
     x_slash_2_
     ret
 
 ; ( Y:n1 -- Y:n1/2 ) 
 ; arithmetic shift right of Y register
-forthword_ YSLASH2, INLINE_OPT, "y/2"
+forthword_ Y_SLASH2, INLINE_OPT, "y/2"
     y_slash_2_
     ret
 
@@ -797,122 +797,146 @@ forthword_ TWOSTAR, INLINE_OPT, "*2"
 
 ; ( A:n1 -- A:n1*2 ) 
 ; arithmetic shift left of A register, multiply by 2
-forthword_ ASTAR2, INLINE_OPT, "a*2"
+forthword_ A_STAR2, INLINE_OPT, "a*2"
     a_star_2_
     ret
 
 ; ( B:n1 -- B:n1*2 ) 
 ; arithmetic shift left of B register, multiply by 2
-forthword_ BSTAR2, INLINE_OPT, "b*2"
+forthword_ B_STAR2, INLINE_OPT, "b*2"
     b_star_2_
     ret
 
 ; ( X:n1 -- X:n1*2 ) 
 ; arithmetic shift left of X register, multiply by 2
-forthword_ XSTAR2, INLINE_OPT, "x*2"
+forthword_ X_STAR2, INLINE_OPT, "x*2"
     x_star_2_
     ret
 
 ; ( Y:n1 -- Y:n1*2 ) 
 ; arithmetic shift left of Y register, multiply by 2
-forthword_ YSTAR2, INLINE_OPT, "y*2"
+forthword_ Y_STAR2, INLINE_OPT, "y*2"
     y_star_2_
     ret
 
 ; ( n1 A:n2 -- n3)
 ; add contents of A register to working register
-forthword_ PLUSA, INLINE_OPT, "+a"
+forthword_ PLUS_A, INLINE_OPT, "+a"
     plus_a_
     ret
 
 ; ( n1 A:n2 -- A:n3)
 ; add contents of working register to A register
-forthword_ APLUS, INLINE_OPT, "a+"
+forthword_ A_PLUS, INLINE_OPT, "a+"
     a_plus_
     ret
 
 ; ( n1 Y:n2 -- n3)
 ; add contents of B register to working register
-forthword_ PLUSB, INLINE_OPT, "+b"
+forthword_ PLUS_B, INLINE_OPT, "+b"
     plus_b_
     ret
 
 ; ( n1 B:n2 -- B:n3)
 ; add contents of working register to B register
-forthword_ BPLUS, INLINE_OPT, "b+"
+forthword_ B_PLUS, INLINE_OPT, "b+"
     b_plus_
     ret
 
 ; ( n1 X:n2 -- n3)
 ; add contents of X register to working register
-forthword_ PLUSX, INLINE_OPT, "+x"
+forthword_ PLUS_X, INLINE_OPT, "+x"
     plus_x_
     ret
 
 ; ( n1 X:n2 -- X:n3)
 ; add contents of working register to X register
-forthword_ XPLUS, INLINE_OPT, "x+"
+forthword_ X_PLUS, INLINE_OPT, "x+"
     x_plus_
     ret
 
 ; ( n1 Y:n2 -- n3)
 ; add contents of Y register to working register
-forthword_ PLUSY, INLINE_OPT, "+y"
+forthword_ PLUS_Y, INLINE_OPT, "+y"
     plus_y_
     ret
 
 ; ( n1 Y:n2 -- Y:n3)
 ; add contents of working register to Y register
-forthword_ YPLUS, INLINE_OPT, "y+"
+forthword_ Y_PLUS, INLINE_OPT, "y+"
     y_plus_
+    ret
+
+; ( n1 SP:n2 -- n1+n2 )
+; add contents of SP register to working register
+forthword_ PLUS_SP, INLINE_OPT, "+sp"
+    plus_sp_
+    ret
+
+; ( n1 SP:n2 -- SP:n3 )
+; add contents of working register to SP register
+forthword_ SP_PLUS, INLINE_OPT, "sp+"
+    sp_plus_
     ret
 
 ; ( n1|u1 -- n1-y|u1-y )
 ; subtract y from n1
-Forthword_ MINUSY, INLINE_OPT, "-y"
+Forthword_ MINUS_Y, INLINE_OPT, "-y"
   minus_y_
   ret
 
 ; ( n1 Y:n2 -- Y:n2-n1)
 ; subtract contents of working register from Y register
-forthword_ YMINUS, INLINE_OPT, "y-"
+forthword_ Y_MINUS, INLINE_OPT, "y-"
     y_minus_
     ret
 
 ; ( n1|u1 -- n1-x|u1-x )
 ; subtract x from n1
-Forthword_ MINUSX, INLINE_OPT, "-x"
+Forthword_ MINUS_X, INLINE_OPT, "-x"
   minus_x_
   ret
 
 ; ( n1 X:n2 -- X:n2-n1)
 ; subtract contents of working register from X register
-forthword_ XMINUS, INLINE_OPT, "x-"
+forthword_ X_MINUS, INLINE_OPT, "x-"
     x_minus_
     ret
 
 ; ( n1|u1 -- n1-a|u1-a )
 ; subtract a from n1
-Forthword_ MINUSA, INLINE_OPT, "-a"
+Forthword_ MINUS_A, INLINE_OPT, "-a"
   minus_a_
   ret
 
 ; ( n1 A:n2 -- A:n2-n1)
 ; subtract contents of working register from A register
-forthword_ AMINUS, INLINE_OPT, "a-"
+forthword_ A_MINUS, INLINE_OPT, "a-"
     a_minus_
     ret
 
 ; ( n1|u1 -- n1-b|u1-b )
 ; subtract b from n1
-Forthword_ MINUSB, INLINE_OPT, "-b"
+Forthword_ MINUS_B, INLINE_OPT, "-b"
   minus_b_
   ret
 
 ; ( n1 B:n2 -- B:n2-n1)
 ; subtract contents of working register from B register
-forthword_ BMINUS, INLINE_OPT, "b-"
+forthword_ B_MINUS, INLINE_OPT, "b-"
     b_minus_
+    ret
+
+; ( n1|u1 -- n1-SP|u1-SP )
+; subtract SP from n1
+Forthword_ MINUS_SP, INLINE_OPT, "-SP"
+  minus_sp_
+  ret
+
+; ( n1 SP:n2 -- SP:n2-n1)
+; subtract contents of working register from SP register
+forthword_ SP_MINUS, INLINE_OPT, "sp-"
+    sp_minus_
     ret
 
 ; ( -- 0 ) 
@@ -1101,6 +1125,58 @@ forthword_ XMINUS2, INLINE_OPT, "x-2"
 ; register Y minus 2
 forthword_ YMINUS2, INLINE_OPT, "y-2"
     yminus2_
+    ret
+
+; ( a-addr Y:c -- a-addr Y:c )
+; Memory
+; store a single byte from Y register to RAM address
+forthword_ Y_WC_STR, INLINE_OPT, "y.c!"
+    y_wc_str_
+    ret
+
+; ( a-addr X:c -- a-addr X:c )
+; Memory
+; store a single byte from X register to RAM address
+forthword_ X_WC_STR, INLINE_OPT, "x.c!"
+    x_wc_str_
+    ret
+
+; ( a-addr A:c -- a-addr A:c )
+; Memory
+; store a single byte from A register to RAM address
+forthword_ AWCSTORE, INLINE_OPT, "a.c!"
+    a_wc_str_
+    ret
+
+; ( a-addr X:c -- )
+; Memory
+; store a single byte from B register to RAM address
+forthword_ BWCSTORE, INLINE_OPT, "b.c!"
+    b_wc_str_
+    ret
+
+; ( n -- n )
+; Write char memory pointed to by register A
+forthword_ A_CSTR, INLINE_OPT, "ac!"
+    a_cstr_
+    ret
+
+; ( n -- n )
+; Write char memory pointed to by register B
+forthword_ BCSTORE, INLINE_OPT, "bc!"
+    b_cstr_
+    ret
+
+; ( n -- n )
+; Write char memory pointed to by register X
+forthword_ XCSTORE, INLINE_OPT, "xc!"
+    x_cstr_
+    ret
+
+; ( n -- n )
+; Write char memory pointed to by register Y
+forthword_ YCSTORE, INLINE_OPT, "yc!"
+    y_cstr_
     ret
 
 ; ( -- icell )

@@ -167,7 +167,7 @@ forthword_ ONLY, IMMEDIATE_EN, "only"
     ; move index to next slot
     lit_y_ 1
     oneminus_
-    rcall YWCSTORE
+    y_wc_str_
     ; make second slot have no vocab
     oneplus_
     twoplus_

@@ -143,8 +143,8 @@ ACCEPT_echo:
     rcall STIB           ; ( k tibaddr #tib)
     pop_y_               ; ( k #tib Y:tibaddr )
     plus_y_              ; ( k tibaddr+#tib ) 
-    pop_y_               ; ( tibaddr+#tib )
-    rcall YWCSTORE       ; ( ? )
+    pop_y_               ; ( tibaddr+#tib Y:k )
+    y_wc_str_            ; ( tibaddr+#tib )
 
     rcall SHARPTIB       ; ( #tibaddr )
     rcall ONEPLUSSTORE   ; ( ? )
