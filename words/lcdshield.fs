@@ -71,7 +71,7 @@ cvar line
 
 \ dim the light
 : dim ( n -- )
-  OCR1BH h!
+  push OCR1BH h!
 ;
 
 \ setup port pins for I/O
@@ -252,12 +252,12 @@ cvar line
 
 \ sends character to lcd
 \ used when defering system emit
-: emit ( c -- )
-  data 
-;
+\ : emit ( c -- )
+\  data 
+\ ;
 
 : {.
-  ['] emit Forth to emit
+  ['] data Forth to emit
 ;
 
 : .}
