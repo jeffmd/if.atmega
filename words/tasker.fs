@@ -155,10 +155,10 @@ cvar exms
     0 over         ( idx 0 idx )
     cnt!           ( idx ? )
     d0 taskclr     ( idx ? )
-    d0 1+ !d0 
-    push 30 >  
+    d0 1+ !d0      ( idx+1 idx+1 )
+    push 30 >      ( idx+1 flag )
   ?until
-  nip
+  nip              ( ? )
 ;
 
 ( -- )
