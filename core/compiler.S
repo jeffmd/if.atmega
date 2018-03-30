@@ -164,30 +164,28 @@ forthword_ COMMA, 0, ","
 ; Compiler
 ; compiles a string from RAM to Flash
 forthword_ DOSCOMMA, 0, "(s,)"
-    rpush_a_           ; ( addr len len' ) (R: A )
+    rpush_a_           ; ( addr len len' ) (R: A' )
+    rpush_b_           ; ( addr len len' ) (R: A' B' )
     rcall COMMA        ; ( addr len ? )
     pop_               ; ( addr len )
     rcall BTOW         ; ( addr len/2 rem )
-    rpush_
-    pop_               ; ( addr len/2 ) (R: rem )
-    d0_str_a_          ; ( addr len/2 ) A: addr
+    rpush_             ; ( addr len/2 rem ) (R: A' B' rem )
+    pop_b_             ; ( addr rem B:len/2 ) 
+    pop_a_             ; ( rem A:addr )
 
     ; begin
 SCOMMA_LOOP:
     ; ?while
-    iszero_            ; ( len len' )
+    b_iszero_          ; ( ? )
     breq SCOMMA_LAST
-    str_d0_            ; ( len' len' )
-    rcall AFETCH       ; ( len c1c2 )
+    rcall AFETCH       ; ( c1c2 )
     aplus2_
-    rcall COMMA        ; ( len ? )
-    d0_                ; ( len len )
-    oneminus_          ; ( len len-1 )
+    rcall COMMA        ; ( ? )
+    bminus1_           ; ( ? )
     ; repeat
     rjmp SCOMMA_LOOP
 
 SCOMMA_LAST:
-    pop_              ; ( len )
     rpop_             ; ( rem ) (R: )
     ; if
     iszero_           ; ( rem )
@@ -197,7 +195,8 @@ SCOMMA_LAST:
 
     ; then
 SCOMMA_END:
-    rpop_a_            ; ( A:a ) (R: )
+    rpop_b_            ; ( B:B' ) (R: A' )
+    rpop_a_            ; ( A:A' ) (R: )
     ret
    
 ; ( start match -- start count )
