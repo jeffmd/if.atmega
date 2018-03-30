@@ -17,7 +17,7 @@ forthword_ EXEC, 0, "exec"
 ; Stack
 ; duplicate WR if non-zero
 forthword_ QDPUSH, 0, "?push"
-    sbiw wl, 0
+    iszero_
     breq PFA_QDUP1
     push_
 PFA_QDUP1:
