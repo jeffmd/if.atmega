@@ -166,18 +166,19 @@ push context @ dcell+ ( nfa forthwid.name )
  
 \ list words starting at a name field address
 : lwords ( nfa -- )
-    push 0 push              ( nfa 0 0 )
-    d1                       ( nfa cnt nfa )
+    rpush.a                  ( nfa ) ( R:A' )
+    push 0!a                 ( nfa nfa A:0 )
     begin
-    ?while                   ( nfa cnt nfa ) \ is nfa = counted string
-      !d1                    ( nfa cnt nfa )
-      .nf                    ( nfa cnt ? )
-      d0 1+ !d0              ( nfa cnt+1 cnt+1 )
-      d1 nfa>lfa             ( nfa cnt lfa )
-      @i                     ( nfa cnt addr )
+    ?while                   ( nfa nfa ) \ is nfa = counted string
+      !d0                    ( nfa nfa )
+      .nf                    ( nfa ? )
+      a+1                    ( nfa ? )
+      d0 nfa>lfa             ( nfa lfa )
+      @i                     ( nfa addr )
     repeat 
-    cr ." count: " d0 .
-    nip2
+    cr ." count: " a .       ( nfa ? )
+    rpop.a                   ( A:A' ) ( R: )
+    nip                      ( ? )
 ;
 
 \ List the names of the definitions in the context vocabulary.
