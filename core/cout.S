@@ -58,19 +58,21 @@ PFA_ITYPE3:
 ; ( addr n -- )
 ; print a RAM based string
 forthword_ TYPE, 0, "type"
-    rpush_a_
-    d0_str_a_        ; ( addr n ) A: addr
+    rpush_a_         ; ( addr n ) (R: A' )
+    rpush_b_         ; ( addr n ) (R: A' B' )
+    pop_a_           ; ( n ) A: addr
+    str_b_           ; ( n B:n )
+    
 PFA_TYPE1:
-    iszero_
+    b_iszero_
     breq PFA_TYPE2
-    str_d0_          ; ( n n )
-    rcall ACFETCH    ; ( n c )
+    rcall ACFETCH    ; ( c )
     aplus1_          ; a+1
-    rcall EMIT       ; ( n ? )
-    d0_              ; ( n n )
-    oneminus_        ; ( n n-1 )
+    rcall EMIT       ; ( ? )
+    bminus1_         ; ( ? B:n-1 )
     rjmp PFA_TYPE1
+    
 PFA_TYPE2:
-    pop_
-    rpop_a_
+    rpop_b_          ; ( ? B:B' ) ( R:A' )
+    rpop_a_          ; ( ? A:A' ) ( R: )
     ret
