@@ -44,12 +44,9 @@ forthword_ STAR, 0, "*"
 ; unsigned division ud / u2 with remainder
 forthword_ UMSLASHMOD, 0, "um/mod"
     movw temp4, wl
-
-    ld yrl, Y+
-    ld yrh, Y+
-
-    ld xrl, Y+
-    ld xrh, Y+
+    ; pop ud into y:x registers
+    pop_y_     ; ( Y:udl )
+    pop_x_     ; ( X:udh )
 
 ;; unsigned 32/16 -> 16r16 divide
 
@@ -70,7 +67,7 @@ PFA_UMSLASHMODmod_loop:
   ; try subtracting divisor
     cp yrl, temp4
     cpc yrh, temp5
-    cpc XH,zerol
+    cpc XH, zerol
 
     brcs PFA_UMSLASHMODmod_loop_control
 
@@ -88,11 +85,10 @@ PFA_UMSLASHMODmod_loop_control:
 
 PFA_UMSLASHMODmod_done:
     ; put remainder on stack
-    st -Y,yrh
-    st -Y,yrl
+    push_y_
 
     ; put quotient on stack
-    movw wl, xrl
+    x_
     ret
 
 
@@ -128,10 +124,8 @@ DIV16_16_3:
 ; Arithmetics
 ; unsigned division n1/n2 with remainder and quotient
 forthword_ USLASHMOD, 0, "u/mod"
-    movw yrl, wl
-
-    ld xrl, Y+
-    ld xrh, Y+
+    str_y_
+    pop_x_
 
     rcall DIV16_16
     rjmp SLASHMOD_end
@@ -141,10 +135,8 @@ forthword_ USLASHMOD, 0, "u/mod"
 ; Arithmetics
 ; signed division n1/n2 with remainder and quotient
 forthword_ SLASHMOD, 0, "/mod"
-    movw yrl, wl
-
-    ld xrl, Y+
-    ld xrh, Y+
+    str_y_
+    pop_x_
 
     mov	XL, xrh	;move dividend High to sign register
     eor	XL, yrh	;xor divisor High with sign register
