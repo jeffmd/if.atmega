@@ -330,7 +330,7 @@ forthword_ REC_NUM, 0, "rec#"
     iszero_
     pop_                     ; ( n )
     breq REC_NUMBER_OK
-      call LIT_COMP
+      rcall LIT_COMP
       rjmp REC_NUMBER_DONE
       
 REC_NUMBER_OK:
@@ -403,7 +403,7 @@ CHECK_COMPILE_ONLY:
   pop_
   brne CHECK_IMMEDIATE
     ; word can only be used in compile state
-    call DOSLIT
+    rcall DOSLIT
     ascii_ " Only Compile!"
     jmp THROW
     
