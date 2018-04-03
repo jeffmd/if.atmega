@@ -100,13 +100,12 @@ def write_line_flow(string, dest):
 
 	if verbose: 
 		print >>sys.stderr, "sending line: "+string
-		
+
 	for o in list(string):
 		# convert tabs to single space
 		if o == "\t":
 			o = " "
 		dest.write(o)
-		
 		while True:
 			i = dest.read(1)
 			#print "<"+i+"]",
@@ -128,7 +127,7 @@ def write_line_flow(string, dest):
 		i = dest.read(1)
 		sys.stdout.write(i)
 		sys.stdout.flush()
-
+		
 		if state == start:
 			if i == " ":
 				state = space
@@ -197,9 +196,10 @@ try:
 except getopt.GetoptError:
 	print >>sys.stderr, "unknown option. try -h"
 	sys.exit(1)
+print args
 for opt, arg in opts:
 	if opt == "-h":
-		print >>sys.stderr, "usage: asforth-upload [-h] [-v] [-f] [-t tty] [file1] [file2] [...]"
+		print >>sys.stderr, "usage: if-upload [-h] [-v] [-f] [-t tty] [file1] [file2] [...]"
 		print >>sys.stderr, "   default tty is "+tty_dev_name
 		print >>sys.stderr, "   if no files are specified, input is read from the the terminal"
 		print >>sys.stderr, "   -f will run without checking for other processes accessing the tty"
@@ -241,7 +241,7 @@ if not force:
 	else:
 		print >>sys.stderr, "couldn't find fuser. so i can't check if "+tty_dev_name+" is in use."
 		
-tty_dev = file(tty_dev_name,"r+",0)
+tty_dev = open(tty_dev_name, "r+b", 0)
 # get a prompt, clean up the input buffer
 write_line_flow("\n", tty_dev)
 
