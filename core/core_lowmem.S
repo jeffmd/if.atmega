@@ -301,7 +301,7 @@ Forthword_ B_STR_R2, DIS_CALL_OPT, "b!r2"
 # (R: ?  ?  n1 -- n2 ?  n1 ) X: n2
 #     r2 r1 r0
 # fetch X register and store in r2 return stack position
-Forthword_ X_STR_R2, DIS_CALL_OPT, "x!R2"
+Forthword_ X_STR_R2, DIS_CALL_OPT, "x!r2"
     in ZL, SPL
     in ZH, SPH
     std Z+7, xrl
