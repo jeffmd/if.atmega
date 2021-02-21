@@ -70,12 +70,11 @@ atmega328p.verify: PART=m328p
 atmega328p.eeprom: PART=m328p
 
 
-# ASFORTH VERSION TO USE
+# if.atmega VERSION TO USE
 # 'code' for trunk and x.y for the releases (i.e 1.0)
 #VERSION=1.1
 VERSION=code
-ASFORTH=
-CORE=core
+CORE=src
 
 # ------------------------
 # PROGRAMMER CONFIGURATION
@@ -102,7 +101,7 @@ override LDFLAGS  = $(LDSECTION) -v -Map=map.txt -mavr5
 ASM = avr-as $(ASFLAGS) $(AS_INCLUDE)
 LINK = avr-ld $(LDFLAGS)
 	
-INCS = $(CORE)/*.inc $(CORE)/*.S $(CORE)/drivers/*.S $(CORE)/devices/atmega328p/*.S
+INCS = $(CORE)/*.inc $(CORE)/*.S
 
 # Assemble the target
 atmega328p.o : atmega328p.S $(INCS)
