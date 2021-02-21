@@ -9,7 +9,7 @@ ram_CURRENT: .space 2
 ; current vocabulary for new words 
 forthword_ CURRENT, 0, "current"
     lit_ ram_CURRENT
-    ret
+    end_
 
 .pushsection .noinit
 ram_CONTEXTidx: .space 1
@@ -22,7 +22,7 @@ ram_CONTEXT: .space 2 * 5 ; 5 wordlists max
 ; array of wordlists
 forthword_ CONTEXT, 0, "context"
     lit_ ram_CONTEXT
-    ret
+    end_
 
 ; ( nfa -- lfa )
 ; System

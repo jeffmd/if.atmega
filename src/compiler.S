@@ -9,20 +9,14 @@ COLON_SMUDGE: .space 2
 ; system SMUDGE. Get flash name address of current word being compiled. 
 forthword_ SMUDGE, 0, "smudge"
     lit_ COLON_SMUDGE
-    rjmp FETCH
+    rjmp MW 
 
 ; ( addr -- )
 ; set system SMUDGE to addr of latest word being compiled.
-Forthword_ SMUDGE_STR, 0, "smudge!"
-  str_y_
+Forthword_ SMUDGE_STR, 0, "smudge="
+  y_w_
   lit_ COLON_SMUDGE
-  rjmp YWSTORE
-
-; ( -- )
-; clear system SMUDGE
-Forthword_ SMUDGE_ZERO_STR, 0, "smudge0!"
-  lit_ COLON_SMUDGE
-  rjmp ZERO_STR
+  rjmp MW_Y
 
 .pushsection .noinit
 ram_dp: .space 2
@@ -40,7 +34,7 @@ forthword_ DPSHARP, 0, "dp#"
 ; address of the next free dictionary cell
 forthword_ DP, 0, "dp"
   rcall DPSHARP
-  rjmp FETCH
+  rjmp MW
 
 ; ( -- )
 ; Compiler
@@ -54,10 +48,10 @@ forthword_ DPSTOREE, 0, "dp!e"
 ; ( addr -- )
 ; System Value
 ; store address of the next free dictionary cell
-forthword_ DPSTORE, 0, "dp!"
-  str_y_
+forthword_ DPSTORE, 0, "dp="
+  y_w_
   rcall DPSHARP
-  rjmp YWSTORE
+  rjmp MW_Y
 
 ; ( -- )
 ; Compiler
@@ -71,9 +65,11 @@ forthword_ DPFETCHE, 0, "dp@e"
 ; Dictionary
 ; add offset to 16 bit (dictionary pointer) DP
 forthword_ DPPLUS, 0, "dp+"
-  str_y_
+  y_w_
   rcall DPSHARP
-  rjmp YPLUSSTORE
+  rcall X_MW_
+  x_plus_y_
+  rjmp MW_X
 
 ; ( -- )
 ; Dictionary

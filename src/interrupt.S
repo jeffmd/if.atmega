@@ -40,7 +40,7 @@ forthword_ ISTART, DIS_CALL_OPT, "(i:)"
     ; save status register
     in xrl, SREG
     push xrl
-    push_
+    d_w_
     ijmp
 
 ; ( -- )
@@ -54,6 +54,6 @@ forthword_ IEND, 0, "(i;)"
     movw temp4, isrTemp4
     
     pop isrxrl
-    pop_
+    w_d_
     out SREG, isrxrl    
     reti

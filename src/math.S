@@ -44,13 +44,13 @@ forthword_ UGREATEREQUAL, 0, "u>="
 ; ( n1 n2 -- n3)
 ; logically shift n1 left n2 times
 forthword_ LSHIFT, 0, "<<"
-    movw ZL, wl
+    movw ZL, wrl
     pop_
 PFA_LSHIFT1:
     sbiw ZL, 1
     brmi PFA_LSHIFT2
-    lsl wl
-    rol wh
+    lsl wrl
+    rol wrh
     rjmp PFA_LSHIFT1
 PFA_LSHIFT2:
     ret
@@ -58,13 +58,13 @@ PFA_LSHIFT2:
 ; ( n1 n2 -- n3 )
 ; shift n1 n2-times logically right
 forthword_ RSHIFT, 0, ">>"
-    movw ZL, wl
+    movw ZL, wrl
     pop_
 PFA_RSHIFT1:
     sbiw ZL, 1
     brmi PFA_RSHIFT2
-    lsr wh
-    ror wl
+    lsr wrh
+    ror wrl
     rjmp PFA_RSHIFT1
 PFA_RSHIFT2:
     ret

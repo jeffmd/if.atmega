@@ -2,20 +2,49 @@
 ;;;;
 ;;;; GPL V2 (only)
 
+; build levels, increasing build level adds higher level functions
+.set MIN_KERNEL,     0  ; minimum kernel built but with no interpreter
+.set CORE_KERNEL,    1  ; higher level core and kernel functionality but no interpreter
+.set INT_DICTIONARY, 2  ; interpreter and dictionary
+.set CORE_INLINE,    3  ; inline core functions
+.set NUMBER_BASE,    4  ; number conversion
+.set INT_NUMBER,     5  ; number interpreter
+.set COMPILER,       8  ; support routines for compiling
+.set ASM_BASE,       9  ; asm routines used by compiler
+.set ASM,           10  ; simple AVR assembler
+.set INCLUDE,       12  ; include file support
+.set MATH_ADV,      14  ; advanced math routines 
+
+.set BUILD_LEVEL, MIN_KERNEL
+
+@ minimum kernel build has minimum word set needed to be up and running without interpreter
+
+
 ; lower part of the dictionary
 ; this dictionary area contains optional/application words
 ; they may be moved to the core dictionary if needed
 
 .include "interrupt.S"
-.include "coreinline.S"
+
+.if BUILD_LEVEL >= CORE_INLINE
+.include "core_inline.S"
+.endif
+
 .include "core_lowmem.S"
 ;.include "minimum.S"
-.include "defer.S"
-.include "math.S"
-.include "mathadv.S"
-.include "number.S"
+;.include "defer.S"
+;.include "math.S"
+
+.if BUILD_LEVEL >= MATH_ADV
+;.include "mathadv.S"
+.endif
+
+;.include "number.S"
 .include "kernel_lowmem.S"
-.include "asm.S"
+
+
+.if BUILD_LEVEL >= ASM
+;.include "asm.S"
 
 ;**********
 DPSTART:
@@ -24,11 +53,19 @@ DPSTART:
 ; upper part of the dictionary that can not be modified once programmed
 .include "cin.S"
 .include "cout.S"
+
+.if BUILD_LEVEL >= INT_DICTIONARY
 .include "interpret.S"
 .include "dictionary.S"
+.endif
+
 .include "core.S"
 .include "string.S"
+
+.if BUILD_LEVEL >= COMPILER
 .include "compiler.S"
+.endif
+
 .include "kernel_highmem.S"
 
 FLASHLAST:

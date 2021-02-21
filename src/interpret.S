@@ -362,6 +362,7 @@ forthword_ REGS, 0, "regs"
   ret
     
 ; load registers W, A, B, X, Y
+; ( xt * -- w xt )
 forthword_ REGL, 0, "regl"
   lit_ RA
   rcall FETCH      ; ( xt w a )

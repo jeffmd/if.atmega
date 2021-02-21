@@ -9,7 +9,7 @@ ram_tib: .space TIBSIZE
 ; terminal input buffer address
 forthword_ TIB, 0, "tib"
     lit_ ram_tib
-    ret
+    end_
 
 .pushsection .noinit
 ram_sharptib: .space 2
@@ -19,13 +19,13 @@ ram_sharptib: .space 2
 ; variable holding the number of characters in TIB
 forthword_ SHARPTIB, 0, "#tib"
     lit_ ram_sharptib
-    ret
+    end_
 
 ; ( -- a-addr )
 ; pointer to current read position in input buffer
 forthword_ G_IN, 0, ">in"
-    lit_ ram_user1 + USER_G_IN
-    ret
+    user_ USER_G_IN
+    end_
 
 ; ( -- addr len )
 ; System
@@ -34,12 +34,12 @@ forthword_ STIB, 0, "stib"
     rcall TIB
     push_
     rcall SHARPTIB
-    rjmp FETCH
+    rjmp MW
 
 ; ( -- c )
 ; fetch key vector and EXEC it, should leave a single character on TOS
 forthword_ KEY, 0, "key"
-    call DODEFR
+    do_ DODEFR
     .word ram_user1 + USER_KEY
     addr_ UPSTORE
 
@@ -47,10 +47,11 @@ forthword_ KEY, 0, "key"
 ; Reset the input buffer
 forthword_ INRESET, 0, "in_"
     rcall G_IN             ; ( >inaddr )
-    rcall ZERO_STR         ; ( ? )
+    y_0_
+    rcall MW_Y             ; ( ? )
     ; reset input buffer cursor position
     rcall SHARPTIB         ; ( #tibaddr )
-    rjmp ZERO_STR          ; ( )
+    rjmp MW_Y              ; ( )
 
 ; ( -- srcaddr len  )
 ; String
@@ -59,16 +60,9 @@ forthword_ SRCIN, 0, "srcin"
     rcall STIB           ; ( srcaddr len )
     push_                ; ( srcaddr len len )
     rcall G_IN           ; ( srcaddr len ginaddr )
-    rcall FETCH          ; ( srcaddr len gin)
+    rcall MW             ; ( srcaddr len gin)
     rjmp SLASHSTRING     ; ( srcaddr' len' )
     
-; ( -- f )
-; refills the input buffer
-forthword_ REFILL, 0, "refill"
-    call DODEFR
-    .word ram_user1 + USER_REFILL
-    addr_ UPSTORE
-
 ; ( -- flag )
 ; System
 ; receive a string of at most tibsize characters or cr/lf detected.
@@ -79,43 +73,43 @@ forthword_ ACCEPT, 0, "accept"
     ; <begin>
     rcall KEY            ; ( k )
     iszero_              ; ( k )
-    brne ACCEPT_checkeol
-    ret
+    if_not_0_ ACCEPT_checkeol
+    exit_
 
 ACCEPT_checkeol:
     ; check for EOL
-    cpi wl, 10
+    cpi wrl, 10
     ; <if>
-    brne ACCEPT_checkreturn
-    ret
+    if_not_0_ ACCEPT_checkreturn
+    exit_
 
 ACCEPT_checkreturn:
-    cpi wl, 13         ; ( k )
+    cpi wrl, 13         ; ( k )
     ; <if>
-    brne ACCEPT_checkdelete
-    ret
+    if_not_0_ ACCEPT_checkdelete
+    exit_
 
 ACCEPT_checkdelete:
     ; check delete
-    cpi wl, 127        ; ( k )
+    cpi wrl, 127        ; ( k )
     ; <if>
-    brne ACCEPT_checkcontrol
+    if_not_0_ ACCEPT_checkcontrol
     ; delete previous character
     ; check beginning of line
     ; if cursor is 0 then at begining of input
     push_              ; ( k k )
     rcall SHARPTIB     ; ( k #tib )
-    rcall FETCH        ; ( k tib )
+    rcall MW           ; ( k tib )
     ; <if>
     iszero_            ; ( k tib )
     pop_               ; ( k )
-    brne ACCEPT_dodelete
+    if_not_0_ ACCEPT_dodelete
     ; at the beginning of the line, ignore this character
     zero_
-    ret
+    exit_
 
 ACCEPT_dodelete:
-    andi wl, 8
+    andi wrl, 8
     push_                ; ( k k )
     rcall EMIT           ; ( k ? )
     bl_                  ; ( k bl )
@@ -125,12 +119,12 @@ ACCEPT_dodelete:
     ; decrease cursor position by one
     y_true_              ; ( Y:true )
     rcall SHARPTIB       ; ( #tibaddr )
-    rcall YPLUSSTORE     ; ( #tibaddr )
+    rcall YSTORE     ; ( #tibaddr )
     rjmp ACCEPT_checkmaxinput
 
 ACCEPT_checkcontrol:
     ; check for remaining control characters, replace them with blank
-    cpi wl, 32           ; ( k )
+    cpi wrl, 32           ; ( k )
     brge ACCEPT_echo
     ; replace control key with a space
     bl_                  ; ( bl_ )
@@ -142,28 +136,31 @@ ACCEPT_echo:
     ; now store the key in the input buffer
     rcall STIB           ; ( k tibaddr #tib)
     pop_y_               ; ( k #tib Y:tibaddr )
-    plus_y_              ; ( k tibaddr+#tib ) 
+    w_plus_y_            ; ( k tibaddr+#tib ) 
     pop_y_               ; ( tibaddr+#tib Y:k )
-    y_wc_str_            ; ( tibaddr+#tib )
+    cmw_y_               ; ( tibaddr+#tib )
 
     rcall SHARPTIB       ; ( #tibaddr )
-    rcall ONEPLUSSTORE   ; ( ? )
+    rcall Y_MW           ; ( ? )
+    y_plus_1_
+    rcall MW_Y
 
 ACCEPT_checkmaxinput:
     ; check if max number of char input
     rcall SHARPTIB       ; ( #tibaddr )
-    rcall FETCH          ; ( #tib)
-    str_y_               ; ( #tib ) Y: #tib
+    rcall Y_MW           ; ( #tib) Y: #tib
     lit_ TIBSIZE         ; ( tibsize )
-    minus_y_             ; ( tibsize-#tib)
+    w_minus_y_           ; ( tibsize-#tib)
     ; <if>
     iszero_              ; ( )
-    breq ACCEPT_atmaxinput
-    jmp ZERO
+    if_0_ ACCEPT_atmaxinput
+    zero_
+    exit_
     
 ACCEPT_atmaxinput:
     ; max number of characters in input buffer so have it processed
-    jmp TRUE
+    true_
+    end_
 
 ; ( -- f )
 ; System
@@ -171,11 +168,17 @@ ACCEPT_atmaxinput:
 forthword_ REFILLTIB, 0, "reftib"
     rcall ACCEPT         ; ( f )
     iszero_              ; ( f )
-    breq REFILLTIB_exit
+    if_0_ REFILLTIB_exit
     push_
     rcall CR
     pop_
-    ret
     
 REFILLTIB_exit:
-    ret
+    end_
+
+; ( -- f )
+; refills the input buffer
+forthword_ REFILL, 0, "refill"
+    do_ DODEFR
+    .word ram_user1 + USER_REFILL
+    addr_ UPSTORE
