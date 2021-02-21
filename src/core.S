@@ -619,7 +619,7 @@ ITOI_B:
     plus_1_         ; ( start start+1 )
     d0_w_           ; ( start+1 start+1 )
     b_              ; ( start+1 count )
-    1_minus_       ; ( start+1 count-1 )
+    1_minus_        ; ( start+1 count-1 )
     rjmp ITOI_B
 
 ITOI_END:

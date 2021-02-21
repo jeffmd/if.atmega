@@ -75,8 +75,8 @@ PFA_RSHIFT2:
 ; 2-complement
 forthword_ NEGATE, INLINE_OPT, "neg"
     not_
-    oneplus_
-    ret
+    plus_1_
+    end_
 
 ; ( n1 -- u1 )
 ; Arithmetics
@@ -88,8 +88,8 @@ forthword_ ABS, 0, "abs"
     ; <if>
     iszero_
     pop_
-    breq ABS_exit
+    ifz_ ABS_exit
       jmp NEGATE
     ; <then>  
 ABS_exit:
-    ret
+    end_

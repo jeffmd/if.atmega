@@ -3,11 +3,11 @@
 # ( x1 x2 x3 -- x1 x2 x3 x1 x2 x3 )
 # Place a copy of x1, x2, x3 on top of the stack
 Forthword_ THREEOVER, 0, "3over"
-    push_
+    d_w_
     d2_
-    push_
+    d_w_
     d2_
-    push_
+    d_w_
     d2_
     end_
 

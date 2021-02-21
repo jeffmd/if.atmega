@@ -36,7 +36,7 @@
 ;.include "math.S"
 
 .if BUILD_LEVEL >= MATH_ADV
-;.include "mathadv.S"
+.include "mathadv.S"
 .endif
 
 ;.include "number.S"
@@ -44,7 +44,8 @@
 
 
 .if BUILD_LEVEL >= ASM
-;.include "asm.S"
+.include "asm.S"
+.endif
 
 ;**********
 DPSTART:

@@ -4,7 +4,7 @@
 ; System Value
 ; address of the next free address in eeprom
 forthword_ EDP, 0, "edp"
-    call DOVALUE
+    do_ DOVALUE
     .word EE_EDP
     addr_ STOREE
 
@@ -12,7 +12,7 @@ forthword_ EDP, 0, "edp"
 ; System Value
 ; address of the next free data space (RAM) cell
 forthword_ HERE, 0, "here"
-    call DOVALUE
+    do_ DOVALUE
     .word EE_HERE
     addr_ STOREE    
 
@@ -20,14 +20,14 @@ forthword_ HERE, 0, "here"
 ; System Value
 ; Deferred action during startup/reset
 forthword_ TURNKEY, 0, "turnkey"
-    call DODEFE
+    do_ DODEFE
     .word EE_TURNKEY
     addr_ STOREE
 
 ; USER variable used by catch/throw
 forthword_ HANDLER, 0, "handle"
     user_ USER_HANDLER
-    ret
+    end_
 
 ; ( val -- char )
 ; convert low byte of val to a printable hex character    
@@ -41,20 +41,20 @@ forthword_ NHEX, 0, "#h"
     ; <then>
 NHEX_NEXT:
     adiw wl, 48  
-    ret            
+    end_            
 
 ; ( n -- )
 ; simple 4 bit hex print
 forthword_ PNIB, 0, ".h"
     rcall NHEX
-    jmp EMIT
+    end_do_ EMIT
     
 ; ( n -- )
 ; simple 16 bit hex print    
 forthword_ PHEX, 0, ".$"
-    push_        ; ( n n )
+    d_w_         ; ( n n )
     lit_ '$      ; ( n $ )
-    call EMIT    ; ( n ? )
+    do_ EMIT     ; ( n ? )
     d0_          ; ( n n )
     highbyte_    ; ( n n.h )
     swapnib_     ; ( n n.h' )
@@ -68,7 +68,7 @@ forthword_ PHEX, 0, ".$"
     pop_         ; ( n )
     rcall PNIB   ; ( ? )
     bl_          ; ( bl )
-    jmp EMIT
+    end_do_ EMIT
 
 ; ( i*x xt -- j*x 0 | i*x n )
 ; Exceptions
@@ -76,25 +76,23 @@ forthword_ PHEX, 0, ".$"
 
 forthword_ CATCH, 0, "catch"
     ; rpush.sp
-    rpush_sp_           ; ( xt ) (R: ret SP )
-    push_               ; ( xt xt )
-    ; handler @ rpush
+    r_dsp_              ; ( xt ) (R: ret DSP )
+    d_w_                ; ( xt xt )
     rcall HANDLER       ; ( xt haddr )
-    call FETCH          ; ( xt hxt )
-    rpush_              ; ( xt hxt ) (R: ret SP hxt )
-    ; rp!y handler y.!
-    rp_str_y_           ; ( xt hxt Y:RP )
+    y_w_                ; ( xt haddr Y:haddr )
+    do_ MW              ; ( xt hxt )
+    r_w_                ; ( xt hxt ) (R: ret DSP hxt )
+    rsp_                ; ( xt RSP )
     rcall HANDLER       ; ( xt haddr )
-    call YWSTORE        ; ( xt haddr )
-    pop_                ; ( xt )
-    call EXEC
+    do_ MY_W            ; ( xt haddr )
+    w_d_                ; ( xt )
+    do_ EXEC
     ; restore handler
-    ; r> handler !
-    rpop_y_             ; ( Y:hxt ) (R: callerret SP )
+    y_r_                ; ( Y:hxt ) (R: callerret DSP )
     rcall HANDLER       ; ( haddr )
-    call YWSTORE        ; ( haddr )
-    rnip_               ; ( ? ) (R: callerret)
-    jmp ZERO
+    do_ MW_Y            ; ( haddr )
+    r_m1_               ; ( ? ) (R: callerret)
+    end_do_ ZERO
 
 ; ( $addr len -- )
 ; Exceptions
@@ -102,16 +100,16 @@ forthword_ CATCH, 0, "catch"
 ; assumes jmp to get here
 ; will type the string passed in
 forthword_ THROW, 0, "throw"
-    call ITYPE
+    do_ ITYPE
     rcall HANDLER      ; ( haddr )
-    str_x_             ; ( haddr X:haddr )
-    call FETCH         ; ( hxt )
-    str_rp_            ; ( hxt ) (R: callerret SP hxt)
-    rpop_              ; ( hxt Y:hxt ) (R: callerret SP )
-    call XSTORE        ; ( hxt )
-    rpop_sp_           ; ( SP ) (R: callerret )
+    x_w_               ; ( haddr X:haddr )
+    do MW              ; ( hxt )
+    rsp_w_             ; ( hxt ) (R: callerret SP hxt)
+    w_r_               ; ( hxt Y:hxt ) (R: callerret SP )
+    do_ MX_W           ; ( hxt )
+    dsp_r_             ; ( SP ) (R: callerret )
     lit_ 1
-    ret
+    end_
 
 ; allocate space for User Area
 .pushsection .noinit
@@ -124,7 +122,7 @@ ram_user1: .space SYSUSERSIZE
 ; get mcusro addr. this is the mcusr read and stored when cold executes.
 forthword_ RAM_MCUSRO, INLINE_OPT, "mcusro"
     lit_ ram_mcusro
-    ret
+    end_
 
 ; ( -- )
 ; System
@@ -135,16 +133,16 @@ forthword_ COLD, 0, "cold"
     clr zerol
     out_ MCUSR, zerol
     ; init return stack pointer
-	  ; using the MCU SP registers
+    ; using the MCU SP registers
     lit_ rstackstart
-    str_rp_
+    rsp_w_
 
     ; init parameter stack pointer
     ldi YL, lo8(stackstart)
     ldi YH, hi8(stackstart)
-    push_
+    d_w_
     rcall RAM_MCUSRO
-    call YWSTORE
+    do_ MW_Y
     rjmp WARM
 
 
@@ -154,22 +152,22 @@ forthword_ COLD, 0, "cold"
 forthword_ WARM, 0, "warm"
     rcall INITUSER
     lit_ pm(NOOP)
-    push_
+    d_w__
     lit_ pm(PAUSE)
     rcall DEFERSTORE
     ; init DP in ram from eeprom
-    call RESET
+    do_ RESET
     rcall DECIMAL
-    call ONLY
-    call USART
-    call INTON
-    call DOSLIT
+    do_ ONLY
+    do_ USART
+    do_ INTON
+    do_ DOSLIT
     ascii_ "if.atmega 0.1"
-    call ITYPE
-    call CR
+    do_ ITYPE
+    do_ CR
     
     rcall TURNKEY
-    jmp QUIT
+    end_do_ QUIT
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
