@@ -33,14 +33,14 @@ forthword_ HANDLER, 0, "handle"
 ; convert low byte of val to a printable hex character    
 forthword_ NHEX, 0, "#h"
     zerohigh_
-    andi wl, 0x0F
-    cpi wl, 10
+    andi wrl, 0x0F
+    cpi wrl, 10
     brlo NHEX_NEXT
-    adiw wl, 7
+    adiw wrl, 7
     
     ; <then>
 NHEX_NEXT:
-    adiw wl, 48  
+    adiw wrl, 48  
     end_            
 
 ; ( n -- )
@@ -65,7 +65,7 @@ forthword_ PHEX, 0, ".$"
     d0_          ; ( n n )
     swapnib_     ; ( n n' )
     rcall PNIB   ; ( n ? )
-    pop_         ; ( n )
+    d_           ; ( n )
     rcall PNIB   ; ( ? )
     bl_          ; ( bl )
     end_do_ EMIT
@@ -83,15 +83,14 @@ forthword_ CATCH, 0, "catch"
     do_ MW              ; ( xt hxt )
     r_w_                ; ( xt hxt ) (R: ret DSP hxt )
     rsp_                ; ( xt RSP )
-    rcall HANDLER       ; ( xt haddr )
-    do_ MY_W            ; ( xt haddr )
-    w_d_                ; ( xt )
+    do_ MY_W            ; ( xt RSP )
+    d_                  ; ( xt )
     do_ EXEC
     ; restore handler
     y_r_                ; ( Y:hxt ) (R: callerret DSP )
     rcall HANDLER       ; ( haddr )
     do_ MW_Y            ; ( haddr )
-    r_m1_               ; ( ? ) (R: callerret)
+    r_sub_1_            ; ( ? ) (R: callerret)
     end_do_ ZERO
 
 ; ( $addr len -- )
@@ -103,9 +102,9 @@ forthword_ THROW, 0, "throw"
     do_ ITYPE
     rcall HANDLER      ; ( haddr )
     x_w_               ; ( haddr X:haddr )
-    do MW              ; ( hxt )
+    do_ MW             ; ( hxt )
     rsp_w_             ; ( hxt ) (R: callerret SP hxt)
-    w_r_               ; ( hxt Y:hxt ) (R: callerret SP )
+    r_                 ; ( hxt Y:hxt ) (R: callerret SP )
     do_ MX_W           ; ( hxt )
     dsp_r_             ; ( SP ) (R: callerret )
     lit_ 1
@@ -130,16 +129,15 @@ forthword_ RAM_MCUSRO, INLINE_OPT, "mcusro"
 forthword_ COLD, 0, "cold"
     in_ yrl, MCUSR
     clr yrh
-    clr zerol
-    out_ MCUSR, zerol
+    out_ MCUSR, yrh
     ; init return stack pointer
     ; using the MCU SP registers
     lit_ rstackstart
     rsp_w_
 
     ; init parameter stack pointer
-    ldi YL, lo8(stackstart)
-    ldi YH, hi8(stackstart)
+    ldi dspl, lo8(stackstart)
+    ldi dsph, hi8(stackstart)
     d_w_
     rcall RAM_MCUSRO
     do_ MW_Y
@@ -152,13 +150,19 @@ forthword_ COLD, 0, "cold"
 forthword_ WARM, 0, "warm"
     rcall INITUSER
     lit_ pm(NOOP)
-    d_w__
+    d_w_
     lit_ pm(PAUSE)
     rcall DEFERSTORE
     ; init DP in ram from eeprom
+.if BUILD_LEVEL >= COMPILER
     do_ RESET
-    rcall DECIMAL
+.endif
+.if BUILD_LEVEL > CORE_KERNEL
     do_ ONLY
+.if BUILD_LEVEL >= NUMBER_BASE
+    rcall DECIMAL
+.endif
+.endif
     do_ USART
     do_ INTON
     do_ DOSLIT
@@ -190,8 +194,8 @@ forthword_ RP0, INLINE_OPT, "rp0"
 ; number of single-cell values contained in the data stack before n was placed on the stack.
 forthword_ DEPTH, 0, "depth"
     rcall SP0
-    minus_sp_
-    twoslash_
+    sub_dsp_
+    div_2_
     ;oneminus_
     ret
 
@@ -222,40 +226,41 @@ forthword_ EEUSER, 0, "ee-u"
 ; Memory
 ; copy len cells from eeprom to ram
 forthword_ EE2RAM, 0, "ee>r"
-    rpush_a_
-    rpush_b_
-    pop_a_             ; ( e-addr len A:r-addr )
-    d0_str_b_          ; ( e-addr len B:e-addr )
+    r_a_
+    r_b_
+    a_d_               ; ( e-addr len A:r-addr )
+    b_d0_              ; ( e-addr len B:e-addr )
     
 EE2RAM_LOOP:
     ; <begin>
     ; <while>
     iszero_
-    breq EE2RAM_DONE
-    str_d0_              ; ( len len )
+    ifz_ EE2RAM_DONE
+    d0_w_                ; ( len len )
     b_                   ; ( len e-addr)
     call FETCHE          ; ( len n )
-    call ASTORE          ; ( len n )
-    aplus2_
-    bplus2_            
+    call MA_W            ; ( len n )
+    a_plus_2_
+    b_plus_2_            
     d0_                  ; ( len len )
-    oneminus_            ; ( len len-1 )
+    _1_sub_              ; ( len len-1 )
     ; <repeat>
     rjmp EE2RAM_LOOP
 
 EE2RAM_DONE:
-    rpop_b_
-    rpop_a_
-    jmp DPOP
+    b_r_
+    a_r_
+    d_
+    end_
 
 ; ( -- )
 ; Tools
 ; setup the default user area from eeprom
 forthword_ INITUSER, 0, "i-u"
     rcall EEUSER
-    push_
+    d_w_
     lit_ ram_user1
-    push_
+    d_w_
     lit_ SYSUSERSIZE/2
     ;twoslash_
     rjmp EE2RAM

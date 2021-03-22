@@ -17,7 +17,7 @@
 
 .set BUILD_LEVEL, MIN_KERNEL
 
-@ minimum kernel build has minimum word set needed to be up and running without interpreter
+; minimum kernel build has minimum word set needed to be up and running without interpreter
 
 
 ; lower part of the dictionary
@@ -26,20 +26,19 @@
 
 .include "interrupt.S"
 
-.if BUILD_LEVEL >= CORE_INLINE
 .include "core_inline.S"
-.endif
-
 .include "core_lowmem.S"
-;.include "minimum.S"
-;.include "defer.S"
-;.include "math.S"
+.include "minimum.S"
+.include "defer.S"
+.include "math.S"
 
 .if BUILD_LEVEL >= MATH_ADV
 .include "mathadv.S"
 .endif
 
-;.include "number.S"
+.if BUILD_LEVEL >= NUMBER_BASE
+.include "number.S"
+.endif
 .include "kernel_lowmem.S"
 
 

@@ -1,4 +1,4 @@
-.section .progmem
+.section .text
 ; some defaults
 
 .set WANT_ISR_TX, 0
@@ -17,7 +17,7 @@
 .equ F_CPU, 16000000
 ; baud rate of terminal
 .equ BAUD, 38400
-.include "drivers/usart_0.S"
+.include "usart_0.S"
 
 .Set rstackstart, RAMEND
 .Set stackstart, RAMEND - 50

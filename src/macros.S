@@ -64,6 +64,9 @@
   ; parameter working register [wreg]
   wrl = 24
   wrh = 25
+  ; data stack pointer low/high registers
+  dspl = 28
+  dsph = 29
 
 ; forth flags register
   fflags = 6
@@ -150,15 +153,15 @@
     push yrh
 .endm
 
-;
+; r=dsp
 .macro r_dsp_ 
     push YL
     push YH
 .endm
 
 ; pop value from return stack into register
-; =r
-.macro w_r_
+; r
+.macro r_
     pop wrh
     pop wrl
 .endm
@@ -194,7 +197,7 @@
 .endm
 
 ; r-1
-.macro r_m1_
+.macro r_sub_1_
     pop temp4
     pop temp4
 .endm
@@ -380,17 +383,17 @@
 .endm
 
 ; d+1
-.macro d_p1_ ; move stack pointer down one cell
+.macro d_plus_1_ ; move stack pointer down one cell
   sbiw YL, 2
 .endm
 
 ; d+2
-.macro d_p2_ ; move stack pointer down two cells
+.macro d_plus_2_ ; move stack pointer down two cells
   sbiw YL, 4
 .endm
 
 ; d+3
-.macro d_p3_ ; move stack pointer down three cells
+.macro d_plus_3_ ; move stack pointer down three cells
     sbiw YL, 6
 .endm
 
@@ -434,8 +437,8 @@
     st -Y, yrl
 .endm
 
-; =d
-.macro w_d_ 
+; d
+.macro d_ 
     ld wrl, Y+
     ld wrh, Y+
 .endm
@@ -465,172 +468,172 @@
 .endm
 
 ; d-1
-.macro d_m1_
+.macro d_sub_1_
     adiw YL, 2
 .endm
 
 ; d-2
-.macro d_m2_
+.macro d_sub_2_
     adiw YL, 4
 .endm
 
 ; d-3
-.macro d_m3_
+.macro d_sub_3_
     adiw YL, 6
 .endm
 
 ; &x
-.macro w_and_x_
+.macro and_x_
     and wrl, xrl
     and wrh, xrh
 .endm
 
 ; x&
-.macro x_and_w_
+.macro x_and_
     and xrl, wrl
     and xrh, wrh
 .endm
 
 ; &y
-.macro w_and_y_
+.macro and_y_
     and wrl, yrl
     and wrh, yrh
 .endm
 
 ; y&
-.macro y_and_w_
+.macro y_and_
     and yrl, wrl
     and yrh, wrh
 .endm
 
 ; &a
-.macro w_and_a_
+.macro and_a_
     and wrl, arl
     and wrh, arh
 .endm
 
 ; a&
-.macro a_and_w_
+.macro a_and_
     and arl, wrl
     and arh, wrh
 .endm
 
 ; &b
-.macro w_and_b_
+.macro and_b_
     and wrl, brl
     and wrh, brh
 .endm
 
 ; b&
-.macro b_and_w_
+.macro b_and_
     and brl, wrl
     and brh, wrh
 .endm
 
 ; |x
-.macro w_or_x_
+.macro or_x_
     or wrl, xrl
     or wrh, xrh
 .endm
 
 ; x|
-.macro x_or_w_
+.macro x_or_
     or xrl, wrl
     or xrh, wrh
 .endm
 
 ; |y
-.macro w_or_y_
+.macro or_y_
     or wrl, yrl
     or wrh, yrh
 .endm
 
 ; y|
-.macro y_or_w_
+.macro y_or_
     or yrl, wrl
     or yrh, wrh
 .endm
 
 ; |a
-.macro w_or_a_
+.macro or_a_
     or wrl, arl
     or wrh, arh
 .endm
 
 ; a|
-.macro a_or_w_
+.macro a_or_
     or arl, wrl
     or arh, wrh
 .endm
 
 ; |b
-.macro w_or_b_
+.macro or_b_
     or wrl, brl
     or wrh, brh
 .endm
 
 ; b|
-.macro b_or_w_
+.macro b_or_
     or brl, wrl
     or brh, wrh
 .endm
 
 ; ^x
-.macro w_xor_x_
+.macro xor_x_
     eor wrl, xrl
     eor wrh, xrh
 .endm
 
 ; x^
-.macro x_xor_w_
+.macro x_xor_
     eor xrl, wrl
     eor xrh, wrh
 .endm
 
 ; ^y
-.macro w_xor_y_
+.macro xor_y_
     eor wrl, yrl
     eor wrh, yrh
 .endm
 
 ; y^
-.macro y_xor_w_
+.macro y_xor_
     eor yrl, wrl
     eor yrh, wrh
 .endm
 
 ; ^a
-.macro w_xor_a_
+.macro xor_a_
     eor wrl, arl
     eor wrh, arh
 .endm
 
 ; a^
-.macro a_xor_w_
+.macro a_xor_
     eor arl, wrl
     eor arh, wrh
 .endm
 
 ; ^b
-.macro w_xor_b_
+.macro xor_b_
     eor wrl, brl
     eor wrh, brh
 .endm
 
 ; b^
-.macro b_xor_w_
+.macro b_xor_
     eor brl, wrl
     eor brh, wrh
 .endm
 
 ; +x
-.macro w_plus_x_
+.macro plus_x_
     add wrl, xrl
     adc wrh, xrh
 .endm
 
 ; x+
-.macro x_plus_w_
+.macro x_plus_
     add xrl, wrl
     adc xrh, wrh
 .endm
@@ -654,13 +657,13 @@
 .endm
 
 ; +y
-.macro w_plus_y_
+.macro plus_y_
     add wrl, yrl
     adc wrh, yrh
 .endm
 
 ; y+
-.macro y_plus_w_
+.macro y_plus_
     add yrl, wrl
     adc yrh, wrh
 .endm
@@ -684,13 +687,13 @@
 .endm
 
 ; +a
-.macro w_plus_a_
+.macro plus_a_
     add wrl, arl
     adc wrh, arh
 .endm
 
 ; a+
-.macro a_plus_w_
+.macro a_plus_
     add arl, wrl
     adc arh, wrh
 .endm
@@ -714,13 +717,13 @@
 .endm
 
 ; +b
-.macro w_plus_b_
+.macro plus_b_
     add wrl, brl
     adc wrh, brh
 .endm
 
 ; b+
-.macro b_plus_w_
+.macro b_plus_
     add brl, wrl
     adc brh, wrh
 .endm
@@ -744,123 +747,135 @@
 .endm
 
 ; -a
-.macro w_minus_a_
+.macro sub_a_
     sub wrl, arl
     sbc wrh, arh
 .endm
 
 ; a-
-.macro a_minus_w_
+.macro a_sub_
     sub arl, wrl
     sbc arh, wrh
 .endm
 
 ; a-b
-.macro a_minus_b_
+.macro a_sub_b_
     sub arl, brl
     sbc arh, brh
 .endm
 
 ; a-x
-.macro a_minus_x_
+.macro a_sub_x_
     sub arl, xrl
     sbc arh, xrh
 .endm
 
 ; a-y
-.macro a_minus_y_
+.macro a_sub_y_
     sub arl, yrl
     sbc arh, yrh
 .endm
 
 ; -b
-.macro w_minus_b_
+.macro sub_b_
     sub wrl, brl
     sbc wrh, brh
 .endm
 
 ; b-
-.macro b_minus_w_
+.macro b_sub_
     sub brl, wrl
     sbc brh, wrh
 .endm
 
 ; b-a
-.macro b_minus_a_
+.macro b_sub_a_
     sub brl, arl
     sbc brh, arh
 .endm
 
 ; b-x
-.macro b_minus_x_
+.macro b_sub_x_
     sub brl, xrl
     sbc brh, xrh
 .endm
 
 ; b-y
-.macro b_minus_y_
+.macro b_sub_y_
     sub brl, yrl
     sbc brh, yrh
 .endm
 
 ; -x
-.macro w_minus_x_
+.macro sub_x_
     sub wrl, xrl
     sbc wrh, xrh
 .endm
 
 ; x-
-.macro x_minus_w_
+.macro x_sub_
     sub xrl, wrl
     sbc xrh, wrh
 .endm
 
 ; x-a
-.macro x_minus_a_
+.macro x_sub_a_
     sub xrl, arl
     sbc xrh, arh
 .endm
 
 ; x-b
-.macro x_minus_b_
+.macro x_sub_b_
     sub xrl, brl
     sbc xrh, brh
 .endm
 
 ; x-y
-.macro x_minus_y_
+.macro x_sub_y_
     sub xrl, yrl
     sbc xrh, yrh
 .endm
 
 ; -y
-.macro w_minus_y_
+.macro sub_y_
     sub wrl, yrl
     sbc wrh, yrh
 .endm
 
 ; y-
-.macro y_minus_w_
+.macro y_sub_
     sub yrl, wrl
     sbc yrh, wrh
 .endm
 
 ; y-a
-.macro y_minus_a_
+.macro y_sub_a_
     sub yrl, arl
     sbc yrh, arh
 .endm
 
 ; y-b
-.macro y_minus_b_
+.macro y_sub_b_
     sub yrl, brl
     sbc yrh, brh
 .endm
 
 ; y-x
-.macro y_minus_x_
+.macro y_sub_x_
     sub yrl, xrl
     sbc yrh, xrh
+.endm
+
+; -dsp
+.macro sub_dsp_
+    sub wrl, dspl
+    sbc wrh, dsph
+.endm
+
+; dsp-
+.macro dsp_sub_
+    sub dspl, wrl
+    sbc dsph, wrh
 .endm
 
 ; +1
@@ -868,7 +883,8 @@
     adiw wrl, 1
 .endm
 
-.macro 1_minus_
+; 1-
+.macro _1_sub_
     sbiw wrl, 1
 .endm
 
@@ -883,12 +899,12 @@
 .endm
 
 ; 2-
-.macro minus_2_
+.macro _2_sub_
     sbiw wrl, 2
 .endm
 
 ; 4-
-.macro 4_minus_
+.macro _4_sub_
     sbiw wrl, 4
 .endm
 
@@ -1055,12 +1071,12 @@
   lit_ 32
 .endm
 
-.macro anditos_ val
+.macro andi_ val
     andi wrh, hi8(\val)
     andi wrl, lo8(\val)
 .endm
 
-.macro oritos_ val
+.macro ori_ val
     ori wrh, hi8(\val)
     ori wrl, lo8(\val)
 .endm
@@ -1136,25 +1152,25 @@
 .endm
 
 ; x-1
-.macro x_minus_1_
+.macro x_sub_1_
   subi xrl, lo8(1)
   sbci xrh, hi8(1)
 .endm
 
 ; y-1
-.macro y_minus_1_
+.macro y_sub_1_
   subi yrl, lo8(1)
   sbci yrh, hi8(1)
 .endm
 
 ; a-1
-.macro a_minus_1_
+.macro a_sub_1_
   subi arl, lo8(1)
   sbci arh, hi8(1)
 .endm
 
 ; b-1
-.macro b_minus_1_
+.macro b_sub_1_
   subi brl, lo8(1)
   sbci brh, hi8(1)
 .endm
@@ -1184,25 +1200,25 @@
 .endm
 
 ; a-2
-.macro a_minus_2_
+.macro a_sub_2_
   subi arl, lo8(2)
   sbci arh, hi8(2)
 .endm
 
 ; b-2
-.macro b_minus_2_
+.macro b_sub_2_
   subi brl, lo8(2)
   sbci brh, hi8(2)
 .endm
 
 ; x-2
-.macro x_minus_2_
+.macro x_sub_2_
   subi xrl, lo8(2)
   sbci xrh, hi8(2)
 .endm
 
 ; y-2
-.macro y_minus_2_
+.macro y_sub_2_
   subi yrl, lo8(2)
   sbci yrh, hi8(2)
 .endm

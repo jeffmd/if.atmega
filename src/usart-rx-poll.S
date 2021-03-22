@@ -8,10 +8,10 @@ forthword_ RX_POLL, 0, "rx-poll"
   breq RX_nodata
   ; get character from usart
   lit_ USART_DATA
-  jmp CFETCH
+  jmp CMW
   
 RX_nodata:
-  ret
+  end_
 
 ; ( -- f)
 ; MCU
@@ -19,7 +19,7 @@ RX_nodata:
 forthword_ RXQ_POLL, 0, "rx?-poll"
   ;rcall PAUSE
   lit_ USART_A
-  call CFETCH
+  call CMW
   lit_x_ bm_USART_RXRD
   and_x_
-  ret
+  end_

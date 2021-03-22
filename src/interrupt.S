@@ -54,6 +54,6 @@ forthword_ IEND, 0, "(i;)"
     movw temp4, isrTemp4
     
     pop isrxrl
-    w_d_
+    d_
     out SREG, isrxrl    
     reti

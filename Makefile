@@ -58,6 +58,7 @@ atmega328p : $(PROGRAM)atmega328p.hex
 atmega328p.o :  MCU=atmega328p
 atmega328p.elf :  MCU=atmega328p
 atmega328p.hex :  MCU=atmega328p
+atmega328p.list :  MCU=atmega328p
 atmega328p.eep.hex :  MCU=atmega328p
 atmega328p.era :  PART=m328p
 atmega328p.bak :  PART=m328p
@@ -90,8 +91,7 @@ AVRDUDE_FLAGS= -P $(PORT) -c $(PROGRAMMER)
 # ASSEMBLER TO USE
 # ----------------
 
-AS_INCLUDE=  -I $(CORE) -I $(CORE)/drivers -I $(CORE)/devices/$(MCU) -I words
-
+AS_INCLUDE=  -I $(CORE) 
 # Override is only needed by avr-lib build system.
 LDSECTION  = --section-start=.text=0x0
 
@@ -113,7 +113,10 @@ atmega328p.o : atmega328p.S $(INCS)
 %.elf : %.o
 	@echo "Producing elf files for ATMEL $*"
 	$(LINK) -o $@ $^
-	avr-objdump -h -x -D -S $@ > a.lst
+
+%.list : %.elf
+	@echo "Producing list file for ATMEL $*"
+	avr-objdump -h -x -D -S $*.elf > a.lst
 
 # make hex target
 %.hex : %.elf

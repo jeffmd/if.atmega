@@ -15,14 +15,14 @@ forthword_ USART, 0, "+usart"
 
   lit_y_ USART_B_VALUE
   lit_ USART_B
-  y_wc_str_
+  cmw_y_
 
   lit_y_ USART_C_VALUE
   lit_ USART_C | bm_USARTC_en
-  y_wc_str_
+  cmw_y_
 
   lit_ UBRR_VAL
-  PUSH_
+  d_w_
   lit_ BAUDRATE_HIGH
   call HSTORE
 

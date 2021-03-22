@@ -4,24 +4,30 @@
 ; Compare
 ; compare two values leave the smaller one
 forthword_ MIN, 0, "min"
-    call TWOOVER    ; ( n1 n2 n1 n2 )
+    d_w_
+    d1_
+    d_w_
+    d1_             ; ( n1 n2 n1 n2 )
     call GREATER    ; ( n1 n2 flag )
     ; <if>
 MIN_TEST:
     iszero_
-    pop_            ; ( n1 n2 )
-    breq MIN_exit
-      call SWAP     ; ( n2 n1 )
+    d0_             ; ( n1 n2 n2 )
+    ifz_ MIN_exit
+      d1_           ; ( n2 n2 n1 )
       
 MIN_exit:
-    pop_
-    ret
+    d_sub_2_        ; ( n? )
+    end_
 
 ; ( n1 n2 -- n1|n2 )
 ; Compare
 ; compare two values, leave the bigger one
 forthword_ MAX, 0, "max"
-    call TWOOVER
+    d_w_
+    d1_
+    d_w_
+    d1_             ; ( n1 n2 n1 n2 )
     call LESS
     rjmp MIN_TEST
 
@@ -31,7 +37,7 @@ forthword_ MAX, 0, "max"
 forthword_ ULESSEQUAL, 0, "u<="
     call UGREATER
     not_
-    ret
+    end_
 
 ; ( u1 u2 -- flag )
 ; Compare
@@ -39,13 +45,13 @@ forthword_ ULESSEQUAL, 0, "u<="
 forthword_ UGREATEREQUAL, 0, "u>="
     call ULESS
     not_
-    ret
+    end_
 
 ; ( n1 n2 -- n3)
 ; logically shift n1 left n2 times
 forthword_ LSHIFT, 0, "<<"
     movw ZL, wrl
-    pop_
+    d_
 PFA_LSHIFT1:
     sbiw ZL, 1
     brmi PFA_LSHIFT2
@@ -53,13 +59,13 @@ PFA_LSHIFT1:
     rol wrh
     rjmp PFA_LSHIFT1
 PFA_LSHIFT2:
-    ret
+    end_
 
 ; ( n1 n2 -- n3 )
 ; shift n1 n2-times logically right
 forthword_ RSHIFT, 0, ">>"
     movw ZL, wrl
-    pop_
+    d_
 PFA_RSHIFT1:
     sbiw ZL, 1
     brmi PFA_RSHIFT2
@@ -67,7 +73,7 @@ PFA_RSHIFT1:
     ror wrl
     rjmp PFA_RSHIFT1
 PFA_RSHIFT2:
-    ret
+    end_
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; ( n1 -- -n1 )
@@ -83,11 +89,11 @@ forthword_ NEGATE, INLINE_OPT, "neg"
 ; get the absolute value
 
 forthword_ ABS, 0, "abs"
-    push_
+    d_w_
     call LESSZERO
     ; <if>
     iszero_
-    pop_
+    d_
     ifz_ ABS_exit
       jmp NEGATE
     ; <then>  

@@ -29,4 +29,4 @@
 .equ bm_7BIT        , 2 << 1
 .equ bm_8BIT        , 3 << 1
 
-.include "drivers/usart_common.S"
+.include "usart_common.S"

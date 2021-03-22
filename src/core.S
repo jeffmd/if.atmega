@@ -8,7 +8,7 @@
 ; execute XT
 forthword_ EXEC, 0, "exec"
     movw ZL, wrl
-    w_d_
+    d_
     ijmp
 
 
@@ -21,7 +21,7 @@ forthword_ EXEC, 0, "exec"
 ; used if data in program mem and need an address to it
 forthword_ POPRET, DIS_CALL_OPT, "popret"
     d_w_
-    w_r_
+    r_
     end_
 
 ; ( -- n) (R: n -- n )
@@ -41,7 +41,7 @@ forthword_ R0, DIS_CALL_OPT, "r0"
 forthword_ R0PLUS, DIS_CALL_OPT, "r0+"
     pop ZH
     pop ZL
-    w_r_
+    r_
     adiw wrl, 0x01
     r_w_
     sbiw wrl, 0x01
@@ -150,7 +150,7 @@ forthword_ GREATERZERO, 0, "0>"
 ; round number up to even value then right shift
 
 forthword_ WALIGN, 0, "w_"
-    1_plus_
+    plus_1_
     div_2_
     end_
 
@@ -161,7 +161,7 @@ forthword_ WALIGN, 0, "w_"
 ; write n (2bytes) to eeprom address
 forthword_ STOREE, 0, "!e"
     movw ZL, wrl
-    w_d_
+    d_
     in_ temp4, SREG
     cli
     rcall STOREE_WRITE
@@ -227,7 +227,7 @@ forthword_ STOREI, 0, "!i"
   cli
 
   movw yrl, wrl ; save the (word) address
-  w_d_          ; get the new value for the flash cell
+  d_            ; get the new value for the flash cell
   ; save parameter stack
   push YL
   push YH
@@ -298,7 +298,7 @@ pageload_loop:
   movw ZL, YL
   cp ZL, yrl
   cpc ZH, yrh
-  if_0_ pageload_newdata
+  ifz_ pageload_newdata
     movw r0, temp6
     rjmp pageload_cont
 pageload_newdata:
@@ -444,7 +444,7 @@ forthword_ MW_B, 0, "@=b"
 ; write n to RAM memory at addr, high byte first
 forthword_ HSTORE, 0, "h!"
     movw ZL, wrl
-    w_d_
+    d_
 
     in_ yrl, SREG
     cli
@@ -475,7 +475,7 @@ forthword_ UPSTORE, 0, "up!"
 ; ( ? -- n2 )
 ; Read memory pointed to by register A
 forthword_ MA, 0, "@a"
-    movw ZL, al
+    movw ZL, arl
     ld wrl, Z
     ldd wrh, Z+1
     end_
@@ -484,7 +484,7 @@ forthword_ MA, 0, "@a"
 ; Read program memory pointed to by register A
 ; note: address must be setup as byte address
 forthword_ MIA, 0, "@ia"
-    movw ZL, al
+    movw ZL, arl
     rjmp ZFETCHI
 
 
@@ -526,7 +526,7 @@ forthword_ CMB, 0, "c@b"
 ; ( n -- n )
 ; Write memory pointed to by register B
 forthword_ MB_W, 0, "@b=w"
-    movw ZL, bl
+    movw ZL, brl
     st Z, wrl
     std Z+1, wrh
     end_
@@ -619,11 +619,11 @@ ITOI_B:
     plus_1_         ; ( start start+1 )
     d0_w_           ; ( start+1 start+1 )
     b_              ; ( start+1 count )
-    1_minus_        ; ( start+1 count-1 )
+    _1_sub_         ; ( start+1 count-1 )
     rjmp ITOI_B
 
 ITOI_END:
     b_r_
     a_r_
-    w_d_
+    d_
     end_

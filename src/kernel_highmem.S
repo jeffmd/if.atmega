@@ -4,21 +4,24 @@
 ; reset forth flags
 forthword_ FFRST, 0, "ffrst"
     ; clear rcall/call flags
-    cbr fflags, (1<<LAST_RCALL_FB)|(1<<LAST_CALL_FB)
+    ldi XL, ~(1<<LAST_RCALL_FB)|(1<<LAST_CALL_FB)
+    and fflags, XL
     ; set disable tail optimize flag
-    sbr fflags, 1<<DIS_CALL_OPT_FB
-    ret
+    ldi XL, 1<<DIS_CALL_OPT_FB
+    or fflags, XL
+    end_
 
 forthword_ STATE, 0, "state"
     user_ USER_STATE
-    rjmp FETCH
+    rjmp MW
 
 ; ( --  ) 
 ; Compiler
 ; enter interpreter mode
 forthword_ LBRACKET, IMMEDIATE_EN, "["
     user_ USER_STATE
-    rjmp ZERO_STR
+    lit_y_ 0
+    rjmp MW_Y
 
 ; ( -- )
 ; enter compile mode
@@ -26,7 +29,7 @@ Forthword_ RBRACKET, 0, "]"
   rcall FFRST
   lit_y_ 1
   user_ USER_STATE
-  rjmp YWSTORE
+  rjmp MW_Y
 
 ; ( -- )
 ; System
@@ -70,7 +73,7 @@ forthword_ QP_RD, 0, "?prd"
     ; output ready prompt if in interpret mode
     ; <-if>
     iszero_
-    brne QP_RD_exit
+    ifnz_ QP_RD_exit
       rjmp PROMPTRDY
 QP_RD_exit:
     ; <then>
@@ -82,9 +85,9 @@ QP_RD_exit:
 forthword_ DOREFILL, 0, "(refill)"
   ; if just starting new input line then check prompt and reset input position
   rcall G_IN               ; ( >inaddr )
-  rcall FETCH              ; ( >in )
+  rcall MW                 ; ( >in )
   iszero_                  ; ( )
-  breq DOREFILL_do
+  ifz_ DOREFILL_do
     rcall INRESET
     rcall QP_RD
 
@@ -92,7 +95,7 @@ forthword_ DOREFILL, 0, "(refill)"
 DOREFILL_do:
   ; refill the input buffer
   rcall REFILL              ; ( f )
-  ret      
+  end_     
     
 ; ( -- )
 ; Multitasking
@@ -110,10 +113,11 @@ forthword_ DOTASKS, 0, "(tasks)"
     rcall DOREFILL
     ; <if>
     iszero_
-    breq DOTASKS_N1
+    ifz_ DOTASKS_N1
       ; there is something in the input buffer, try interpreting it      
+.if BUILD_LEVEL >= INT_DICTIONARY
       rcall DOINTERPRET
-
+.endif
 DOTASKS_N1:
     ; <then>
     rcall PAUSE
@@ -126,12 +130,16 @@ DOTASKS_N1:
 forthword_ QUIT, 0, "quit"
     ; reset data stack
     call SP0
-    str_sp_
+    dsp_w_
     ; reset return stack pointers
     call RP0
-    str_rp_
-    rcall RESET  
+    rsp_w_
+.if BUILD_LEVEL >= COMPILER
+    rcall RESET
+.endif
+.if BUILD_LEVEL >= INT_NUMBER
     call WSET
+.endif
     rjmp DOTASKS
 
 ; must be last word in highmem of kernel/core
@@ -139,27 +147,27 @@ forthword_ WIPE, 0, "WIPE"
     ; reset forth dictionary, here, edp, dp to original burn state
     ; set EE_DP to DPSTART
     lit_ pm(DPSTART)
-    push_
+    d_w_
     lit_ EE_DP
     rcall STOREE
     ; set EE_HERE to HERESTART
     lit_ HERESTART
-    push_
+    d_w_
     lit_ EE_HERE
     rcall STOREE
     ; set EE_EDP to EDPSTART
     lit_ EDPSTART
-    push_
+    d_w_
     lit_ EE_EDP
     rcall STOREE
     ; set EE_TURNKEY to NOOP
     lit_ pm(NOOP)
-    push_
+    d_w_
     lit_ EE_TURNKEY
     rcall STOREE
     ; set EE_FORTHWORDLIST to 0
     zero_
-    push_
+    d_w_
     lit_ EE_FORTHWORDLIST
     rcall STOREE
-    jmp COLD
+    end_do_ COLD
