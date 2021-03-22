@@ -150,7 +150,7 @@ forthword_ GREATERZERO, 0, "0>"
 ; round number up to even value then right shift
 
 forthword_ WALIGN, 0, "w_"
-    plus_1_
+    add_1_
     div_2_
     end_
 
@@ -614,9 +614,9 @@ ITOI_B:
     d_w_
     a_              ; ( start val dest )
     rcall STOREI    ; ( start ? )
-    a_plus_1_
+    a_add_1_
     d0_             ; ( start start )
-    plus_1_         ; ( start start+1 )
+    add_1_         ; ( start start+1 )
     d0_w_           ; ( start+1 start+1 )
     b_              ; ( start+1 count )
     _1_sub_         ; ( start+1 count-1 )

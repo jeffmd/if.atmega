@@ -20,7 +20,7 @@ forthword_ DEFGET, 0, "defg"
 forthword_ DEFX, 0, "defx"
     rcall DEFGET
     ; get the fetch Xt pointer which is one word after the data
-    plus_1_
+    add_1_
     call FETCHI        ; ( valaddr xtfetch )
     ; EXEC the fetch
     jmp EXEC        ; ( n )
@@ -71,7 +71,7 @@ forthword_ DODEFE, DIS_CALL_OPT, "(defe)"
 ; returns the XT associated with the given XT
 forthword_ DEFERFETCH, 0, "def@"
     ; skip passed call to get to data field
-    plus_2_                 ; ( xt1+2 )
+    add_2_                 ; ( xt1+2 )
     rjmp DEFX
 
 ; ( xt1 xt2 -- )
@@ -79,11 +79,11 @@ forthword_ DEFERFETCH, 0, "def@"
 ; stores xt1 as the xt to be EXECd when xt2 is called
 forthword_ DEFERSTORE, 0, "def!"
     ; skip past call to get to data
-    plus_2_                  ; ( xt1 xt2+2 )
+    add_2_                  ; ( xt1 xt2+2 )
     rcall DEFGET             ; ( st1 defaddr xt2+2 )
     ; skip past data address field to get
     ; to deferstore field
-    plus_1_                  ; ( xt1 defaddr xt2+3 )
+    add_1_                  ; ( xt1 defaddr xt2+3 )
     ; get defered store xt address
     call FETCHI              ; ( xt1 defaddr xtstore )
     jmp EXEC

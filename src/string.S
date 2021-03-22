@@ -6,7 +6,7 @@
 forthword_ ISTRLEN, 0, "$l"
     x_w_
     x_mul_2_
-    plus_1_
+    add_1_
     d_w_
     rjmp MIX
 
@@ -20,7 +20,7 @@ forthword_ SLASHSTRING, 0, "/$"
     call MIN      ; ( addr1 u1 n' )
     y_w_          ; ( addr1 u1 n' Y:n' )
     d1_           ; ( addr1 u1 addr1 )
-    plus_y_       ; ( addr1 u1 addr1+n' )
+    add_y_        ; ( addr1 u1 addr1+n' )
     d1_w_         ; ( addr2 u1 addr2 )
     d_            ; ( addr2 u1 )
     sub_y_        ; ( addr2 u1-n' )
@@ -42,9 +42,9 @@ forthword_ DOSLIT, 0, "(slit)"
   rcall FETCHI   ; ( raddr slength )
   d_w_           ; ( raddr slength slength )
   ; calculate string address
-  x_plus_1_
+  x_add_1_
   d1_x_          ; ( straddr slength slength )
   ; calculate the number of words to skip over for return address
   rcall WALIGN   ; ( straddr slength k/2 )
-  plus_x_        ; ( straddr slength straddr+k/2 )
+  add_x_         ; ( straddr slength straddr+k/2 )
   rjmp EXEC

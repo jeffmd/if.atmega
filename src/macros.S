@@ -383,17 +383,17 @@
 .endm
 
 ; d+1
-.macro d_plus_1_ ; move stack pointer down one cell
+.macro d_add_1_ ; move stack pointer down one cell
   sbiw YL, 2
 .endm
 
 ; d+2
-.macro d_plus_2_ ; move stack pointer down two cells
+.macro d_add_2_ ; move stack pointer down two cells
   sbiw YL, 4
 .endm
 
 ; d+3
-.macro d_plus_3_ ; move stack pointer down three cells
+.macro d_add_3_ ; move stack pointer down three cells
     sbiw YL, 6
 .endm
 
@@ -627,121 +627,121 @@
 .endm
 
 ; +x
-.macro plus_x_
+.macro add_x_
     add wrl, xrl
     adc wrh, xrh
 .endm
 
 ; x+
-.macro x_plus_
+.macro x_add_
     add xrl, wrl
     adc xrh, wrh
 .endm
 
 ; x+a
-.macro x_plus_a_
+.macro x_add_a_
     add xrl, arl
     adc xrh, arh
 .endm
 
 ; x+b
-.macro x_plus_b_
+.macro x_add_b_
     add xrl, brl
     adc xrh, brh
 .endm
 
 ; x+y
-.macro x_plus_y_
+.macro x_add_y_
     add xrl, yrl
     adc xrh, yrh
 .endm
 
 ; +y
-.macro plus_y_
+.macro add_y_
     add wrl, yrl
     adc wrh, yrh
 .endm
 
 ; y+
-.macro y_plus_
+.macro y_add_
     add yrl, wrl
     adc yrh, wrh
 .endm
 
 ; y+a
-.macro y_plus_a_
+.macro y_add_a_
     add yrl, arl
     adc yrh, arh
 .endm
 
 ; y+b
-.macro y_plus_b_
+.macro y_add_b_
     add yrl, brl
     adc yrh, brh
 .endm
 
 ; y+x
-.macro y_plus_x_
+.macro y_add_x_
     add yrl, xrl
     adc yrh, xrh
 .endm
 
 ; +a
-.macro plus_a_
+.macro add_a_
     add wrl, arl
     adc wrh, arh
 .endm
 
 ; a+
-.macro a_plus_
+.macro a_add_
     add arl, wrl
     adc arh, wrh
 .endm
 
 ; a+b
-.macro a_plus_b_
+.macro a_add_b_
     add arl, brl
     adc arh, brh
 .endm
 
 ; a+x
-.macro a_plus_x_
+.macro a_add_x_
     add arl, xrl
     adc arh, xrh
 .endm
 
 ; a+y
-.macro a_plus_y_
+.macro a_add_y_
     add arl, yrl
     adc arh, yrh
 .endm
 
 ; +b
-.macro plus_b_
+.macro add_b_
     add wrl, brl
     adc wrh, brh
 .endm
 
 ; b+
-.macro b_plus_
+.macro b_add_
     add brl, wrl
     adc brh, wrh
 .endm
 
 ; b+a
-.macro b_plus_a_
+.macro b_add_a_
     add brl, arl
     adc brh, arh
 .endm
 
 ; b+x
-.macro b_plus_x_
+.macro b_add_x_
     add brl, xrl
     adc brh, xrh
 .endm
 
 ; b+y
-.macro b_plus_y_
+.macro b_add_y_
     add brl, yrl
     adc brh, yrh
 .endm
@@ -879,7 +879,7 @@
 .endm
 
 ; +1
-.macro plus_1_
+.macro add_1_
     adiw wrl, 1
 .endm
 
@@ -889,12 +889,12 @@
 .endm
 
 ; +2
-.macro plus_2_
+.macro add_2_
     adiw wrl, 2
 .endm
 
 ; +4
-.macro plus_4_
+.macro add_4_
     adiw wrl, 4
 .endm
 
@@ -1128,25 +1128,25 @@
 .endm
 
 ; x+1
-.macro x_plus_1_
+.macro x_add_1_
   subi xrl, lo8(-1)
   sbci xrh, hi8(-1)
 .endm
 
 ; y+1
-.macro y_plus_1_
+.macro y_add_1_
   subi yrl, lo8(-1)
   sbci yrh, hi8(-1)
 .endm
 
 ; a+1
-.macro a_plus_1_
+.macro a_add_1_
   subi arl, lo8(-1)
   sbci arh, hi8(-1)
 .endm
 
 ; b+1
-.macro b_plus_1_
+.macro b_add_1_
   subi brl, lo8(-1)
   sbci brh, hi8(-1)
 .endm
@@ -1176,25 +1176,25 @@
 .endm
 
 ; a+2
-.macro a_plus_2_
+.macro a_add_2_
   subi arl, lo8(-2)
   sbci arh, hi8(-2)
 .endm
 
 ; b+2
-.macro b_plus_2_
+.macro b_add_2_
   subi brl, lo8(-2)
   sbci brh, hi8(-2)
 .endm
 
 ; x+2
-.macro x_plus_2_
+.macro x_add_2_
   subi xrl, lo8(-2)
   sbci xrh, hi8(-2)
 .endm
 
 ; y+2
-.macro y_plus_2_
+.macro y_add_2_
   subi yrl, lo8(-2)
   sbci yrh, hi8(-2)
 .endm

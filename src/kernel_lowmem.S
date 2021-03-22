@@ -240,8 +240,8 @@ EE2RAM_LOOP:
     b_                   ; ( len e-addr)
     call FETCHE          ; ( len n )
     call MA_W            ; ( len n )
-    a_plus_2_
-    b_plus_2_            
+    a_add_2_
+    b_add_2_            
     d0_                  ; ( len len )
     _1_sub_              ; ( len len-1 )
     ; <repeat>

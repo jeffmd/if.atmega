@@ -81,7 +81,7 @@ PFA_RSHIFT2:
 ; 2-complement
 forthword_ NEGATE, INLINE_OPT, "neg"
     not_
-    plus_1_
+    add_1_
     end_
 
 ; ( n1 -- u1 )

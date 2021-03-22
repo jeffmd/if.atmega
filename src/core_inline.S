@@ -9,20 +9,20 @@ forthword_ NOOP, INLINE_OPT, "noop"
 
 ; ( n -- ? n  )
 ; restore top of data stack once
-Forthword_ D_PLUS_1, INLINE_OPT, "d+1"
-    d_plus_1_
+Forthword_ D_ADD_1, INLINE_OPT, "d+1"
+    d_add_1_
     end_  
   
 ; ( n -- ? ? n )
 ; restore top of data stack twice
-Forthword_ D_PLUS_2, INLINE_OPT, "d+2"
-    d_plus_2_
+Forthword_ D_ADD_2, INLINE_OPT, "d+2"
+    d_add_2_
     end_  
   
 ; ( n -- ? ? ? n)
 ; restore top of data stack three times
-Forthword_ D_PLUS_3, INLINE_OPT, "d+3"
-    d_plus_2_
+Forthword_ D_ADD_3, INLINE_OPT, "d+3"
+    d_add_2_
     end_  
   
 
@@ -452,8 +452,8 @@ forthword_ ISZERO, INLINE_OPT, "==0"
 ; Arithmetics
 ; optimized increment
 
-forthword_ PLUS_1, INLINE_OPT, "+1"
-    plus_1_
+forthword_ ADD_1, INLINE_OPT, "+1"
+    add_1_
     end_
 
 ; (S: n1 -- n2 )
@@ -467,15 +467,15 @@ forthword_ _1_SUB, INLINE_OPT, "1-"
 ; ( n1|u1 -- n2|u2 ) 
 ; Arithmetics
 ; optimized two increment
-forthword_ PLUS_2, INLINE_OPT, "+2"
-    plus_2_
+forthword_ ADD_2, INLINE_OPT, "+2"
+    add_2_
     end_
 
 ; ( n1|u1 -- n2|u2 ) 
 ; Arithmetics
 ; optimized four increment
-forthword_ PLUS_4, INLINE_OPT, "+4"
-    plus_4_
+forthword_ ADD_4, INLINE_OPT, "+4"
+    add_4_
     end_
 
 ; (S: n1 -- n2 )
@@ -785,50 +785,50 @@ forthword_ Y_MUL_2, INLINE_OPT, "y*2"
 
 ; ( n1 A:n2 -- n1+n2)
 ; w = w + a
-forthword_ PLUS_A, INLINE_OPT, "+a"
-    plus_a_
+forthword_ ADD_A, INLINE_OPT, "+a"
+    add_a_
     end_
 
 ; ( n1 A:n2 -- A:n1+n2)
 ; a = a + w
-forthword_ A_PLUS, INLINE_OPT, "a+"
-    a_plus_
+forthword_ A_ADD, INLINE_OPT, "a+"
+    a_add_
     end_
 
 ; ( n1 Y:n2 -- n3)
 ; w = w + b
-forthword_ PLUS_B, INLINE_OPT, "+b"
-    plus_b_
+forthword_ ADD_B, INLINE_OPT, "+b"
+    add_b_
     end_
 
 ; ( n1 B:n2 -- B:n3)
 ; b = b + w
-forthword_ B_PLUS, INLINE_OPT, "b+"
-    b_plus_
+forthword_ B_ADD, INLINE_OPT, "b+"
+    b_add_
     end_
 
 ; ( n1 X:n2 -- n3)
 ; w = w + x
-forthword_ PLUS_X, INLINE_OPT, "+x"
-    plus_x_
+forthword_ ADD_X, INLINE_OPT, "+x"
+    add_x_
     end_
 
 ; ( n1 X:n2 -- X:n3)
 ; x = x + w
-forthword_ X_PLUS, INLINE_OPT, "x+"
-    x_plus_
+forthword_ X_ADD, INLINE_OPT, "x+"
+    x_add_
     end_
 
 ; ( n1 Y:n2 -- n3)
 ; w = w + y
-forthword_ PLUS_Y, INLINE_OPT, "+y"
-    plus_y_
+forthword_ ADD_Y, INLINE_OPT, "+y"
+    add_y_
     end_
 
 ; ( n1 Y:n2 -- Y:n3)
 ; y = y + w
-forthword_ Y_PLUS, INLINE_OPT, "y+"
-    y_plus_
+forthword_ Y_ADD, INLINE_OPT, "y+"
+    y_add_
     end_
 
 ; ( n1|u1 -- n1-y|u1-y )
@@ -985,50 +985,50 @@ Forthword_ Y_0, INLINE_OPT, "y=0"
 
 ; ( -- )
 ; add 1 to register A 
-forthword_ A_PLUS_1, INLINE_OPT, "a+1"
-    a_plus_1_
+forthword_ A_ADD_1, INLINE_OPT, "a+1"
+    a_add_1_
     end_
 
 ; ( -- )
 ; add 1 to register B 
-forthword_ B_PLUS_1, INLINE_OPT, "b+1"
-    b_plus_1_
+forthword_ B_ADD_1, INLINE_OPT, "b+1"
+    b_add_1_
     end_
 
 ; ( -- )
 ; add 1 to register X 
-forthword_ X_PLUS_1, INLINE_OPT, "x+1"
-    x_plus_1_
+forthword_ X_ADD_1, INLINE_OPT, "x+1"
+    x_add_1_
     end_
 
 ; ( -- )
 ; add 1 to register Y 
-forthword_ Y_PLUS_1, INLINE_OPT, "y+1"
-    y_plus_1_
+forthword_ Y_ADD_1, INLINE_OPT, "y+1"
+    y_add_1_
     end_
 
 ; ( -- )
 ; add 2 to register A
-forthword_ A_PLUS_2, INLINE_OPT, "a+2"
-    a_plus_2_
+forthword_ A_ADD_2, INLINE_OPT, "a+2"
+    a_add_2_
     end_
 
 ; ( -- )
 ; add 2 to register B
-forthword_ B_PLUS_2, INLINE_OPT, "b+2"
-    b_plus_2_
+forthword_ B_ADD_2, INLINE_OPT, "b+2"
+    b_add_2_
     end_
 
 ; ( -- )
 ; add 2 to register X
-forthword_ X_PLUS_2, INLINE_OPT, "x+2"
-    x_plus_2_
+forthword_ X_ADD_2, INLINE_OPT, "x+2"
+    x_add_2_
     end_
 
 ; ( -- )
 ; add 2 to register Y
-forthword_ Y_PLUS_2, INLINE_OPT, "y+2"
-    y_plus_2_
+forthword_ Y_ADD_2, INLINE_OPT, "y+2"
+    y_add_2_
     end_
 
 ; ( -- )
@@ -1144,8 +1144,8 @@ forthword_ SUB_ICELL, INLINE_OPT, "-icell"
     
 ; ( n -- n+icell )
 ; add instruction cell size to n
-forthword_ PLUS_ICELL, INLINE_OPT, "+icell"
-    plus_1_
+forthword_ ADD_ICELL, INLINE_OPT, "+icell"
+    add_1_
     end_
   
 ; ( -- dcell )
@@ -1162,8 +1162,8 @@ forthword_ SUB_DCELL, INLINE_OPT, "-dcell"
     
 ; ( n -- n+dcell )
 ; add data cell size to n
-forthword_ PLUS_DCELL, INLINE_OPT, "+dcell"
-    plus_2_
+forthword_ ADD_DCELL, INLINE_OPT, "+dcell"
+    add_2_
     end_
   
 ; ( n -- n*dcell )

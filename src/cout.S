@@ -32,7 +32,7 @@ PFA_ITYPE1:
     ifz_ PFA_ITYPE2
     d0_w_             ; ( len len )
     rcall MIA         ; ( len c1c2 )
-    a_plus_2_           
+    a_add_2_           
     d_w_              ; ( len c1c2 c1c2 )
     rcall EMIT        ; ( len c1c2 ? )
     d_                ; ( len c1c2 )
@@ -67,7 +67,7 @@ PFA_TYPE1:
     b_iszero_
     ifz_ PFA_TYPE2
     rcall CMA       ; ( c )
-    a_plus_1_       ; a+1
+    a_add_1_       ; a+1
     rcall EMIT      ; ( ? )
     b_sub_1_        ; ( ? B:n-1 )
     rjmp PFA_TYPE1

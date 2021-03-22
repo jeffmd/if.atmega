@@ -137,13 +137,13 @@ ACCEPT_echo:
     ; now store the key in the input buffer
     rcall STIB           ; ( k tibaddr #tib)
     y_d_                 ; ( k #tib Y:tibaddr )
-    plus_y_              ; ( k tibaddr+#tib ) 
+    add_y_              ; ( k tibaddr+#tib ) 
     y_d_                 ; ( tibaddr+#tib Y:k )
     cmw_y_               ; ( tibaddr+#tib )
 
     rcall SHARPTIB       ; ( #tibaddr )
     rcall Y_MW           ; ( ? )
-    y_plus_1_
+    y_add_1_
     rcall MW_Y
 
 ACCEPT_checkmaxinput:
