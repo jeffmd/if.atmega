@@ -1,7 +1,6 @@
 ; dict_interpret.inc
 ; forth words that make up the forth interpreter
 
-
 .pushsection .noinit
 ; interpreter register copy
 REG_BANK:
@@ -18,40 +17,37 @@ Lit_Compile: .space 2
 ; ( -- )
 ; ignore remaining text to end of line
 Forthword_ COMMENT, IMMEDIATE_EN, "\\"
-  push_      ; preserve WR
-  rcall STIB
-  str_y_
-  nip_
-  rcall G_IN  ; skip to end of input buffer
-  rcall YWSTORE
-  pop_      
-  ret
+  d_w_           ; preserve WR
+  rcall TIB_W
+  rcall TIB_R_STR  ; skip to end of input buffer
+  d_      
+  end_
 
 ; ( addr1 n1 c -- n2 )
 ; String
 ; skips leading occurances in string at addr1/n1 leaving n2 as an index pointing to the 1st non-c character
 forthword_ CSKIP, 0, "cskip"
-  rpush_a_
-  str_y_               ; ( addr1 n1 c Y:c )
-  d1_str_a_            ; ( addr1 n1 c A:addr1 )
-  pop_x_               ; ( addr1 c X:n1 )
-  x_str_d0_            ; ( n1 c )
+  r_a_
+  y_w_                 ; ( addr1 n1 c Y:c )
+  a_d1_                ; ( addr1 n1 c A:addr1 )
+  x_d_                 ; ( addr1 c X:n1 )
+  d0_x_                ; ( n1 c )
   
 CSKIP_LOOP:
   x_iszero_            ; ( n1 n')
-  breq CSKIP_DONE
-  rcall ACFETCH        ; ( n1 c' )
-  aplus1_
-  cp wl, yrl           ; ( n1 c' )
-  brne CSKIP_DONE
-  xminus1_             ; ( n1 c X:n'-1 )
+  ifz_ CSKIP_DONE
+  rcall CMA            ; ( n1 c' )
+  a_add_1_
+  cp wrl, yrl          ; ( n1 c' )
+  ifnz_ CSKIP_DONE
+  x_sub_1_             ; ( n1 c X:n'-1 )
   rjmp CSKIP_LOOP
 
 CSKIP_DONE:
-  rpop_a_
-  pop_                 ; ( n1 )
-  minus_x_             ; ( n1-n' )
-  ret
+  a_r_
+  d_                   ; ( n1 )
+  sub_x_               ; ( n1-n' )
+  end_
   
 
 ; ( addr1 n1 c -- addr1 n2 )
@@ -59,94 +55,96 @@ CSKIP_DONE:
 ; Scan string at addr1/n1 for the first occurance of c, leaving addr1 n2,
 ; char at n2 is first c character
 forthword_ CSCAN, 0, "cscan"
-  rpush_a_
-  str_y_               ; ( addr1 n1 c Y:c )
-  d1_str_a_            ; ( addr1 n1 c A:addr1 )
-  d0_str_x_            ; ( addr1 n1 c X:n1 )
+  r_a_
+  y_w_                 ; ( addr1 n1 c Y:c )
+  a_d1_                ; ( addr1 n1 c A:addr1 )
+  x_d0_                ; ( addr1 n1 c X:n1 )
   
 CSCAN_LOOP:
   x_iszero_            ; ( addr1 n1 c )
-  breq CSCAN_DONE
-  rcall ACFETCH        ; ( addr1 n1 c' )
-  aplus1_
-  cp wl, yrl            ; ( addr1 n1 c' )
-  breq CSCAN_DONE
-  xminus1_             ; ( addr1 n1 c' X:n'-1 )
+  ifz_ CSCAN_DONE
+  rcall CMA            ; ( addr1 n1 c' )
+  a_add_1_
+  cp wrl, yrl          ; ( addr1 n1 c' )
+  ifz_ CSCAN_DONE
+  x_sub_1_             ; ( addr1 n1 c' X:n'-1 )
   rjmp CSCAN_LOOP
 
 CSCAN_DONE:
-  rpop_a_
-  pop_                 ; ( addr1 n1 )
-  minus_x_             ; ( addr1 n1-n' )
-  ret
+  a_r_
+  d_                   ; ( addr1 n1 )
+  sub_x_               ; ( addr1 n1-n' )
+  end_
   
 ; ( r-addr r-len f-addr f-len --  f)
 ; Memory
 ; compares string in RAM with string in flash
 forthword_ ISTRCOMPARE, 0, "icmp"
-  push_                    ; ( r-addr r-len f-addr f-len  f-len )
+  d_w_                     ; ( r-addr r-len f-addr f-len  f-len )
   d2_                      ; ( r-addr r-len f-addr f-len r-len )
   ; check if strings are same length
   rcall NOTEQUAL           ; ( r-addr r-len f-addr flag )
   ; if
   iszero_                  ; ( r-addr r-len f-addr flag )
-  breq ICOMPARE_SAMELEN
+  ifz_ ICOMPARE_SAMELEN
 
   ; strings are not the same length
-  nip3_                    ; ( flag )
+  d_sub_3_                 ; ( flag )
   zero_                    ; ( 0 )
-  ret
+  exit_
 
     ; then
 ICOMPARE_SAMELEN:
-  rpush_a_
-  rpush_b_
-  pop_a_                   ; ( r-addr r-len flag A:f-addr )
-  a_star_2_                ; ( r-addr len flag A:f-addr*2 )
-  pop_x_                   ; ( r-addr flag X:len )
-  pop_b_                   ; ( flag B:r-addr )
-  xplus1_                  ; ( flag X:len+1 )
-  x_slash_2_               ; ( flag X:(len+1)/2 )
+  r_a_
+  r_b_
+  a_d_                     ; ( r-addr r-len flag A:f-addr )
+  a_mul_2_                 ; ( r-addr len flag A:f-addr*2 )
+  x_d_                     ; ( r-addr flag X:len )
+  b_d_                     ; ( flag B:r-addr )
+  x_add_1_                ; ( flag X:len+1 )
+  x_div_2_                 ; ( flag X:(len+1)/2 )
 
   ; begin
 ICOMPARE_LOOP:
   ; while
   x_iszero_                ; ( ? )
-  breq ICOMPARE_FOUND
-  rcall BFETCH             ; ( r-cc )
-  push_                    ; ( r-cc r-cc )
-  rcall AFETCHI            ; ( r-cc f-cc )
-  xminus1_
+  ifz_ ICOMPARE_FOUND
+  rcall MB                 ; ( r-cc )
+  d_w_                     ; ( r-cc r-cc )
+  rcall MIA                ; ( r-cc f-cc )
+  x_sub_1_
   
   ; if not last check then compare words
-  brne ICOMPARE_COMPCELL
+  ifnz_ ICOMPARE_COMPCELL
   ; flash strings are zero-padded at the last cell
   ; that means: if the flash cell is less $0100, than mask the
   ; high byte in the ram cell
-  push_                    ; ( r-cc f-cc f-cc )
-  push_                    ; ( r-cc f-cc f-cc f-cc )
+  d_w_                     ; ( r-cc f-cc f-cc )
+  d_w_                     ; ( r-cc f-cc f-cc f-cc )
   lit_ 0x100               ; ( r-cc f-cc f-cc 0x100 )
   rcall ULESS              ; ( r-cc f-cc flag )
   ; if
   iszero_
-  pop_                     ; ( r-cc f-cc )
-  breq ICOMPARE_COMPCELL
-  rcall SWAP               ; ( f-cc r-cc )
+  d_                       ; ( r-cc f-cc )
+  ifz_ ICOMPARE_COMPCELL
+  y_w_
+  d0_
+  d0_y_                    ; ( f-cc r-cc )
   zerohigh_                ; ( f-cc 0:r-cc)
   ; then
 ICOMPARE_COMPCELL:
   rcall NOTEQUAL           ; ( flag )
   ; if
   iszero_                  ; ( flag )
-  breq ICOMPARE_NEXTLOOP
+  ifz_ ICOMPARE_NEXTLOOP
     ; not equal
     zero_                  ; ( 0 )
     rjmp ICOMPARE_DONE
 
   ; then
 ICOMPARE_NEXTLOOP:
-  aplus2_
-  bplus2_
+  a_add_2_
+  b_add_2_
   ; repeat
   rjmp ICOMPARE_LOOP
 
@@ -155,42 +153,36 @@ ICOMPARE_FOUND:
   true_
   
 ICOMPARE_DONE:
-  rpop_b_
-  rpop_a_
-  ret
+  b_r_
+  a_r_
+  end_
     
 ; ( -- )
 ; Input
 ; skip space in input source.
 forthword_ SKIPBL, 0, "skipbl"
-  rcall SRCIN          ; ( srcaddr len )
-  push_
+  rcall TIB_STRING     ; ( srcaddr len )
+  d_w_
   bl_                  ; ( srcaddr len bl )
   rcall CSKIP          ; ( n2 )
-
-  ; adjust >IN
-  str_y_               ; ( n2 Y:n2 )
-  rcall G_IN           ; ( ginaddr )
-  rjmp YPLUSSTORE      ; ( ? )
-
+  ; adjust tib.r
+  rjmp TIB_R_ADD_STR   ; ( ribaddr )
 
 ; ( char "ccc<char>" -- c-addr len )
 ; String
 ; in input buffer parse ccc delimited string by the delimiter char.
 forthword_ PARSE, 0, "parse"
-  rpush_           ; ( c )(R: c )
-  rcall SRCIN      ; ( addr len)
-  push_            ; ( addr len len )
-  rpop_            ; ( addr' len' c ) (R:  )
+  r_w_             ; ( c )(R: c )
+  rcall TIB_STRING ; ( addr len)
+  d_w_             ; ( addr len len )
+  r_               ; ( addr' len' c ) (R:  )
   rcall CSCAN      ; ( addr'' len'' )
-  str_y_           ; ( addr'' len'' Y:len'' )
-  str_x_           ; ( addr'' len'' X:len'' )
-  yplus1_          ; ( addr'' len'' Y:len''+1 )
-  rcall G_IN       ; ( addr'' >in)
-  rcall YPLUSSTORE ; ( addr'' ? )
-  x_               ; ( addr'' len'' )
-  ret
-
+  # skip terminating delimeter in input buffer
+  add_1_           ; ( addr' len''+1 )
+  rcall TIB_R_ADD_STR
+  y_               ; ( addr' len''+1)
+  _1_sub_          ; ( addr' len'')
+  end_
 
 ; ( "<name>" -- c-addr len )
 ; String
@@ -200,186 +192,41 @@ forthword_ PNAME, 0, "pname"
   bl_              ; ( bl )
   rjmp PARSE       ; ( c-addr len )
 
-; ( xtc xti -- )
-; Select register for literal
-Forthword_ REGSET, IMMEDIATE_EN, "regset"
-  rpush_y_           ; ( xtc xti )(R:y)
-  str_y_             ; ( xtc xti Y:xti )
-  lit_ Lit_Interpret ; ( xtc Lit_Interpret )
-  rcall YWSTORE      ; ( xtc Lit_Interpret )
-  d0_str_y_          ; ( xtc Lit_Interpret Y:xtc )
-  lit_ Lit_Compile   ; ( xtc Lit_Compile Y:xtc )
-  rcall YWSTORE      ; ( xtc Lit_Compile )
-  rcall DPOP2        ; ( )
-  rpop_y_            ; ( Y:y )
-  ret
-
-; ( -- )
-; Select W register for literal
-Forthword_ WSET, IMMEDIATE_EN, "w="
-  push_
-  lit_ pm(WLIT_C)
-  push_
-  lit_ pm(WLIT_INTERP)
-  rjmp REGSET
-  
-; ( -- )
-; Select A register for literal
-Forthword_ ASET, IMMEDIATE_EN, "a="
-  push_
-  lit_ pm(ALIT_C)
-  push_
-  lit_ pm(ALIT_INTERP)
-  rjmp REGSET
-
-; ( -- )
-; Select B register for literal
-Forthword_ BSET, IMMEDIATE_EN, "b="
-  push_
-  lit_ pm(BLIT_C)
-  push_
-  lit_ pm(BLIT_INTERP)
-  rjmp REGSET
-
-; ( -- )
-; Select X register for literal
-Forthword_ XSET, IMMEDIATE_EN, "x="
-  push_
-  lit_ pm(XLIT_C)
-  push_
-  lit_ pm(XLIT_INTERP)
-  rjmp REGSET
-
-; ( -- )
-; Select Y register for literal
-Forthword_ YSET, IMMEDIATE_EN, "y="
-  push_
-  lit_ pm(YLIT_C)
-  push_
-  lit_ pm(YLIT_INTERP)
-  rjmp REGSET
-
-            
-; ( n -- )
-; store n in WR
-Forthword_ WLIT_INTERP, IMMEDIATE_EN, "[w=]"
-  lit_z_ WR            ; ( WR )
-  st Z, wl
-  std Z+1, wh
-  ret
-
-; ( n -- )
-; store n in RY
-Forthword_ YLIT_INTERP, IMMEDIATE_EN, "[y=]"
-  lit_z_ RY            ; ( RY )
-  st Z, wl
-  std Z+1, wh
-  ret
-
-; ( n -- )
-; store n in RX
-Forthword_ XLIT_INTERP, IMMEDIATE_EN, "[x=]"
-  lit_z_ RX            ; ( RX )
-  st Z, wl
-  std Z+1, wh
-  ret
-
-; ( n -- )
-; store n in RA
-Forthword_ ALIT_INTERP, IMMEDIATE_EN, "[a=]"
-  lit_z_ RA            ; ( RA )
-  st Z, wl
-  std Z+1, wh
-  ret
-
-; ( n -- )
-; store n in RB
-Forthword_ BLIT_INTERP, IMMEDIATE_EN, "[b=]"
-  lit_z_ RB            ; ( RB )
-  st Z, wl
-  std Z+1, wh
-  ret
-
-; ( c -- )
-; fetch the lit vector and EXEC it. Will interpret a litteral for one of the registers
-Forthword_ LIT_INTERP, 0, "lit.interp"
-  push_
-  lit_  Lit_Interpret
-  rcall FETCH
-  jmp EXEC
-
-; ( c -- )
-; fetch the lit vector and EXEC it. Will compile a litteral for one of the registers
-Forthword_ LIT_COMP, 0, "lit.comp"
-  push_
-  lit_  Lit_Compile
-  rcall FETCH
-  jmp EXEC
-
-            
-; ( addr len -- [n] f )
-; Interpreter
-; recognizer for integer numbers
-forthword_ REC_NUM, 0, "rec#"
-    ; try converting to a number
-    call NUMBER              ; ( [n] f )
-    iszero_
-    breq REC_NONUMBER
-
-    rcall STATE              ; ( n state )
-    iszero_
-    pop_                     ; ( n )
-    breq REC_NUMBER_OK
-      rcall LIT_COMP
-      rjmp REC_NUMBER_DONE
-      
-REC_NUMBER_OK:
-    rcall LIT_INTERP
-
-REC_NUMBER_DONE:
-    rcall WSET
-    true_                   ; ( true )
-
-REC_NONUMBER:
-    ret                     ; ( 0 )
-
 ; save registers W, A, B, X, Y
 forthword_ REGS, 0, "regs"
-  push_a_          ; ( a w )
-  push_            ; ( a w w )
-  lit_ WR          ; ( a w WR )
-  pop_a_           ; ( a WR A:w )
-  rcall AWSTORE    ; ( a WR )
-  twoplus_
-  pop_a_           ; ( WR A:a )
-  rcall AWSTORE
-  twoplus_
-  rcall BWSTORE
-  twoplus_
-  rcall XWSTORE
-  twoplus_
-  rcall YWSTORE
-  ret
+  d_y_             ; ( y w )
+  y_w_             ; ( y w ) Y:W
+  lit_ WR          ; ( y WR )
+  rcall MW_Y       ; [WR]=w
+  add_2_
+  rcall MW_A       ; [RA]=a
+  add_2_
+  rcall MW_B       ; [RB]=b
+  add_2_
+  rcall MW_X       ; [RX]=x
+  add_2_
+  y_d_
+  rcall MW_Y       ; [RY]=x
+  end_
     
 ; load registers W, A, B, X, Y
 ; ( xt * -- w xt )
 forthword_ REGL, 0, "regl"
-  lit_ RA
-  rcall FETCH      ; ( xt w a )
-  str_a_
-  lit_ RB
-  rcall FETCH      ; ( xt w b )
-  str_b_
-  lit_ RX
-  rcall FETCH      ; ( xt w x )
-  str_x_
-  lit_ RY
-  rcall FETCH      ; ( xt w y )
-  str_y_
-  lit_ WR          ; ( xt ? Y:WR )
-  rcall FETCH
-  rcall SWAP       ; ( w xt )
-  ret
+  d0_              ; ( xt xt )
+  d_w_             ; ( xt xt xt )
+  lit_ WR
+  rcall Y_MW       ; ( xt xt WR )
+  d1_y_            ; ( w xt WR )
+  add_2_           ; ( w xt RA )
+  rcall A_MW       ; ( w xt RA ) A:[RA]
+  add_2_           ; ( w xt RB )
+  rcall B_MW       ; ( w xt RB ) B:[RB]
+  add_2_           ; ( w xt RX )
+  rcall X_MW       ; ( w xt RX ) X:[RX]
+  add_2_           ; ( w xt RY )
+  rcall Y_MW       ; ( w xt RY ) Y:[RY]
+  d_               ; ( w xt )
+  end_
     
 ; ( addr len -- f )
 ; Interpreter
@@ -388,21 +235,21 @@ forthword_ REGL, 0, "regl"
 forthword_ REC_WORD, 0, "recw"
   rcall FINDW           ; ( nfa )
   iszero_
-  brne REC_WORD_FOUND
+  ifnz_ REC_WORD_FOUND
   ret
 
 REC_WORD_FOUND:
   rcall NFATOXTF        ; ( xt flag )
   ; check if compile only word
-  sbrc wh, COMPILE_ONLY_FB 
+  sbrc wrh, COMPILE_ONLY_FB 
     rjmp CHECK_IMMEDIATE
       
 CHECK_COMPILE_ONLY:
-  push_
+  d_w_
   rcall STATE
   iszero_
-  pop_
-  brne CHECK_IMMEDIATE
+  d_
+  ifnz_ CHECK_IMMEDIATE
     ; word can only be used in compile state
     rcall DOSLIT
     ascii_ " Only Compile!"
@@ -410,21 +257,23 @@ CHECK_COMPILE_ONLY:
     
 
 CHECK_IMMEDIATE:
-	; either compile or EXEC the XT
+    ; either compile or EXEC the XT
     ; check if word is immediate: bit 7 is clear if immediate
-	sbrs wh, IMMEDIATE_EN_FB ; skip next instruction if bit 7 is set: not immediate word
+    sbrs wrh, IMMEDIATE_EN_FB ; skip next instruction if bit 7 is set: not immediate word
     ; flag is 0: always EXEC
     rjmp REC_WORD_EXECUTE
 
 REC_WORD_CHECKSTATE:
   ; check state
-  push_
+  d_w_
   rcall STATE
   iszero_
-  pop_
-  breq REC_WORD_EXECUTE
+  d_
+  ifz_ REC_WORD_EXECUTE
+.if BUILD_LEVEL >= ASM_BASE
     ; in compile mode so compile xt
     call COMPILEXT
+.endif
     jmp TRUE
       
 REC_WORD_EXECUTE:
@@ -438,36 +287,38 @@ REC_WORD_EXECUTE:
 ; System
 ; recognize and execute name of word in ram using recognizer list.
 forthword_ RECX, 0, "recx"
-  rpush_                ; ( addr len ) (R: len )
+  r_w_                  ; ( addr len ) (R: len )
   ; put addr and len on return stack so that
   ; stack can be manipulated by interpreted word
-  d0_str_y_
-  rpush_y_              ; ( addr len ) (R: len addr )
+  y_d0_
+  r_y_                  ; ( addr len ) (R: len addr )
   ; test if its a word
   rcall REC_WORD        ; ( flag ) ( R: len addr )
-  str_y_                ; ( Y:flag )
-  rpop_                 ; ( addr ) (R: len )
-  push_                 ; ( addr addr )
-  rpop_                 ; ( addr len ) (R: )
+  y_w_                  ; ( Y:flag )
+  r_                    ; ( addr ) (R: len )
+  d_w_                  ; ( addr addr )
+  r_                    ; ( addr len ) (R: )
   ; <if>
   y_iszero_             ; ( addr len )
-  brne RECX_DONE
-  rpush_                ; ( addr len ) (R: len )
-  d0_str_y_
-  rpush_y_              ; ( addr len ) (R: len addr )
+  ifnz_ RECX_DONE
+.if BUILD_LEVEL >= INT_NUMBER
+  r_w_                  ; ( addr len ) (R: len )
+  y_d0_
+  r_y_                  ; ( addr len ) (R: len addr )
   ; test if its a number
   rcall REC_NUM         ; ( flag ) ( R: len addr )
-  str_y_                ; ( Y:flag )
-  rpop_                 ; ( addr ) (R: len )
-  push_                 ; ( addr addr )
-  rpop_                 ; ( addr len ) (R: )
+  y_w_                  ; ( Y:flag )
+  r_                    ; ( addr ) (R: len )
+  d_w_                  ; ( addr addr )
+  r_                    ; ( addr len ) (R: )
   ; <if>
   y_iszero_             ; ( addr len )
-  brne RECX_DONE
+  ifnz_ RECX_DONE
+.endif
   ; not recognized so throw
-  push_
+  d_w_
   rcall CR
-  pop_
+  d_
   ; print unrecognized word
   rcall TYPE
   rcall DOSLIT
@@ -475,8 +326,8 @@ forthword_ RECX, 0, "recx"
   jmp THROW
   
 RECX_DONE:
-  nip_
-  ret             ; ( )
+  d_sub_1_
+  end_                 ; ( )
 
 ; ( -- ) (R: i*x - j*x )
 ; System
@@ -486,14 +337,15 @@ forthword_ INTERPRET, 0, "interp"
   rcall PNAME         ; ( addr len )
   ; ?while
   iszero_             ; ( addr len )
-  breq INTERPRET_END
+  ifz_ INTERPRET_END
     rcall RECX        ; ( ? )
-    call QSTACK       ; ( ? )
+    do_ QSTACK        ; ( ? )
     ; repeat
     rjmp INTERPRET
 
 INTERPRET_END:
-  jmp DPOP
+  d_
+  end_
         
 ; ( -- )
 ; System
@@ -501,19 +353,19 @@ INTERPRET_END:
 forthword_ DOINTERPRET, 0, "(interp)"
   ; input buffer has something so try to interpret it
   ; setup exception handling in case of error
-  push_                     ; ( ? ? )
+  d_w_                      ; ( ? ? )
   lit_ pm(INTERPRET)        ; ( ? INTERPRETxt )
-  call CATCH                ; ( ? [???] flag )
+  do_ CATCH                 ; ( ? [???] flag )
   ; check to make sure no throws
   ; <if>
   iszero_
-  breq DOINTERPRET_ok
+  ifz_ DOINTERPRET_ok
     rcall PROMPTERROR
-  	rjmp QUIT
+    rjmp QUIT
 	
   ; <then>
 DOINTERPRET_ok:
   ; make sure in buf pointer is not at zero
-  rcall G_IN               ; ( ? [???] >inaddr )
-  rcall ONEPLUSSTORE       ; ( ? [???] ? )
+  lit_ 1
+  rcall TIB_R_ADD_STR        ; ( ribaddr )
   rjmp PROMPTOK

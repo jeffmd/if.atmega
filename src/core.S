@@ -464,7 +464,42 @@ ZCFETCH:
     ld wrl, Z
     end_
 
-    
+; ( a-addr - a-addr a:c1 )
+; Memory
+; fetch a single byte from RAM
+forthword_ A_CMW, 0, "a=c@"
+    movw ZL, wrl
+    clr arh
+    ld arl, Z
+    end_
+
+; ( a-addr - a-addr b:c1 )
+; Memory
+; fetch a single byte from RAM
+forthword_ B_CMW, 0, "b=c@"
+    movw ZL, wrl
+    clr brh
+    ld brl, Z
+    end_
+
+; ( a-addr - a-addr x:c1 )
+; Memory
+; fetch a single byte from RAM
+forthword_ X_CMW, 0, "x=c@"
+    movw ZL, wrl
+    clr xrh
+    ld xrl, Z
+    end_
+
+; ( a-addr - a-addr y:c1 )
+; Memory
+; fetch a single byte from RAM
+forthword_ Y_CMW, 0, "y=c@"
+    movw ZL, wrl
+    clr yrh
+    ld yrl, Z
+    end_
+
 ; ( n addr -- )
 ; Memory
 ; write n to user RAM memory at addr, low byte first
@@ -497,7 +532,7 @@ forthword_ CMA, 0, "c@a"
 ; ( n -- n )
 ; Extended VM
 ; Write memory pointed to by register A (Extended VM)
-forthword_ MA_W, 0, "@a=w"
+forthword_ MA_W, 0, "@a="
     movw ZL, arl
     st Z, wrl
     std Z+1, wrh
@@ -525,7 +560,7 @@ forthword_ CMB, 0, "c@b"
 
 ; ( n -- n )
 ; Write memory pointed to by register B
-forthword_ MB_W, 0, "@b=w"
+forthword_ MB_W, 0, "@b="
     movw ZL, brl
     st Z, wrl
     std Z+1, wrh
@@ -552,7 +587,7 @@ forthword_ CMX, 0, "c@x"
 
 ; ( n -- n )
 ; Write memory pointed to by register X
-forthword_ MX_W, 0, "@x=w"
+forthword_ MX_W, 0, "@x="
     movw ZL, xrl
     st Z, wrl
     std Z+1, wrh
@@ -579,7 +614,7 @@ forthword_ CMY, 0, "c@y"
 
 ; ( n -- n )
 ; Write memory pointed to by register Y
-forthword_ MY_W, 0, "@y=w"
+forthword_ MY_W, 0, "@y="
     movw ZL, yrl
     st Z, wrl
     std Z+1, wrh

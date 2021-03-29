@@ -28,4 +28,4 @@ EE_INITUSER:
     addr_ XT_TX  ; USER_EMIT
     addr_ XT_RX  ; USER_KEY
     .word 1      ; USER_G_IN
-    addr_ REFILLTIB ; USER_REFILL  
+    addr_ TIB_FILL ; USER_REFILL  

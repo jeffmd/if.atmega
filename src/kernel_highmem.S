@@ -79,24 +79,6 @@ QP_RD_exit:
     ; <then>
       rjmp PROMPTCOMPILE
 
-; ( -- flag )
-; System
-; wait for the input buffer to be refilled then interpret
-forthword_ DOREFILL, 0, "(refill)"
-  ; if just starting new input line then check prompt and reset input position
-  rcall G_IN               ; ( >inaddr )
-  rcall MW                 ; ( >in )
-  iszero_                  ; ( )
-  ifz_ DOREFILL_do
-    rcall INRESET
-    rcall QP_RD
-
-    
-DOREFILL_do:
-  ; refill the input buffer
-  rcall REFILL              ; ( f )
-  end_     
-    
 ; ( -- )
 ; Multitasking
 ; Fetch pause vector and EXEC it. may make a context/task switch
@@ -110,7 +92,7 @@ forthword_ PAUSE, 0, "pause"
 ; main loop - iterate through scheduled tasks 
 forthword_ DOTASKS, 0, "(tasks)"
     ; <begin>
-    rcall DOREFILL
+    rcall DO_CIN
     ; <if>
     iszero_
     ifz_ DOTASKS_N1

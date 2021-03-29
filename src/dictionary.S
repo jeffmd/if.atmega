@@ -31,27 +31,27 @@ forthword_ NFA2LFA, 0, "nfa>lfa"
     rcall ISTRLEN      ; ( straddr len )
     zerohigh_          ; ( straddr 0:len )
     rcall WALIGN       ; ( straddr len/2 )
-    pop_y_             ; ( len' Y:straddr )
-    plus_y_            ; ( lfa )
-    ret
+    y_d_               ; ( len' Y:straddr )
+    add_y_             ; ( lfa )
+    end_
     
 ; ( nfa -- [ 0 ] | [ xt xtflags] )
 ; convert name field address to xt and xtflags
 forthword_ NFATOXTF, 0, "nfa>xtf"
     iszero_                     ; ( n )
-    breq NFATOXTF_EXIT
+    ifz_ NFATOXTF_EXIT
 
-    push_                       ; ( nfa nfa )
+    d_w_                        ; ( nfa nfa )
     rcall FETCHI                ; ( nfa xtflags )
-    rpush_
-    pop_                        ; ( nfa ) (R: xtflags)
+    r_w_
+    d_                          ; ( nfa ) (R: xtflags)
     rcall NFA2LFA               ; ( lfa )
-    oneplus_   ; lfa>xt         ; ( xt )
-    push_                       ; ( xt xt )
-    rpop_                       ; ( xt xtflags ) (R: )
+    add_1_     ; lfa>xt         ; ( xt )
+    d_w_                        ; ( xt xt )
+    r_                          ; ( xt xtflags ) (R: )
 
 NFATOXTF_EXIT:
-    ret
+    end_
     
     
 ; ( c-addr len wid -- [ 0 | nfa ] )
@@ -60,7 +60,7 @@ NFATOXTF_EXIT:
 ; nfa if word is found
 forthword_ FINDNFA, 0, "findnfa"
     iszero_
-    breq FINDNFA_DONE ; terminating, wid is empty
+    ifz_ FINDNFA_DONE ; terminating, wid is empty
 
 FINDNFA_:
     rcall FETCHE                ; ( c-addr len nfa )
@@ -68,22 +68,22 @@ FINDNFA_:
 FINDNFA_BEGIN:
     ; <while>
     iszero_                     ; ( c-addr len nfa )
-    breq FINDNFA_DONE ; terminating, 0 found
+    ifz_ FINDNFA_DONE ; terminating, 0 found
 
-    rpush_
+    r_w_
     d1_                         ; ( c-addr len c-addr ) (R: nfa )
-    rcall OVER                  ; ( c-addr len c-addr len )
-    push_                       ; ( c-addr len c-addr len len )
-    rpop_                       ; ( c-addr len c-addr len nfa ) (R: )
-    rpush_                      ; ( c-addr len c-addr len nfa ) (R: nfa )
+    d_w_
+    d1_                         ; ( c-addr len c-addr len )
+    d_w_                        ; ( c-addr len c-addr len len )
+    rcall R0                    ; ( c-addr len c-addr len nfa ) (R: nfa )
     rcall ISTRLEN               ; ( c-addr len c-addr len f-addr len )
     zerohigh_                   ; ( c-addr len c-addr len f-addr 0:len )
        
     rcall ISTRCOMPARE           ; ( c-addr len flag )
     ; <if>
     iszero_
-    rpop_                       ; ( c-addr len nfa ) (R: )
-    brne FINDNFA_DONE ; string is found
+    r_                          ; ( c-addr len nfa ) (R: )
+    ifnz_ FINDNFA_DONE          ; string is found
     ; <then>
 FINDNFA_NEXT:
       ; next try
@@ -93,14 +93,14 @@ FINDNFA_NEXT:
       rjmp FINDNFA_BEGIN
 
 FINDNFA_DONE:
-    nip2_                       ; ( nfa )
-    ret
+    d_sub_2_                    ; ( nfa )
+    end_
 
 ; ( addr len --  0 | nfa )
 ; Tools
 ; search root wordlists for the name from string addr/len
 forthword_ FINDROOT, 0, "froot"
-    push_                      ; ( addr len len )
+    d_w_                       ; ( addr len len )
     ; put root wid on stack
     lit_  pm(VE_WIPE)          ; ( addr len VE_WIPE )
     ; search root
@@ -108,16 +108,17 @@ forthword_ FINDROOT, 0, "froot"
 
 ; ( addr len idx -- 0 | nfa )
 FINDWI:
-      twostar_          ; ( addr len idx*2)
-      str_y_            ; ( addr len idx*2 Y:idx*2 )
+      mul_2_            ; ( addr len idx*2)
+      y_w_              ; ( addr len idx*2 Y:idx*2 )
       rcall CONTEXT     ; ( addr len context )
-      plus_y_           ; ( addr len context' )
-      rcall FETCH       ; ( addr len wid )
+      add_y_            ; ( addr len context' )
+      rcall MW          ; ( addr len wid )
       rjmp FINDNFA      ; ( nfa)
 
 ; ( addr len idx * -- 0 | nfa )
 FINDLAST:
-      rcall DPOP2
+      d_sub_1_
+      d_
       rjmp FINDROOT
       
 ; ( addr len --  0 | nfa )
@@ -126,30 +127,30 @@ FINDLAST:
 forthword_ FINDW, 0, "findw"
     ; loop through context slots to find a word
     ; start with last slot
-    push_               ; ( addr len len )
+    d_w_                ; ( addr len len )
     rcall CONTEXT       ; ( addr len context )
     ; get context index and use as counter
-    oneminus_           ; ( addr len context-1 )
-    rcall CFETCH        ; ( addr len idx )
-    push_               ; ( addr len idx idx )
+    _1_sub_             ; ( addr len context-1 )
+    rcall CMW           ; ( addr len idx )
+    d_w_                ; ( addr len idx idx )
     
 FINDW_BEGIN:
     iszero_
     brmi FINDLAST       ; ( addr len idx idx )
-      pop_              ; ( addr len idx )
+      d_                ; ( addr len idx )
       call THREEOVER    ; ( addr len idx addr len idx )
       rcall FINDWI      ; ( addr len idx nfa )
       iszero_
       ; end loop if word found
-      breq FINDW_NEXT
-        nip3_           ; ( nfa )
-        ret
+      ifz_ FINDW_NEXT
+        d_sub_3_        ; ( nfa )
+        end_
         
 FINDW_NEXT:
       d0_               ; ( addr len idx idx )
       ; decrement index
-      oneminus_         ; ( addr len idx idx-1 )
-      str_d0_           ; ( addr len idx-1 idx-1 )
+      _1_sub_            ; ( addr len idx idx-1 )
+      d0_w_             ; ( addr len idx-1 idx-1 )
       rjmp FINDW_BEGIN
 
 ; ( -- ) 
@@ -161,14 +162,16 @@ forthword_ ONLY, IMMEDIATE_EN, "only"
     lit_y_ EE_FORTHWORDLIST
     ; make current also forth vocab
     rcall CURRENT
-    rcall YWSTORE
+    rcall MW_Y
     rcall CONTEXT
-    rcall YWSTORE
+    rcall MW_Y
     ; move index to next slot
     lit_y_ 1
-    oneminus_
-    y_wc_str_
+    _1_sub_
+    cmw_y_
     ; make second slot have no vocab
-    oneplus_
-    twoplus_
-    rjmp ZERO_STR
+    add_1_
+    add_2_
+    y_0_
+    cmw_y_
+    end_

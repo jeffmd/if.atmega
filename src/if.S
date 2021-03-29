@@ -15,10 +15,9 @@
 .set INCLUDE,       12  ; include file support
 .set MATH_ADV,      14  ; advanced math routines 
 
-.set BUILD_LEVEL, MIN_KERNEL
+.set BUILD_LEVEL, INT_DICTIONARY
 
 ; minimum kernel build has minimum word set needed to be up and running without interpreter
-
 
 ; lower part of the dictionary
 ; this dictionary area contains optional/application words
@@ -57,6 +56,10 @@ DPSTART:
 .if BUILD_LEVEL >= INT_DICTIONARY
 .include "interpret.S"
 .include "dictionary.S"
+.endif
+
+.if BUILD_LEVEL >= INT_NUMBER
+.include "interpret_number.S"
 .endif
 
 .include "core.S"

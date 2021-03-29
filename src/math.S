@@ -12,9 +12,9 @@ forthword_ MIN, 0, "min"
     ; <if>
 MIN_TEST:
     iszero_
-    d0_             ; ( n1 n2 n2 )
+    d1_             ; ( n1 n2 n2 )
     ifz_ MIN_exit
-      d1_           ; ( n2 n2 n1 )
+      d0_           ; ( n1 n2 n1 )
       
 MIN_exit:
     d_sub_2_        ; ( n? )

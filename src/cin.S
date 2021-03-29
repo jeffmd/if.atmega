@@ -1,7 +1,9 @@
 ; cin.S - character input
 
 .pushsection .noinit
-ram_tib: .space TIBSIZE
+  ram_tib_w: .space 1         ; write index
+  ram_tib_r: .space 1         ; read index
+  ram_tib: .space TIBSIZE     ; text input buffer
 .popsection
 
 ; ( -- addr )
@@ -11,30 +13,90 @@ forthword_ TIB, 0, "tib"
     lit_ ram_tib
     end_
 
-.pushsection .noinit
-ram_sharptib: .space 2
-.popsection
+; ( -- wib )
+; the number of characters (write position) in TIB
+forthword_ TIB_W, 0, "tib.w"
+    lit_ ram_tib_w
+    rjmp CMW
 
-; ( -- addr )
-; variable holding the number of characters in TIB
-forthword_ SHARPTIB, 0, "#tib"
-    lit_ ram_sharptib
-    end_
+; ( n -- Y:n )
+; set TIB write index to value n
+Forthword_ TIB_W_STR, 0, "tib.w="
+  y_w_
+  lit_ ram_tib_w
+  cmw_y_
+  end_
 
-; ( -- a-addr )
-; pointer to current read position in input buffer
-forthword_ G_IN, 0, ">in"
-    user_ USER_G_IN
-    end_
+; ( -- )
+; decrement TIB write index
+Forthword_ TIB_W_DEC, 0, "tib.w--"
+  lit_ ram_tib_w
+  rcall Y_CMW
+  y_sub_1_
+  cmw_y_
+  end_
+
+; ( -- )
+; increment TIB write index
+Forthword_ TIB_W_INC, 0, "tib.w++"
+  lit_ ram_tib_w
+  rcall Y_CMW
+  y_add_1_
+  cmw_y_
+  end_
+
+; ( -- rib )
+; index to current read position in input buffer
+forthword_ TIB_R, 0, "tib.r"
+    lit_ ram_tib_r
+    rjmp CMW
+
+; ( n -- Y:n )
+; set index to current read position in input buffer
+Forthword_ TIB_R_STR, 0, "tib.r="
+  y_w_
+  lit_ ram_tib_r
+  cmw_y_
+  end_
+
+; ( n -- ribaddr Y:n )
+; add n to read index of input buffer
+Forthword_ TIB_R_ADD_STR, 0, "tib.r+="
+  y_w_
+  lit_ ram_tib_r
+  rcall X_CMW
+  x_add_y_
+  cmw_x_
+  end_
 
 ; ( -- addr len )
 ; System
 ; address and current length of the input buffer
-forthword_ STIB, 0, "stib"
+forthword_ TIBW, 0, "tibw"
     rcall TIB
     d_w_
-    rcall SHARPTIB
-    rjmp MW
+    rjmp TIB_W
+
+; ( -- srcaddr len  )
+; String
+; get adjusted TIB addr using tib.r index.
+forthword_ TIB_STRING, 0, "tib.$"
+    rcall TIBW           ; ( srcaddr len )
+    d_w_                 ; ( srcaddr len len )
+    rcall TIB_R          ; ( srcaddr len tib.r )
+    rjmp SLASHSTRING     ; ( srcaddr' len' )
+    
+; ( k ? -- )
+; put key character in input buffer
+Forthword_ TIB_STR, 0, "tib="
+  rcall TIBW           ; ( k tibaddr wib )
+  y_d0_                ; ( k tibaddr wib ) Y:tibaddr
+  x_d1_                ; ( k tibaddr wib ) X:k
+  add_y_               ; ( k tibaddr tibaddr+wib )
+  cmw_x_               ; ( k tibaddr tibaddr+wib )
+  d_sub_2_             ; ( tibaddr+wib )
+
+  rjmp TIB_W_INC       ; ( #tibaddr )
 
 ; ( -- c )
 ; fetch key vector and EXEC it, should leave a single character on TOS
@@ -45,24 +107,15 @@ forthword_ KEY, 0, "key"
 
 ; ( -- )
 ; Reset the input buffer
-forthword_ INRESET, 0, "in_"
-    rcall G_IN             ; ( >inaddr )
-    y_0_
-    rcall MW_Y             ; ( ? )
-    ; reset input buffer cursor position
-    rcall SHARPTIB         ; ( #tibaddr )
-    rjmp MW_Y              ; ( )
+forthword_ TIB_RST, 0, "tib.rst"
+    zero_    
+    ; reset input buffer read position
+    rcall TIB_R_STR
+    ; reset input buffer write position
+    y_
+    rcall TIB_W_STR           ; ( #tibaddr )
+    rjmp QP_RD
 
-; ( -- srcaddr len  )
-; String
-; Adjust the source addr using >in.
-forthword_ SRCIN, 0, "srcin"
-    rcall STIB           ; ( srcaddr len )
-    d_w_                 ; ( srcaddr len len )
-    rcall G_IN           ; ( srcaddr len ginaddr )
-    rcall MW             ; ( srcaddr len gin)
-    rjmp SLASHSTRING     ; ( srcaddr' len' )
-    
 ; ( -- flag )
 ; System
 ; receive a string of at most tibsize characters or cr/lf detected.
@@ -98,8 +151,7 @@ ACCEPT_checkdelete:
     ; check beginning of line
     ; if cursor is 0 then at begining of input
     d_w_               ; ( k k )
-    rcall SHARPTIB     ; ( k #tib )
-    rcall MW           ; ( k tib )
+    rcall TIB_W        ; ( k wib )
     ; <if>
     iszero_            ; ( k tib )
     d_                 ; ( k )
@@ -117,10 +169,7 @@ ACCEPT_dodelete:
     d_                   ; ( K )
     rcall EMIT           ; ( ? )
     ; decrease cursor position by one
-    rcall SHARPTIB       ; ( #tibaddr )
-    rcall Y_MW           ; ( ? )
-    y_sub_1_
-    rcall MW_Y
+    rcall TIB_W_DEC      ; ( #tibaddr )
     rjmp ACCEPT_checkmaxinput
 
 ACCEPT_checkcontrol:
@@ -135,23 +184,13 @@ ACCEPT_echo:
     d_w_                 ; ( k k )
     rcall EMIT           ; ( k ? )
     ; now store the key in the input buffer
-    rcall STIB           ; ( k tibaddr #tib)
-    y_d_                 ; ( k #tib Y:tibaddr )
-    add_y_              ; ( k tibaddr+#tib ) 
-    y_d_                 ; ( tibaddr+#tib Y:k )
-    cmw_y_               ; ( tibaddr+#tib )
-
-    rcall SHARPTIB       ; ( #tibaddr )
-    rcall Y_MW           ; ( ? )
-    y_add_1_
-    rcall MW_Y
-
+    rcall TIB_STR        ; ( ? )
 ACCEPT_checkmaxinput:
     ; check if max number of char input
-    rcall SHARPTIB       ; ( #tibaddr )
-    rcall Y_MW           ; ( #tib) Y: #tib
+    rcall TIB_W          ; ( wib )
+    y_w_                 ; ( wib) Y:wib
     lit_ TIBSIZE         ; ( tibsize )
-    sub_y_               ; ( tibsize-#tib)
+    sub_y_               ; ( tibsize-wib)
     ; <if>
     iszero_              ; ( )
     ifz_ ACCEPT_atmaxinput
@@ -165,21 +204,36 @@ ACCEPT_atmaxinput:
 
 ; ( -- f )
 ; System
-; refills the input buffer - flag is true if buffer has something
-forthword_ REFILLTIB, 0, "reftib"
+; fills the input buffer - flag is true if buffer needs processing
+forthword_ TIB_FILL, 0, "tib.fill"
     rcall ACCEPT         ; ( f )
     iszero_              ; ( f )
-    ifz_ REFILLTIB_exit
+    ifz_ TIB_FILL_exit
     d_w_
     rcall CR
     d_
     
-REFILLTIB_exit:
+TIB_FILL_exit:
     end_
 
 ; ( -- f )
 ; refills the input buffer
-forthword_ REFILL, 0, "refill"
+forthword_ CIN, 0, "cin"
     do_ DODEFR
     .word ram_user1 + USER_REFILL
     addr_ UPSTORE
+
+; ( -- flag )
+; tell input device to get a character and put in input buffer
+; if buffer needs processing then flag > 0
+forthword_ DO_CIN, 0, "(cin)"
+  ; if just starting new input line then check prompt and reset input position
+  rcall TIB_R              ; ( tib.r )
+  iszero_                  ; ( )
+  ifz_ DO_CIN_do
+    rcall TIB_RST
+    
+DO_CIN_do:
+  ; refill the input buffer
+  rjmp CIN                 ; ( f )
+    
