@@ -380,8 +380,8 @@ forthword_ Y_MW, 0, "y=@"
 ; read 1 cell from RAM address
 forthword_ X_MW, 0, "x=@"
     movw ZL, wrl
-    ld yrl, Z
-    ldd yrh, Z+1
+    ld xrl, Z
+    ldd xrh, Z+1
     end_
 
 ; ( a-addr -- a-addr A:n )
@@ -651,7 +651,7 @@ ITOI_B:
     rcall STOREI    ; ( start ? )
     a_add_1_
     d0_             ; ( start start )
-    add_1_         ; ( start start+1 )
+    add_1_          ; ( start start+1 )
     d0_w_           ; ( start+1 start+1 )
     b_              ; ( start+1 count )
     _1_sub_         ; ( start+1 count-1 )
