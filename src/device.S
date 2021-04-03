@@ -2,12 +2,7 @@
 
 .include "m328Pdef.inc"
 
-.pushsection .noinit
-.org 0xa0 ; SRAM_START
-.popsection
-
 .equ CELLSIZE,  2
-
 
 .set WANT_USART0,  0
 .set WANT_TWI,  0

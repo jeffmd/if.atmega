@@ -1,20 +1,11 @@
 ; dictionary.S
 
-.pushsection .noinit
-ram_CURRENT: .space 2
-.popsection
-
 ; ( -- addr ) 
 ; System Variable
 ; current vocabulary for new words 
 forthword_ CURRENT, 0, "current"
     lit_ ram_CURRENT
     end_
-
-.pushsection .noinit
-ram_CONTEXTidx: .space 1
-ram_CONTEXT: .space 2 * 5 ; 5 wordlists max
-.popsection
 
 ; ( -- addr ) 
 ; System Variable

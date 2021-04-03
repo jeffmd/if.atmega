@@ -1112,7 +1112,7 @@
 .endm
 
 .macro user_ val
-  lit_ ram_user1 + \val
+  lit_ \val
 .endm
 
 .macro zerohigh_

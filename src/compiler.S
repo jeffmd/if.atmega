@@ -1,9 +1,5 @@
 ; compiler.S - basic compiler words
 
-.pushsection .noinit
-COLON_SMUDGE: .space 2
-.popsection
-
 ; ( -- addr ) 
 ; System Variable
 ; system SMUDGE. Get flash name address of current word being compiled. 
@@ -17,10 +13,6 @@ Forthword_ SMUDGE_STR, 0, "smudge="
   y_w_
   lit_ COLON_SMUDGE
   rjmp MW_Y
-
-.pushsection .noinit
-ram_dp: .space 2
-.popsection
 
 ; ( -- f-addr )
 ; System Value

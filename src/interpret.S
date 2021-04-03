@@ -1,20 +1,8 @@
 ; dict_interpret.inc
 ; forth words that make up the forth interpreter
 
-.pushsection .noinit
-; interpreter register copy
-REG_BANK:
-WR: .space 2
-RA: .space 2
-RB: .space 2
-RX: .space 2
-RY: .space 2
-; litteral word defer
-Lit_Interpret: .space 2
-Lit_Compile: .space 2
-.popsection
-
 ; ( -- )
+
 ; ignore remaining text to end of line
 Forthword_ COMMENT, IMMEDIATE_EN, "\\"
   d_w_           ; preserve WR

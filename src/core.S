@@ -2,7 +2,6 @@
 ; this part of the dictionay has to fit into the nrww flash
 ; most of these words are assembly and can be inlinned when required.
 
-
 ; ( xt -- )
 ; System
 ; execute XT
@@ -10,7 +9,6 @@ forthword_ EXEC, 0, "exec"
     movw ZL, wrl
     d_
     ijmp
-
 
 ;;;;;;;;;;;; Return Stack ;;;;;;;;;;;;;
 
@@ -47,7 +45,6 @@ forthword_ R0PLUS, DIS_CALL_OPT, "r0+"
     sbiw wrl, 0x01
     ijmp
 
-
 ;;;;;;;;;;;;; Operators ;;;;;;;;;;;
 ; ( n1 n2 -- flag)
 ; Compare
@@ -66,7 +63,6 @@ forthword_ EQUALZERO, 0, "==0"
     or wrh, wrl
     rjmp PFA_EQUALDONE
 
-
 ; ( n2 n1 -- n1 )
 ; compare top of stack and next on top of stack and sets mcu status register flags
 forthword_ NTCP, 0, "ntcp"
@@ -79,7 +75,6 @@ forthword_ NTCP, 0, "ntcp"
 ; ( n1 n2 -- flag )
 ; Compare
 ; flag is true if TOS and NOS are equal
-
 forthword_ EQUAL, 0, "=="
     rcall NTCP
 PFA_EQUALDONE:
@@ -148,7 +143,6 @@ forthword_ GREATERZERO, 0, "0>"
 ; Arithmetics
 ; convert byte length to word align length
 ; round number up to even value then right shift
-
 forthword_ WALIGN, 0, "w_"
     add_1_
     div_2_

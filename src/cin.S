@@ -1,11 +1,5 @@
 ; cin.S - character input
 
-.pushsection .noinit
-  ram_tib_w: .space 1         ; write index
-  ram_tib_r: .space 1         ; read index
-  ram_tib: .space TIBSIZE     ; text input buffer
-.popsection
-
 ; ( -- addr )
 ; System Variable
 ; terminal input buffer address
@@ -81,10 +75,10 @@ forthword_ TIBW, 0, "tibw"
 ; String
 ; get adjusted TIB addr using tib.r index.
 forthword_ TIB_STRING, 0, "tib.$"
-    rcall TIBW           ; ( srcaddr len )
-    d_w_                 ; ( srcaddr len len )
-    rcall TIB_R          ; ( srcaddr len tib.r )
-    rjmp SLASHSTRING     ; ( srcaddr' len' )
+    rcall TIBW         ; ( srcaddr len )
+    d_w_               ; ( srcaddr len len )
+    rcall TIB_R        ; ( srcaddr len tib.r )
+    rjmp SLASHSTRING   ; ( srcaddr' len' )
     
 ; ( k ? -- )
 ; put key character in input buffer
@@ -102,7 +96,7 @@ Forthword_ TIB_STR, 0, "tib="
 ; fetch key vector and EXEC it, should leave a single character on TOS
 forthword_ KEY, 0, "key"
     do_ DODEFR
-    .word ram_user1 + USER_KEY
+    .word USER_KEY
     addr_ UPSTORE
 
 ; ( -- )
@@ -122,45 +116,45 @@ forthword_ TIB_RST, 0, "tib.rst"
 ; flag will be true if input buffer needs to be processed ie interpreted
 ; flag will be false if more input needed
 
-forthword_ ACCEPT, 0, "accept"
+forthword_ TIB_EDIT, 0, "tib.edit"
     ; <begin>
     rcall KEY            ; ( k )
     iszero_              ; ( k )
-    ifnz_ ACCEPT_checkeol
+    ifnz_ TIB_EDIT_checkeol
     exit_
 
-ACCEPT_checkeol:
+TIB_EDIT_checkeol:
     ; check for EOL
     cpi wrl, 10
     ; <if>
-    ifnz_ ACCEPT_checkreturn
+    ifnz_ TIB_EDIT_checkreturn
     exit_
 
-ACCEPT_checkreturn:
+TIB_EDIT_checkreturn:
     cpi wrl, 13         ; ( k )
     ; <if>
-    ifnz_ ACCEPT_checkdelete
+    ifnz_ TIB_EDIT_checkdelete
     exit_
 
-ACCEPT_checkdelete:
+TIB_EDIT_checkdelete:
     ; check delete
     cpi wrl, 127        ; ( k )
     ; <if>
-    ifnz_ ACCEPT_checkcontrol
+    ifnz_ TIB_EDIT_checkcontrol
     ; delete previous character
     ; check beginning of line
     ; if cursor is 0 then at begining of input
-    d_w_               ; ( k k )
-    rcall TIB_W        ; ( k wib )
+    d_w_                ; ( k k )
+    rcall TIB_W         ; ( k wib )
     ; <if>
-    iszero_            ; ( k tib )
-    d_                 ; ( k )
-    ifnz_ ACCEPT_dodelete
+    iszero_             ; ( k tib )
+    d_                  ; ( k )
+    ifnz_ TIB_EDIT_dodelete
     ; at the beginning of the line, ignore this character
     zero_
     exit_
 
-ACCEPT_dodelete:
+TIB_EDIT_dodelete:
     andi wrl, 8
     d_w_                 ; ( k k )
     rcall EMIT           ; ( k ? )
@@ -170,22 +164,23 @@ ACCEPT_dodelete:
     rcall EMIT           ; ( ? )
     ; decrease cursor position by one
     rcall TIB_W_DEC      ; ( #tibaddr )
-    rjmp ACCEPT_checkmaxinput
+    rjmp TIB_EDIT_checkmaxinput
 
-ACCEPT_checkcontrol:
+TIB_EDIT_checkcontrol:
     ; check for remaining control characters, replace them with blank
-    cpi wrl, 32           ; ( k )
-    brge ACCEPT_echo
+    cpi wrl, 32          ; ( k )
+    brge TIB_EDIT_echo
     ; replace control key with a space
     bl_                  ; ( bl_ )
 
-ACCEPT_echo:
+TIB_EDIT_echo:
     ; emit the key
     d_w_                 ; ( k k )
     rcall EMIT           ; ( k ? )
     ; now store the key in the input buffer
     rcall TIB_STR        ; ( ? )
-ACCEPT_checkmaxinput:
+
+TIB_EDIT_checkmaxinput:
     ; check if max number of char input
     rcall TIB_W          ; ( wib )
     y_w_                 ; ( wib) Y:wib
@@ -193,11 +188,11 @@ ACCEPT_checkmaxinput:
     sub_y_               ; ( tibsize-wib)
     ; <if>
     iszero_              ; ( )
-    ifz_ ACCEPT_atmaxinput
+    ifz_ TIB_EDIT_atmaxinput
     zero_
     exit_
     
-ACCEPT_atmaxinput:
+TIB_EDIT_atmaxinput:
     ; max number of characters in input buffer so have it processed
     true_
     end_
@@ -206,8 +201,8 @@ ACCEPT_atmaxinput:
 ; System
 ; fills the input buffer - flag is true if buffer needs processing
 forthword_ TIB_FILL, 0, "tib.fill"
-    rcall ACCEPT         ; ( f )
-    iszero_              ; ( f )
+    rcall TIB_EDIT         ; ( f )
+    iszero_                ; ( f )
     ifz_ TIB_FILL_exit
     d_w_
     rcall CR
@@ -220,7 +215,7 @@ TIB_FILL_exit:
 ; refills the input buffer
 forthword_ CIN, 0, "cin"
     do_ DODEFR
-    .word ram_user1 + USER_REFILL
+    .word USER_REFILL
     addr_ UPSTORE
 
 ; ( -- flag )

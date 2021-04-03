@@ -4,7 +4,7 @@
 ; fetch the emit vector and EXEC it. should emit a character from TOS
 forthword_ EMIT, 0, "emit"
     call DODEFR
-    .word ram_user1 + USER_EMIT
+    .word USER_EMIT
     addr_ UPSTORE
 
 ; ( -- )
@@ -67,7 +67,7 @@ PFA_TYPE1:
     b_iszero_
     ifz_ PFA_TYPE2
     rcall CMA       ; ( c )
-    a_add_1_       ; a+1
+    a_add_1_        ; a+1
     rcall EMIT      ; ( ? )
     b_sub_1_        ; ( ? B:n-1 )
     rjmp PFA_TYPE1

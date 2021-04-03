@@ -15,7 +15,73 @@
 .set INCLUDE,       12  ; include file support
 .set MATH_ADV,      14  ; advanced math routines 
 
-.set BUILD_LEVEL, INT_DICTIONARY
+.set BUILD_LEVEL, CORE_INLINE
+
+.section .text
+
+; Dictionary setup
+.set VE_HEAD, 0x0000
+
+.include "macros.S"
+.include "device.S"
+
+.equ TIBSIZE, 0x50   ; 80 characters is one line...
+
+.Set rstackstart, RAMEND
+.Set stackstart, RAMEND - 50
+
+.pushsection .noinit
+.org 0xa0 ; SRAM_START
+  ; compiler
+  COLON_SMUDGE:   .space 2
+  ram_dp: .space 2
+
+  ; allocate space for User Area
+  ; MCUSR from last cold execution
+  ram_mcusro: .space 2
+ram_user1:
+  USER_STATE: .space 2
+  USER_PAUSE: .space 2
+
+; exception handling
+  USER_HANDLER: .space 2
+
+; numeric IO
+  USER_BASE:  .space 2
+
+; character IO 
+  USER_EMIT:  .space 2
+  USER_KEY:   .space 2
+
+  USER_REFILL: .space 2
+ram_user1_end:
+  .set SYSUSERSIZE, (ram_user1_end - ram_user1)
+
+  ; dictionary
+  ram_CURRENT:    .space 2
+  ram_CONTEXTidx: .space 1
+  ram_CONTEXT:    .space 2 * 5       ; 5 wordlists max
+  
+  ; text input buffer TIB
+  ram_tib_w:      .space 1           ; write index
+  ram_tib_r:      .space 1           ; read index
+  ram_tib:        .space TIBSIZE     ; text input buffer
+
+  ; interpreter register copy
+;REG_BANK:
+  WR: .space 2
+  RA: .space 2
+  RB: .space 2
+  RX: .space 2
+  RY: .space 2
+  ; litteral word defer
+  Lit_Interpret: .space 2
+  Lit_Compile: .space 2
+
+  ; 1st free ram address
+HERESTART:
+
+.popsection
 
 ; minimum kernel build has minimum word set needed to be up and running without interpreter
 
@@ -23,6 +89,7 @@
 ; this dictionary area contains optional/application words
 ; they may be moved to the core dictionary if needed
 
+.include "usart_0.S"
 .include "interrupt.S"
 
 .include "core_inline.S"
@@ -80,10 +147,6 @@ FLASHLAST:
 ;  .error "*** Flash size exceeded, please edit your dict_appl_core file to use less space! Aborting."
 ;.endif
 
-.pushsection .noinit
-; define a label for the 1st free ram address
-HERESTART:
-.popsection
 
 .pushsection .eeprom
 ; how to setup eeprom section in avr-as

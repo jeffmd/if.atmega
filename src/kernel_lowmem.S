@@ -73,7 +73,6 @@ forthword_ PHEX, 0, ".$"
 ; ( i*x xt -- j*x 0 | i*x n )
 ; Exceptions
 ; setup handler to catch exceptions and then EXEC XT.
-
 forthword_ CATCH, 0, "catch"
     ; rpush.sp
     r_dsp_              ; ( xt ) (R: ret DSP )
@@ -109,13 +108,6 @@ forthword_ THROW, 0, "throw"
     dsp_r_             ; ( SP ) (R: callerret )
     lit_ 1
     end_
-
-; allocate space for User Area
-.pushsection .noinit
-; MCUSR from last cold execution
-ram_mcusro: .space 2
-ram_user1: .space SYSUSERSIZE
-.popsection
 
 ; ( -- ram_mcusr )
 ; get mcusro addr. this is the mcusr read and stored when cold executes.

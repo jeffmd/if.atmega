@@ -2,10 +2,7 @@
 ; words needed to make up minimum forth system. These are placed
 ; in low flash
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 ; ( -- )
 ; send Ctrl-Q (XON) to resume transmission
@@ -18,12 +15,9 @@
 ;    lit_ 19
 ;    rjmp EMIT
 
-
-
 ; ( r-addr r-len f-addr f-len --  f) 
 ; String
 ; compares two strings in RAM
-
 ;forthword_ COMPARE, 0, "compare"
 ;    movw xrl, wl
 ;    pop_
@@ -63,7 +57,6 @@
 ; (addr-from addr-to n -- )
 ; Memory
 ; copy data in RAM, from lower to higher addresses
-
 ;forthword_ CMOVE, 0, "cmove"
 ;    ld ZL, Y+
 ;    ld ZH, Y+ ; addr-to
@@ -86,7 +79,6 @@
 ; (addr-from addr-to n -- ) 
 ; Memory
 ; copy data in RAM from higher to lower addresses.
-
 ;forthword_ CMOVE_G, 0, "c>"
 ;    ld ZL, Y+
 ;    ld ZH, Y+ ; addr-to
@@ -107,7 +99,6 @@
 ;PFA_CMOVE_G1:
 ;    pop_
 ;    ret
-
 
 ; ( ee-addr -- itemn .. item0 n) 
 ; Tools
@@ -160,7 +151,6 @@
 ; ( i*x x1 -- | i*x ) (R: j*y -- | j*y ) (C: "ccc<quote>" -- )
 ; Exceptions
 ; check flag. If true display the parsed text and throw exception -2 
-
 ;forthword_ ABORTSTRING, DIS_CALL_OPT, "abort\""
 ;    ; postpone if
 ;    call DOCOMPILE
