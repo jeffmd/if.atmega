@@ -15,7 +15,7 @@
 .set INCLUDE,       12  ; include file support
 .set MATH_ADV,      14  ; advanced math routines 
 
-.set BUILD_LEVEL, INT_NUMBER
+.set BUILD_LEVEL, ASM_BASE
 
 .section .text
 
@@ -33,7 +33,7 @@
 .pushsection .noinit
 .org 0xa0 ; SRAM_START
   ; compiler
-  COLON_SMUDGE:   .space 2
+  NEW_WORD:       .space 2
   ram_dp:         .space 2
 
   ; allocate space for User Area
@@ -109,7 +109,7 @@ HERESTART:
 
 .include "kernel_lowmem.S"
 
-.if BUILD_LEVEL >= ASM
+.if BUILD_LEVEL >= ASM_BASE
 .include "asm.S"
 .endif
 

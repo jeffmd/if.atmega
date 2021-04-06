@@ -2,22 +2,22 @@
 
 ; ( -- addr ) 
 ; System Variable
-; system SMUDGE. Get flash name address of current word being compiled. 
-forthword_ SMUDGE, 0, "smudge"
-    lit_ COLON_SMUDGE
+; system new word. Get flash name address of current word being compiled. 
+forthword_ NWORD, 0, "nword"
+    lit_ NEW_WORD
     rjmp MW 
 
 ; ( addr -- )
 ; set system SMUDGE to addr of latest word being compiled.
-Forthword_ SMUDGE_STR, 0, "smudge="
+Forthword_ NWORD_STR, 0, "nword="
   y_w_
-  lit_ COLON_SMUDGE
+  lit_ NEW_WORD
   rjmp MW_Y
 
 ; ( -- f-addr )
 ; System Value
 ; address of the next free dictionary cell
-forthword_ DPSHARP, 0, "dp#"
+forthword_ DP_ADDR, 0, "dp#"
   lit_ ram_dp
   end_
 
@@ -25,13 +25,13 @@ forthword_ DPSHARP, 0, "dp#"
 ; System Value
 ; address of the next free dictionary cell
 forthword_ DP, 0, "dp"
-  rcall DPSHARP
+  rcall DP_ADDR
   rjmp MW
 
 ; ( -- )
 ; Compiler
 ; backup DP to eeprom
-forthword_ DPSTOREE, 0, "dp!e"
+forthword_ EDP_DP, 0, "edp=dp"
   rcall DP
   d_w_
   lit_ EE_DP
@@ -40,41 +40,41 @@ forthword_ DPSTOREE, 0, "dp!e"
 ; ( addr -- )
 ; System Value
 ; store address of the next free dictionary cell
-forthword_ DPSTORE, 0, "dp="
+forthword_ DP_STORE, 0, "dp="
   y_w_
-  rcall DPSHARP
+  rcall DP_ADDR
   rjmp MW_Y
 
 ; ( -- )
 ; Compiler
 ; fetch DP from eeprom and put in ram
-forthword_ DPFETCHE, 0, "dp@e"
+forthword_ DP_EDP, 0, "dp=edp"
   lit_ EE_DP
   rcall FETCHE 
-  rjmp DPSTORE
+  rjmp DP_STORE
 
 ; ( offset -- )
 ; Dictionary
 ; add offset to 16 bit (dictionary pointer) DP
-forthword_ DPPLUS, 0, "dp+"
+forthword_ DP_ADD, 0, "dp+"
   y_w_
-  rcall DPSHARP
-  rcall X_MW_
-  x_plus_y_
+  rcall DP_ADDR
+  rcall X_MW
+  x_add_y_
   rjmp MW_X
 
 ; ( -- )
 ; Dictionary
 ; increment 16 bit (dictionary pointer) DP by one
-forthword_ DPPLUSONE, 0, "dp+1"
+forthword_ DP_ADD_1, 0, "dp+1"
     lit_ 1
-    rjmp DPPLUS
+    rjmp DP_ADD
 
 ; ( -- )
 ; tail call optimize: change last rcall/call into rjmp/jmp
 forthword_ TAILOPT, 0, ";opt"
     ; optimize only if smudge is not zero
-    rcall SMUDGE
+    rcall NWORD
     iszero_
     ifnz_ TAILOPT_OPT
     exit_
@@ -94,7 +94,7 @@ TAILOPT_OPT:
     ; 1101kkkk kkkkkkkk -> 1100kkkk kkkkkkkk
     ; fetch contents at DP-1
     rcall DP       ; ( DP )
-    sub_1_         ; ( DP-1 )
+    _1_sub_        ; ( DP-1 )
     d_w_           ; ( DP-1 DP-1 )
     rcall FETCHI   ; ( DP-1 inst )
     ; bit 4 of high byte must be cleared.
@@ -119,22 +119,23 @@ TAILOPT_CALL:
     lit_ 0x940C        ; ( 0x940c )
     d_w_               ; ( 0x940c 0x940c )
     rcall DP           ; ( 0x940c DP )
-    sub_2_             ; ( 0x940c DP-2 )
+    _2_sub_            ; ( 0x940c DP-2 )
     rjmp STOREI        ; ( ? )
 
 ; ( -- )
 ; Compiler
 ; update wid from smudge if valid 
 forthword_ UWID, 0, "uwid"
-    rcall SMUDGE        ;( smudge )
+    rcall NWORD         ;( nword )
     iszero_
     ifz_ UWID_end
-       d_w_             ;( smudge smudge )
-       rcall CURRENT    ;( smudge current )
-       rcall MW         ;( smudge wid )
+       d_w_             ;( nword nword )
+       rcall CURRENT    ;( nword current )
+       rcall MW         ;( nword wid )
        rcall STOREE     ;( ? )
-       rcall SMUDGE_ZERO_STR ;( smudgeaddr )
-       rjmp DPSTOREE
+       zero_
+       rcall NWORD_STR ;( nword )
+       rjmp EDP_DP
        
 UWID_end:
     end_
@@ -146,7 +147,7 @@ forthword_ COMMA, 0, ","
     d_w_            ;( n n )
     rcall DP        ;( n DP )
     rcall STOREI    ;( ? )
-    rjmp DPPLUSONE
+    rjmp DP_ADD_1
 
 ; ( addr len len' -- )
 ; Compiler
@@ -167,7 +168,7 @@ SCOMMA_LOOP:
     b_iszero_          ; ( ? )
     ifz_ SCOMMA_LAST
     rcall MA           ; ( c1c2 )
-    a_plus_2_
+    a_add_2_
     rcall COMMA        ; ( ? )
     b_sub_1_           ; ( ? )
     ; repeat
@@ -203,7 +204,7 @@ forthword_ FINDI, 0, "findi"
     ; begin
 FINDI_BEGIN:
     rcall MIA        ; ( start val )
-    a_plus_2_
+    a_add_2_
     d_w_
     b_               ; ( start val match )
     rcall EQUAL      ; ( start flag )
@@ -213,7 +214,7 @@ FINDI_BEGIN:
 
     a_               ; ( start end )
     div_2_           ; ( start end/2 )
-    sub_1_           ; ( start end/2-1 )
+    _1_sub_          ; ( start end/2-1 )
     y_d0_            ; ( start end/2-1 Y:start )
     sub_y_           ; ( start count )
     b_r_             ; ( start count B:b )(R: A )
@@ -226,7 +227,8 @@ FINDI_BEGIN:
 ; copy code to current dictionary entry
 forthword_ INLINE, 0, "inline"
     ; set disable tail call optimize flag:
-    sbr fflags, 1<<DIS_CALL_OPT_FB
+    ldi XL, 1<<DIS_CALL_OPT_FB
+    or fflags, XL
     ; find the ret word, want count to ret
     ; count will be number of words to inline
     d_w_
@@ -240,15 +242,16 @@ forthword_ INLINE, 0, "inline"
     d0_w_                    ; ( start dp dp )
     d_y_                     ; ( start dp count dp )
     y_                       ; ( start dp count count )
-    rcall DPPLUS             ; ( start dp count ? )
+    rcall DP_ADD             ; ( start dp count ? )
     d_                       ; ( start dp count )
     rjmp ITOI
 
 ; ( -- )
 ; reset compiler state
 forthword_ RESET, 0, "rst"
-    rcall SMUDGE_ZERO_STR
+    zero_
+    rcall NWORD_STR
     ; restore dp from eeprom
-    rcall DPFETCHE
+    rcall DP_EDP
     ; switch to interpret mode
     rjmp LBRACKET

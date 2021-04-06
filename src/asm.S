@@ -7,48 +7,48 @@
 ; set/clear specific bits in dest1 using src through a mask
 ; dest2 = (!mask & dest1) | (src & mask)
 forthword_ MASKSET, 0, "maskset" 
-  popy_             ;( dest1 mask Y:src )
-  y_and_w_          ;( dest1 mask Y:src&mask )
-  popx_             ;( mask X:dest1 )
+  y_d_              ;( dest1 mask Y:src )
+  y_and_            ;( dest1 mask Y:src&mask )
+  x_d_              ;( mask X:dest1 )
   not_              ;( !mask )
-  w_and_x_          ;( !mask&dest1 )
-  w_or_y_           ;( !mask&dest1|src&mask )
+  and_x_            ;( !mask&dest1 )
+  or_y_             ;( !mask&dest1|src&mask )
   end_
 
 ; Operands Rd,constant 8bit
 ; Rd,k,     ( Rd k8 opcode mask -- xxxx.kkkk.dddd.kkkk )
 forthword_ RD_K, 0, "Rd,k,"
-  rpush_
-  pop_                 ;( Rd k8 opcode ) (R: mask )
-  rpush_
-  pop_                 ;( Rd k8 ) (R: mask opcode )
+  r_w_
+  d_                   ;( Rd k8 opcode ) (R: mask )
+  r_w_
+  d_                   ;( Rd k8 ) (R: mask opcode )
   zerohigh_            ;( Rd 00k8 )
-  push_                ;( Rd 00k8 00k8 )
-  push_
+  d_w_                 ;( Rd 00k8 00k8 )
+  d_w_
   lit_ 4               ;( Rd 00k8 00k8 4 )
   do_ LSHIFT           ;( Rd 00k8 0000kkkk.kkkk0000 )
-  popy_                ;( Rd 0000kkkk.kkkk0000 Y:00k8 )
-  w_or_y_              ;( Rd 0000kkkk.kkkkkkkk )
-  anditos_ 0x0f0f      ;( Rd 0000kkkk0000kkkk )
+  y_d_                 ;( Rd 0000kkkk.kkkk0000 Y:00k8 )
+  or_y_                ;( Rd 0000kkkk.kkkkkkkk )
+  andi_ 0x0f0f         ;( Rd 0000kkkk0000kkkk )
   x_w_                 ;( Rd 0000kkkk0000kkkk X:0000kkkk0000kkkk )
   d0_                  ;( Rd Rd )
   swapnib_             ;( Rd Rd' )
-  anditos_ 0x00f0      ;( Rd dddd0000 )
-  w_or_x_              ;( Rd 0000kkkkddddkkkk )
+  andi_ 0x00f0         ;( Rd dddd0000 )
+  or_x_                ;( Rd 0000kkkkddddkkkk )
   d0_w_                ;( 0kdk 0kdk )
-  rpop_                ;( 0kdk opcode )
-  push_
-  rpop_                ;( 0kdk opcode mask )
+  r_                   ;( 0kdk opcode )
+  d_w_
+  r_                   ;( 0kdk opcode mask )
   rcall MASKSET        ;( ops )
-  end_do_ COMMA       ;( )
+  end_do_ COMMA        ;( )
 
 ; load register with immediate value
 ; ( reg n -- )
 ; ex: 2 FF ldi,  R2<--#FF
 forthword_ LDI, 0, "ldi,"
-  push_
+  d_w_
   lit_ 0xE000     ;( reg n 0xe000 )
-  push_
+  d_w_
   lit_ 0xF000     ;( reg n 0xe000 0xf000 )
   rjmp  RD_K      ;( ? )
 
@@ -56,19 +56,19 @@ forthword_ LDI, 0, "ldi,"
 ; Assembler
 ; ( Port bit opcode mask -- xxxx.xxxx.PPPP.Pbbb )
 forthword_ P_b_, 0, "P,b,"
-  rpush_
-  pop_          ; ( p b opcode )(R: mask )
-  rpush_
-  pop_          ; ( P b ) (R: mask opcode)
-  anditos_ 7    ; ( P b )
+  r_w_
+  d_            ; ( p b opcode )(R: mask )
+  r_w_
+  d_            ; ( P b ) (R: mask opcode)
+  andi_ 7       ; ( P b )
   y_w_          ; ( P b Y:b)
   lit_ 3        ; ( P 3 )
   do_ LSHIFT    ; ( PPPPP000)
-  w_or_y_       ; ( PPPPPbbb )
-  push_
-  rpop_         ; ( PPPPPbbb opcode )
-  push_
-  rpop_         ; ( PPPPPbbb opcode mask)
+  or_y_         ; ( PPPPPbbb )
+  d_w_
+  r_            ; ( PPPPPbbb opcode )
+  d_w_
+  r_            ; ( PPPPPbbb opcode mask)
   rcall MASKSET ; ( inst )
   end_do_ COMMA     ; PPbb opcode mask mask! to flash
 
@@ -76,9 +76,9 @@ forthword_ P_b_, 0, "P,b,"
 ; Assembler
 ;   ( Port bit -- )
 forthword_ CBI_C, 0, "cbi,"
-  push_
+  d_w_
   lit_ 0x9800
-  push_
+  d_w_
   lit_ 0xff00
   rjmp P_b_
  
@@ -86,9 +86,9 @@ forthword_ CBI_C, 0, "cbi,"
 ; Assembler
 ;   ( Port bit -- )
 forthword_ SBI_C, 0, "sbi,"
-  push_
+  d_w_
   lit_ 0x9a00
-  push_
+  d_w_
   lit_ 0xff00
   rjmp P_b_
 
@@ -96,9 +96,9 @@ forthword_ SBI_C, 0, "sbi,"
 ; Assembler
 ;   ( Port bit -- )
 forthword_ SBIC_C, 0, "sbic,"
-  push_
+  d_w_
   lit_ 0x9900
-  push_
+  d_w_
   lit_ 0xff00
   rjmp P_b_
 
@@ -106,9 +106,9 @@ forthword_ SBIC_C, 0, "sbic,"
 ; Assembler
 ;   ( Port bit -- )
 forthword_ SBIS_C, 0, "sbis,"
-  push_
+  d_w_
   lit_ 0x9b00
-  push_
+  d_w_
   lit_ 0xff00
   rjmp P_b_
 
@@ -117,13 +117,13 @@ forthword_ SBIS_C, 0, "sbis,"
 ; compile inlinned immediate value
 ; ( n rl -- )
 forthword_ DOLIT, 0, "(lit,)"
-  push_           ;( n rl rl )
-  push_           ;( n rl rl rl )
+  d_w_            ;( n rl rl )
+  d_w_            ;( n rl rl rl )
   d2_             ;( n rl rl n )
   rcall LDI       ;( n rl ? )
-  popy_           ;( n ? Y:rl)
+  y_d_            ;( n ? Y:rl)
   d0_             ;( n n )
-  y_plus_1_        ;( n n Y:rl+1 )
+  y_add_1_        ;( n n Y:rl+1 )
   d0_y_           ;( rl+1 n )
   do_ BYTESWAP    ;( rl+1 n' )
   rjmp LDI        ;( ? )
@@ -131,35 +131,35 @@ forthword_ DOLIT, 0, "(lit,)"
 ; compile W register load inlinned immediate 16 bit constant
 ; ( n -- )
 forthword_ WLIT_C, 0, "w=,"
-  push_           ;( n n )
+  d_w_           ;( n n )
   lit_ wrl        ;( n wl )
   rjmp DOLIT
     
 ; compile Y register load inlinned immediate 16 bit constant
 ; ( n -- )
 Forthword_ YLIT_C, 0, "y=,"
-  push_
+  d_w_
   lit_ yrl
   rjmp DOLIT
 
 ; compile X register load inlinned immediate 16 bit constant
 ; ( n -- )
 Forthword_ XLIT_C, 0, "x=,"
-  push_
+  d_w_
   lit_ xrl
   rjmp DOLIT
 
 ; compile A register load inlinned immediate 16 bit constant
 ; ( n -- )
 Forthword_ ALIT_C, 0, "a=,"
-  push_
+  d_w_
   lit_ arl
   rjmp DOLIT
 
 ; compile B register load inlinned immediate 16 bit constant
 ; ( n -- )
 Forthword_ BLIT_C, 0, "b=,"
-  push_
+  d_w_
   lit_ brl
   rjmp DOLIT
 
@@ -184,8 +184,8 @@ forthword_ RELDIST, 0, "reldist"
   ; calculate relative distance in words from start to dest
   ; rel dist = dest - start
   y_d0_                ; ( start dest Y:start )
-  w_minus_y_           ; ( start dist )
-  oneminus_            ; ( start dist-1 )
+  sub_y_               ; ( start dist )
+  _1_sub_              ; ( start dist-1 )
   end_
 
 
@@ -193,9 +193,11 @@ forthword_ RELDIST, 0, "reldist"
 ; ( start dest -- )
 forthword_ RJMPC, 0, "rjmpc"
   ; clear rcall/call flags
-  cbr fflags, (1<<LAST_RCALL_FB)|(1<<LAST_CALL_FB)
+  ldi XL, ~((1<<LAST_RCALL_FB)|(1<<LAST_CALL_FB))
+  and fflags, XL
   ; set disable tail optimize flag
-  sbr fflags, 1<<DIS_CALL_OPT_FB
+  ldi XL, 1<<DIS_CALL_OPT_FB
+  or fflags, XL
   ; calculate relative distance in words from start to dest
   rcall RELDIST        ; ( start distance )
   ; compile a rjmp at first mark that jumps to the current DP
@@ -211,7 +213,7 @@ forthword_ RJMPC, 0, "rjmpc"
 ; Determines if a relative distance is within a relative jmp/call range
 ; flag is true if relative distance is between -2048 and 2047
 forthword_ QRDIST, 0, "?rdist"
-  push_
+  d_w_
   cpi wrh, 0x08
   brsh QDIST_HTEST
 QDIST_INRANGE:
@@ -226,39 +228,44 @@ QDIST_HTEST:
 ; ( xt flags -- )
 forthword_ COMPILEXT, 0, "cxt"
   ; default to tail call optimization enabled
-  cbr fflags, 1<<DIS_CALL_OPT_FB
+  ldi XL, ~(1<<DIS_CALL_OPT_FB)
+  and fflags, XL
   ; check bit 2 of word high byte flags: if set then tail call optimization stays enabled
   sbrs wrh, DIS_CALL_OPT_FB
   ; bit 2 of high byte flag is clear so disable tail call optimization
-  sbr fflags, 1<<DIS_CALL_OPT_FB
+  ldi XL, 1<<DIS_CALL_OPT_FB
+  or fflags, XL
   ; if bit 0 of high byte flag is 0 then word is to be inlinned
   sbrc wrh, INLINE_OPT_FB
   rjmp DO_COMPILEXT
-  pop_           ; ( xt )
+  d_           ; ( xt )
   end_do_ INLINE
 
 DO_COMPILEXT:
   ; calculate relative distance in words from start to dest
   do_ DP              ; ( xt dp )
-  do_ OVER            ; ( xt dp xt )
+  d_w_
+  d1_                 ; ( xt dp xt )
 
   rcall RELDIST        ; ( xt dp distance )
-  nip_                 ; ( xt distance )
+  d_sub_1_             ; ( xt distance )
   ; is the relative distance in range
   rcall QRDIST         ; ( xt distance flag )
   iszero_              ; ( xt distance )
-  pop_
+  d_
   ; do relative call if flag is true
-  if_not_0_ DO_RCALLC
-  pop_                ; ( xt )
+  ifnz_ DO_RCALLC
+  d_                   ; ( xt )
   rjmp CALLC
 
 DO_RCALLC:
   ; set compile flags: last instruction compiled was a rcall
-  cbr fflags, 1<<LAST_CALL_FB  ; clear call flag bit
-  sbr fflags, 1<<LAST_RCALL_FB ; set rcall flag bit
+  ldi XL, ~(1<<LAST_CALL_FB)  ; clear call flag bit
+  and fflags, XL              ; clear call flag bit
+  ldi XL, 1<<LAST_RCALL_FB    ; set rcall flag bit
+  or fflags, 1<<LAST_RCALL_FB ; set rcall flag bit
 
-  nip_                 ; ( distance )
+  d_sub_1_              ; ( distance )
   ; compile a rcall at the current DP
   andi    wrh, 0x0f
   ori     wrh, 0xd0     ; ( rcalldist )
@@ -268,13 +275,15 @@ DO_RCALLC:
 ; ( xt -- )
 forthword_ CALLC, 0, "callc"
   ; set compile flags: last instruction compiled was a call
-  cbr fflags, 1<<LAST_RCALL_FB ; clear rcall flag bit
-  sbr fflags, 1<<LAST_CALL_FB ; set call flag bit
+  ldi XL, ~(1<<LAST_RCALL_FB)  ; clear rcall flag bit
+  and fflags, XL               ; clear rcall flag bit
+  ldi XL, 1<<LAST_CALL_FB      ; set call flag bit
+  or fflags, XL                ; set call flag bit
 
-  push_
-  lit_ 0x940e         ; ( xt 0x940e )
-  do_ COMMA           ; ( xt ? )
-  pop_
+  d_w_
+  lit_ 0x940e                  ; ( xt 0x940e )
+  do_ COMMA                    ; ( xt ? )
+  d_
   end_do_ COMMA
 
 ; branch 1 word if not zero
