@@ -15,7 +15,7 @@
 .set INCLUDE,       12  ; include file support
 .set MATH_ADV,      14  ; advanced math routines 
 
-.set BUILD_LEVEL, CORE_INLINE
+.set BUILD_LEVEL, NUMBER_BASE
 
 .section .text
 
@@ -34,26 +34,27 @@
 .org 0xa0 ; SRAM_START
   ; compiler
   COLON_SMUDGE:   .space 2
-  ram_dp: .space 2
+  ram_dp:         .space 2
 
   ; allocate space for User Area
   ; MCUSR from last cold execution
-  ram_mcusro: .space 2
+  ram_mcusro:     .space 2
+
 ram_user1:
-  USER_STATE: .space 2
-  USER_PAUSE: .space 2
+  USER_STATE:     .space 2
+  USER_PAUSE:     .space 2
 
 ; exception handling
-  USER_HANDLER: .space 2
+  USER_HANDLER:   .space 2
 
 ; numeric IO
-  USER_BASE:  .space 2
+  USER_BASE:      .space 2
 
 ; character IO 
-  USER_EMIT:  .space 2
-  USER_KEY:   .space 2
+  USER_EMIT:      .space 2
+  USER_KEY:       .space 2
 
-  USER_REFILL: .space 2
+  USER_REFILL:    .space 2
 ram_user1_end:
   .set SYSUSERSIZE, (ram_user1_end - ram_user1)
 
@@ -68,15 +69,15 @@ ram_user1_end:
   ram_tib:        .space TIBSIZE     ; text input buffer
 
   ; interpreter register copy
-;REG_BANK:
-  WR: .space 2
-  RA: .space 2
-  RB: .space 2
-  RX: .space 2
-  RY: .space 2
+  WR:             .space 2
+  RA:             .space 2
+  RB:             .space 2
+  RX:             .space 2
+  RY:             .space 2
+
   ; litteral word defer
-  Lit_Interpret: .space 2
-  Lit_Compile: .space 2
+  Lit_Interpret:  .space 2
+  Lit_Compile:    .space 2
 
   ; 1st free ram address
 HERESTART:
@@ -99,14 +100,14 @@ HERESTART:
 .include "math.S"
 
 .if BUILD_LEVEL >= MATH_ADV
-.include "mathadv.S"
 .endif
 
 .if BUILD_LEVEL >= NUMBER_BASE
+.include "mathadv.S"
 .include "number.S"
 .endif
-.include "kernel_lowmem.S"
 
+.include "kernel_lowmem.S"
 
 .if BUILD_LEVEL >= ASM
 .include "asm.S"

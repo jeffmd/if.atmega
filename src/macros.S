@@ -20,30 +20,25 @@
 ; yreg -> r19:18 # Y register used as a temp register
 ; sysvar -> hard coded # system variables base pointer
 
-  ; registers 0, 1 not used except in interrupt service routines
-  isrZL = 0
-  isrZH = 1
+; registers 0, 1 not to be used by ISR since used by mul
 
-  ; register 2, 3 not used except in interrupt service routines
-  isrXL = 2 
-  isrXH = 3
-  
-  ; register 4, 5 not used except in interrupt service routines
-  isrTemp4 = 4 
-  isrTemp5 = 5
-
-
-  ; registers 8 to 11 not used except in interrupt service routines
+  ; registers 2 to 11 not used except in interrupt service routines
+  isrZL = 2
+  isrZH = 3
+  isrXL = 4 
+  isrXH = 5
+  isrTemp4 = 6
+  isrTemp5 = 7
   isrxrl = 8
   isrxrh = 9
   isryrl = 10
   isryrh = 11
   
   ; not to be used in ISR
-  temp0 = 7
+  temp0 = 0
+  temp1 = 1
   temp4 = 12
   temp5 = 13
-  ; not to be used in ISR
   temp6 = 14
   temp7 = 15
 

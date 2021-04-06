@@ -135,7 +135,6 @@ forthword_ COLD, 0, "cold"
     do_ MW_Y
     rjmp WARM
 
-
 ; ( nx* -- ) (R: ny* -- )
 ; System
 ; initialize if.atmega further. EXECs turnkey operation and go to quit
@@ -152,7 +151,7 @@ forthword_ WARM, 0, "warm"
 .if BUILD_LEVEL > CORE_KERNEL
     do_ ONLY
 .if BUILD_LEVEL >= NUMBER_BASE
-    rcall DECIMAL
+    rcall DEC
 .endif
 .endif
     do_ USART
@@ -161,10 +160,8 @@ forthword_ WARM, 0, "warm"
     ascii_ "if.atmega 0.1"
     do_ ITYPE
     do_ CR
-    
     rcall TURNKEY
     end_do_ QUIT
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; ( -- addr)
@@ -210,8 +207,8 @@ QSTACK_ERROR:
 ; System Value
 ; address of the default user area content in eeprom
 forthword_ EEUSER, 0, "ee-u"
-  lit_ EE_INITUSER
-  ret
+    lit_ EE_INITUSER
+    end_
 
 ; ( e-addr r-addr len -- )
 ; len: number of words to transfer

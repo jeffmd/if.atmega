@@ -4,37 +4,42 @@
 ; Numeric IO
 ; location of the cell containing the number conversion radix
 
-forthword_ BASE, 0, "base"
-    lit_ ram_user1 + USER_BASE
+forthword_ BASE_ADDR, 0, "base#"
+    lit_ USER_BASE
     ret
 
 ; ( n -- )
 ; Numeric IO
 ; save base
-forthword_ BASESTORE, 0, "base!"
-    str_y_
-    rcall BASE
-    jmp YWSTORE
+forthword_ BASESTORE, 0, "base="
+    y_w_
+    rcall BASE_ADDR
+    jmp MW_Y
 
 ; ( n -- )
 ; Numeric IO
 ; load base
-forthword_ BASEFETCH, 0, "base@"
-    rcall BASE
-    jmp FETCH
+forthword_ BASE, 0, "base"
+    rcall BASE_ADDR
+    jmp MW
 
 ; ( -- )
 ; Numeric IO
 ; set base for number conversion to 2
-
 forthword_ BIN, 0, "bin"
     lit_ 2
     rjmp BASESTORE
 
 ; ( -- )
+; set base for numeric conversion to 8
+Forthword_ OCT, 0, "oct"
+  lit_ 8
+  rjmp BASESTORE
+
+; ( -- )
 ; Numeric IO
 ; set base for numeric conversion to 10
-forthword_ DECIMAL, 0, "decimal"
+forthword_ DEC, 0, "dec"
     lit_ 10
     rjmp BASESTORE
 
@@ -51,24 +56,25 @@ forthword_ HEX, 0, "hex"
 ; returns the converted number and flag is true
 ; if can't convert then no number returned and flag is false
 forthword_ DIGITQ, 0, "digit?"
-    sbiw wl, 0x30            ; ( c )
-    cpi wl, 10
+    sbiw wrl, 0x30           ; ( c )
+    cpi wrl, 10
     brlo DIGITQ_VALID
-    sbiw wl, 7
-    cpi wl, 10
+    sbiw wrl, 7
+    cpi wrl, 10
     brge DIGITQ_VALID
     zero_                    ; ( 0 )
     ret
 
 DIGITQ_VALID:
-    call DPUSH2              ; ( n n n )
-    rcall BASEFETCH          ; ( n n base )
-    call UGREATEREQUAL       ; ( n f )
+    d_w_
+    d_w_                     ; ( n n n )
+    rcall BASE               ; ( n n base )
+    do_ UGREATEREQUAL        ; ( n f )
     iszero_
-    breq DIGITQ_DONE
-    nip_                     ; ( f )
-    zero_                    ; ( 0 )
-    ret
+    ifz_ DIGITQ_DONE
+    zero_                    ; ( n 0 )
+    d_sub_1_                 ; ( 0 )
+    exit_
 
 DIGITQ_DONE:
     jmp TRUE                 ; ( n true )
@@ -76,40 +82,44 @@ DIGITQ_DONE:
 ; (c -- ) Numeric IO
 ; R( -- )
 ; set the BASE value depending on the character
-;forthword_ SETBASE, 0, "setbase"
-SETBASE:        ; ( c -- )
-    cpi wl, '$
-    brne CHECK_BASE_BIN
+forthword_ SETBASE, 0, "setbase"
+    cpi wrl, '$
+    ifnz_ CHECK_BASE_BIN
     rjmp HEX
 
 CHECK_BASE_BIN:
-    cpi wl, '%
-    brne CHECK_BASE_DECIMAL
+    cpi wrl, '%
+    ifnz_ CHECK_BASE_DEC
     rjmp BIN
 
-CHECK_BASE_DECIMAL:
-    cpi wl, '&
-    brne BAD_BASE
-    rjmp DECIMAL
+CHECK_BASE_DEC:
+    cpi wrl, '#
+    ifnz_ CHECK_BASE_OCT
+    rjmp DEC
+
+CHECK_BASE_OCT:
+    cpi wrl, '&
+    ifnz_ BAD_BASE
+    rjmp OCT
 
 BAD_BASE:               ; ( error)
-    call EMIT
-    call DOSLIT
+    do_ EMIT
+    do_ DOSLIT
     ascii_ " bad base!"
     rjmp THROW
 
 ; ( addr len -- addr' len' )
 ; Numeric IO
 ; skip a numeric prefix character
-;forthword_ PRAEFIX, 0, "praefix"
-PRAEFIX:        ; ( adr1 len1 -- adr2 len2 )
-    call OVER          ;( adr1 len1 adr1 )
-    call CFETCH        ;( adr1 len1 c )
-    cpi wl, 0x30       
+forthword_ PRAEFIX, 0, "praefix"
+    d_w_
+    d1_                ;( adr1 len1 adr1 )
+    do_ CMW            ;( adr1 len1 c )
+    cpi wrl, 0x30       
     brlo SET_PRAEFIX
     ; no praefix
-    pop_               ;( adr1 len1 )
-    ret
+    d_                 ;( adr1 len1 )
+    exit_
 
 SET_PRAEFIX:
     rcall SETBASE     ;( adr1 len1 ? )
@@ -118,102 +128,105 @@ SET_PRAEFIX:
 
 ; (addr len -- addr len flag) Numeric IO
 ; check for - sign
-; forthword_ NUMBERSIGN, 0, "numbersign"
-NUMBERSIGN:        ; ( addr len -- )
-    call OVER      ; ( addr len addr )
-    call CFETCH    ; ( addr len char )
-    cpi wl, '-
-    breq NUMBERSIGN_HASSIGN
+forthword_ NUMBERSIGN, 0, "#-"
+    d_w_
+    d1_            ; ( addr len addr )
+    call CMW       ; ( addr len char )
+    cpi wrl, '-
+    ifz_ NUMBERSIGN_HASSIGN
       zero_        ; ( addr len 0 )
-      ret
+      exit_
+
 NUMBERSIGN_HASSIGN:
-      rpush_       ; ( addr len flag ) (R: flag )
+      r_w_         ; ( addr len flag ) (R: flag )
       lit_ 1       ; ( addr len 1 )
-      call SLASHSTRING ; ( addr' len' )
-      push_        ; ( addr' len' len' )
-      rpop_        ; ( addr' len' char )
-      ret
+      do_ SLASHSTRING ; ( addr' len' )
+      d_w_         ; ( addr' len' len' )
+      r_           ; ( addr' len' char )
+      end_
 
 ; ( u1 c-addr1 len1 -- u2 c-addr2 len2 )
 ; Numeric IO
 ; convert a string to a number  c-addr2/u2 is the unconverted string
 forthword_ TO_NUMBER, 0, ">num"
     iszero_
-    breq TO_NUMBER_END
-      call OVER            ; ( u adr len adr)
-      call CFETCH          ; ( u adr len char)
+    ifz_ TO_NUMBER_END
+      d_w_
+      d1_                  ; ( u adr len adr)
+      do_ CMW              ; ( u adr len char)
       rcall DIGITQ         ; ( u adr len [digit] flag)
       iszero_
-      pop_                 ; ( u adr len [digit] )
-      brne TO_NUMBER_CONV
+      d_                   ; ( u adr len [digit] )
+      ifnz_ TO_NUMBER_CONV
         ; character is not a recognized number
-        ret
+        exit_
+
 TO_NUMBER_CONV:
-      d2_str_x_            ; ( u adr len digit X:u )
-      push_                ; ( u adr len digit digit )
-      rcall BASEFETCH      ; ( u adr len digit base)
-      push_x_              ; ( u adr len digit u base )
+      rcall X_D2           ; ( u adr len digit X:u )
+      d_w_                 ; ( u adr len digit digit )
+      rcall BASE           ; ( u adr len digit base)
+      d_x_                 ; ( u adr len digit u base )
       call STAR            ; ( u adr len digit u*base)
-      pop_x_               ; ( u adr len u' X:digit )
-      plus_x_              ; ( u adr len u'+x )
-      str_d2_              ; ( u'' adr len u'' )
+      x_d_                 ; ( u adr len u' X:digit )
+      add_x_               ; ( u adr len u'+x )
+      d2_w_                ; ( u'' adr len u'' )
       lit_ 1               ; ( u'' adr len 1 )
       call SLASHSTRING     ; ( u'' adr' len' )
       rjmp TO_NUMBER
 
 TO_NUMBER_END:
-    ret
+    end_
     
 ; (addr len -- [n] f)
 ; Numeric IO
 ; convert a string at addr to a number
 forthword_ NUMBER, 0, "num"
-    push_                   ; ( addr len len )
-    rcall BASEFETCH         ; ( addr len base )
-    rpush_                  ; ( addr len base ) (R: base)
-    pop_
+    d_w_                    ; ( addr len len )
+    rcall BASE              ; ( addr len base )
+    r_w_                    ; ( addr len base ) (R: base)
+    d_
     rcall NUMBERSIGN        ; ( addr len flag )
-    rpush_                  ; ( addr len flagsign ) (R: base flagsign)
-    pop_
+    r_w_                    ; ( addr len flagsign ) (R: base flagsign)
+    d_
     rcall PRAEFIX
     rcall NUMBERSIGN        ; ( addr len flagsign2 )
-    call R0_STR_Y           ; ( addr len flagsign2 Y:flagsign ) (R: base flagsign)
+    call Y_R0               ; ( addr len flagsign2 Y:flagsign ) (R: base flagsign)
     or_y_                   ; ( addr len flagsign' )
-    call STR_R0             ; ( addr len flagsign' ) (R: base flagsign')
-    d0_str_x_               ; ( addr len flagsign' ) X: len
-    d1_str_y_               ; ( addr len flagsign' ) Y: addr
+    call R0_W               ; ( addr len flagsign' ) (R: base flagsign')
+    x_d0_                   ; ( addr len flagsign' ) X: len
+    y_d1_                   ; ( addr len flagsign' ) Y: addr
     zero_                   ; ( addr len 0 )
-    str_d1_                 ; ( 0 len 0 )
-    y_str_d0_               ; ( 0 addr 0 )
+    d1_w_                   ; ( 0 len 0 )
+    d0_y_                   ; ( 0 addr 0 )
     x_                      ; ( 0 addr len )
     rcall TO_NUMBER         ; ( n addr' len' )
     ; check length of the remaining string.
     ; if zero: a single cell number is entered
     iszero_
-    pop_
-	  breq NUMBER_OK
+    d_
+    ifz_ NUMBER_OK
 
     ; error in string to number conversion
 NUMBER_ERROR:
-	nip_                    ; ( addr' )  (R: base flagsign' )
-	rpop_x_                 ; ( addr' X:flagsign ) (R: base )
+	d_sub_1_                ; ( addr' )  (R: base flagsign' )
+	x_r_                    ; ( addr' X:flagsign ) (R: base )
 	zero_                   ; ( 0 ) (R: base )
-  rjmp NUMBER_DONE
+        rjmp NUMBER_DONE
 
 NUMBER_OK:
-    rpop_                  ; ( n flagsign' ) (R: base )
+    r_                          ; ( n flagsign' ) (R: base )
     iszero_
-    breq NUMBER_TRUE
-    pop_
-    call NEGATE
-    push_
+    ifz_ NUMBER_TRUE
+    d_
+    do_ NEGATE
+    d_w_
 
 NUMBER_TRUE:
-    call TRUE               ; ( n true ) (R: base )
+    do_ TRUE                    ; ( n true ) (R: base )
 
 NUMBER_DONE:
-    push_
-    rpop_                   ; ( n true base ) (R: )
-    rcall BASESTORE         ; ( n true ? )
-    pop_                    ; ( n true )
-    ret
+    d_w_
+    r_                          ; ( n true base ) (R: )
+    rcall BASESTORE             ; ( n true ? )
+    d_                          ; ( n true )
+    end_
