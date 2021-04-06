@@ -15,7 +15,7 @@
 .set INCLUDE,       12  ; include file support
 .set MATH_ADV,      14  ; advanced math routines 
 
-.set BUILD_LEVEL, NUMBER_BASE
+.set BUILD_LEVEL, INT_NUMBER
 
 .section .text
 
