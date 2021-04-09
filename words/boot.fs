@@ -4,55 +4,58 @@
 
 \ header ( addr len wid -- nfa )
 \ 
-dp push                               \ ( nfa nfa )
-pname header push y= $FF00 or.y (s,)  \ ( nfa ? )
-  current @ @e ,                      \ ( nfa ? )
-  pop smudge!                         \ ( ? )
+dp d=                                 \ ( nfa nfa )
+pname header d= y# $FF00 |y (s,)      \ ( nfa ? )
+  current# @ @e ,                     \ ( nfa ? )
+  d nword=                            \ ( ? )
   ]
-    push dp                   \ ( addr len wid nfa )
-    rpush pop rpush           \ ( addr len wid )(R: nfa wid )  
-    d0 y= $FF00 or.y          \ ( addr len len' )
+    d= dp                     \ ( addr len wid nfa )
+    r= d r=                   \ ( addr len wid )(R: nfa wid )  
+    d0 y# $FF00 |y            \ ( addr len len' )
     (s,)                      \ ( ? )
-    rpop @e ,                 \ ( ? )(R: nfa )
-    rpop                      \ ( nfa )
-  [
-  ;opt uwid
+    r @e ,                    \ ( ? )(R: nfa )
+    r                         \ ( nfa )
+  [ ;opt uwid
 
 \ (create) ( <input> -- nfa )
-pname (create) push current @ header
-  smudge!
+pname (create) d= current# @ header
+  nword=
   ]
-    pname push current @ header
-  [
-  ;opt uwid
+    pname d= current# @ header
+  [ ;opt uwid
 
 \ : ( <input> -- )
 \ used to define a new word
 (create) :
-  smudge!
+  nword=
   ]
-    (create) smudge! ]
-  [
-  ;opt uwid
+    (create) nword= ]
+  [ ;opt uwid
+
 \ : can now be used to define a new word but must manually 
 \ terminate the definition of a new word
 
+\ ( -- wlist )
+\ get the current wlist
+: current
+  current# @
+  [ ;opt uwid
 
-\ ( -- wid )
-\ get the current wid
-: cur@
-  current @
-[ ;opt uwid
+\ ( wlist -- )
+\ set current word list
+: current=
+    y= current# @=y
+  [ ;opt uwid
 
 \ ( n -- )
 \ set wid flags of current word
 : widf 
-  rpush         \ ( n )(R: n )
-  cur@ @e push  \ ( nfa nfa )
-  @i            \ ( nfa flags )
-  rpop.y        \ ( nfa flags Y:n )(R: )
-  and.y         \ ( nfa n&flags )
-  swap          \ ( n&flags nfa )
+  r=            \ ( n )(R: n )
+  current @e x= \ ( nfa X:nfa )
+  @i            \ ( flags )
+  y=r           \ ( flags Y:n )(R: )
+  &y            \ ( n&flags )
+  d= x          \ ( n&flags nfa )
   !i            \ ( ? )
 [ ;opt uwid
 
@@ -65,7 +68,7 @@ pname (create) push current @ header
 \ define ; which is used when finishing the compiling of a word
 : ;
   \ change to interpret mode and override to compile [
-  [ pname [ findw nfa>xtf cxt ]
+  [ pname [ findw wid.xtf xt, ]
   \ back in compile mode
   ;opt uwid
 [ ;opt uwid immediate
