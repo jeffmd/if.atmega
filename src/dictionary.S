@@ -3,7 +3,7 @@
 ; ( -- addr ) 
 ; System Variable
 ; current vocabulary for new words 
-forthword_ CURRENT, 0, "current"
+forthword_ CURRENT_ADDR, 0, "current#"
     lit_ ram_CURRENT
     end_
 
@@ -11,14 +11,14 @@ forthword_ CURRENT, 0, "current"
 ; System Variable
 ; current vocabulary for searching
 ; array of wordlists
-forthword_ CONTEXT, 0, "context"
+forthword_ CONTEXT_ADDR, 0, "context#"
     lit_ ram_CONTEXT
     end_
 
 ; ( nfa -- lfa )
 ; System
 ; get the link field address from the name field address
-forthword_ NFA2LFA, 0, "nfa>lfa"
+forthword_ WID_LFA, 0, "wid.lfa"
     rcall ISTRLEN      ; ( straddr len )
     zerohigh_          ; ( straddr 0:len )
     rcall WALIGN       ; ( straddr len/2 )
@@ -28,20 +28,20 @@ forthword_ NFA2LFA, 0, "nfa>lfa"
     
 ; ( nfa -- [ 0 ] | [ xt xtflags] )
 ; convert name field address to xt and xtflags
-forthword_ NFATOXTF, 0, "nfa>xtf"
+forthword_ WID_XTF, 0, "wid.xtf"
     iszero_                     ; ( n )
-    ifz_ NFATOXTF_EXIT
+    ifz_ WID_XTF_EXIT
 
     d_w_                        ; ( nfa nfa )
     rcall FETCHI                ; ( nfa xtflags )
     r_w_
     d_                          ; ( nfa ) (R: xtflags)
-    rcall NFA2LFA               ; ( lfa )
+    rcall WID_LFA               ; ( lfa )
     add_1_     ; lfa>xt         ; ( xt )
     d_w_                        ; ( xt xt )
     r_                          ; ( xt xtflags ) (R: )
 
-NFATOXTF_EXIT:
+WID_XTF_EXIT:
     end_
     
     
@@ -78,7 +78,7 @@ FINDNFA_BEGIN:
     ; <then>
 FINDNFA_NEXT:
       ; next try
-      rcall NFA2LFA             ; ( c-addr len lfa )
+      rcall WID_LFA             ; ( c-addr len lfa )
       rcall FETCHI              ; ( c-addr len nfa )
       ; <repeat>
       rjmp FINDNFA_BEGIN
@@ -97,11 +97,18 @@ forthword_ FINDROOT, 0, "froot"
     ; search root
     rjmp FINDNFA_BEGIN
 
+; ( -- idx )
+; get context index
+Forthword_ CONTIDX, 0 "contidx"
+    rcall CONTEXT_ADDR  ; ( context_addr )
+    _1_sub_             ; ( context-1 )
+    rjmp CMW            ; ( idx )
+
 ; ( addr len idx -- 0 | nfa )
 FINDWI:
       mul_2_            ; ( addr len idx*2)
       y_w_              ; ( addr len idx*2 Y:idx*2 )
-      rcall CONTEXT     ; ( addr len context )
+      rcall CONTIDX     ; ( addr len context )
       add_y_            ; ( addr len context' )
       rcall MW          ; ( addr len wid )
       rjmp FINDNFA      ; ( nfa)
@@ -119,10 +126,8 @@ forthword_ FINDW, 0, "findw"
     ; loop through context slots to find a word
     ; start with last slot
     d_w_                ; ( addr len len )
-    rcall CONTEXT       ; ( addr len context )
     ; get context index and use as counter
-    _1_sub_             ; ( addr len context-1 )
-    rcall CMW           ; ( addr len idx )
+    rcall CONTIDX       ; ( addr len idx )
     d_w_                ; ( addr len idx idx )
     
 FINDW_BEGIN:
@@ -140,7 +145,7 @@ FINDW_BEGIN:
 FINDW_NEXT:
       d0_               ; ( addr len idx idx )
       ; decrement index
-      _1_sub_            ; ( addr len idx idx-1 )
+      _1_sub_           ; ( addr len idx idx-1 )
       d0_w_             ; ( addr len idx-1 idx-1 )
       rjmp FINDW_BEGIN
 
@@ -152,9 +157,9 @@ forthword_ ONLY, IMMEDIATE_EN, "only"
     ; forth vocab always takes slot 0
     lit_y_ EE_FORTHWORDLIST
     ; make current also forth vocab
-    rcall CURRENT
+    rcall CURRENT_ADDR
     rcall MW_Y
-    rcall CONTEXT
+    rcall CONTEXT_ADDR
     rcall MW_Y
     ; move index to next slot
     lit_y_ 1

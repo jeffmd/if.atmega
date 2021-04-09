@@ -124,13 +124,13 @@ TAILOPT_CALL:
 
 ; ( -- )
 ; Compiler
-; update wid from smudge if valid 
+; update wid from nword if valid 
 forthword_ UWID, 0, "uwid"
     rcall NWORD         ;( nword )
     iszero_
     ifz_ UWID_end
        d_w_             ;( nword nword )
-       rcall CURRENT    ;( nword current )
+       rcall CURRENT_ADDR ;( nword current# )
        rcall MW         ;( nword wid )
        rcall STOREE     ;( ? )
        zero_
@@ -159,8 +159,8 @@ forthword_ DOSCOMMA, 0, "(s,)"
     d_                 ; ( addr len )
     rcall BTOW         ; ( addr len/2 rem )
     r_w_               ; ( addr len/2 rem ) (R: A' B' rem )
-    b_r_               ; ( addr rem B:len/2 ) 
-    a_r_               ; ( rem A:addr )
+    b_d_               ; ( addr rem B:len/2 ) 
+    a_d_               ; ( rem A:addr )
 
     ; begin
 SCOMMA_LOOP:

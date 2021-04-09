@@ -227,7 +227,7 @@ forthword_ REC_WORD, 0, "recw"
   ret
 
 REC_WORD_FOUND:
-  rcall NFATOXTF        ; ( xt flag )
+  rcall WID_XTF         ; ( xt flag )
   ; check if compile only word
   sbrc wrh, COMPILE_ONLY_FB 
     rjmp CHECK_IMMEDIATE

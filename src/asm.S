@@ -226,7 +226,7 @@ QDIST_HTEST:
 ; compile rcall to xt at the current dictionary position (DP) if relative distance is in range
 ; otherwise do long call to xt.  If word flag indicates inlining then the word is inlined.
 ; ( xt flags -- )
-forthword_ COMPILEXT, 0, "cxt"
+forthword_ COMPILEXT, 0, "xt,"
   ; default to tail call optimization enabled
   ldi XL, ~(1<<DIS_CALL_OPT_FB)
   and fflags, XL
